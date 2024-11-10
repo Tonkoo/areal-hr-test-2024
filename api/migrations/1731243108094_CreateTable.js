@@ -1,6 +1,3 @@
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
-
 exports.up = (pgm) => {
   pgm.createTable("organizations", {
     id: { type: "serial", primaryKey: true },

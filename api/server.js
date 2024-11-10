@@ -1,17 +1,15 @@
+require('dotenv').config({ path: '../.env' });
 const express = require('express');
+const organizationsRoutes = require('./routes/organizations');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
-  
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from Node.js!' });
-});
+app.use(express.json());
+app.use('/api', organizationsRoutes);
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });
