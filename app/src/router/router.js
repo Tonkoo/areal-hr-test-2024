@@ -5,15 +5,15 @@ import Departments from "../components/Departments.vue";
 import Positions from "../components/Positions.vue";
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/organizations', component: Organizations },
-  { path: '/departments', component: Departments },
-  { path: '/positions', component: Positions }
+  { path: "/", component: Home },
+  { path: "/organizations", component: Organizations },
+  { path: "/departments", component: Departments },
+  { path: "/positions", component: Positions },
 ];
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
+  routes,
 });
 
 export default router;

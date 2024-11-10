@@ -1,12 +1,12 @@
 <script>
 export default {
-  name: 'Home',
+  name: "Home",
 };
 </script>
 
 <template>
   <v-container class="home-container" fluid>
-    <v-row justify="center" align="center" class="home-row">
+    <v-row justify="center" class="home-row">
       <v-col cols="12" md="6" class="text-center">
         <h1 class="home-title">Добро пожаловать!!!</h1>
         <img src="../assets/images/icon.png" alt="Icon" class="home-image" />
@@ -30,7 +30,7 @@ export default {
 
 .home-title {
   font-size: 3rem;
-  color: #1976D2;
+  color: #1976d2;
   margin-bottom: 30px;
   font-weight: bold;
   text-transform: uppercase;
