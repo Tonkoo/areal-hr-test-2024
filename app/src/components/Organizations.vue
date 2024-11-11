@@ -9,7 +9,7 @@
       <v-spacer></v-spacer>
       <v-btn
         color="deep-purple accent-4"
-        @click="dialog = true"
+        @click="openAddDialog"
         elevation="10"
         class="white--text"
       >
@@ -18,17 +18,18 @@
     </v-toolbar>
     <v-dialog v-model="dialog" max-width="700px">
       <v-card>
-        <v-card-title class="headline">Добавить организацию</v-card-title>
+        <v-card-title class="headline">{{
+          isEditMode ? "Изменить организацию" : "Добавить организацию"
+        }}</v-card-title>
         <v-card-text>
-          <v-form ref="form" v-model="formValid">
+          <v-form ref="form">
             <v-text-field
-              v-model="newOrganization.name"
+              v-model="TableOrganization.name"
               label="Название организации"
               required
             ></v-text-field>
-
             <v-textarea
-              v-model="newOrganization.comment"
+              v-model="TableOrganization.comment"
               label="Комментарий"
               required
             ></v-textarea>
@@ -36,7 +37,13 @@
         </v-card-text>
         <v-card-actions>
           <v-btn color="blue" text @click="dialog = false">Отмена</v-btn>
-          <v-btn color="blue" text @click="addOrganization" :disabled="!formValid">Добавить</v-btn>
+          <v-btn
+            color="blue"
+            text
+            @click="isEditMode ? updateOrganization() : addOrganization()"
+          >
+            {{ isEditMode ? "Сохранить" : "Добавить" }}
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -56,8 +63,12 @@
           <td>{{ item.name }}</td>
           <td>{{ item.comment }}</td>
           <td>
-            <v-btn color="blue" @click="editOrganization(item)" small>Изменить</v-btn>
-            <v-btn color="red" @click="deleteOrganization(item.id)" small>Удалить</v-btn>
+            <v-btn color="blue" @click="openEditDialog(item)" small
+              >Изменить</v-btn
+            >
+            <v-btn color="red" @click="deleteOrganization(item.id)" small
+              >Удалить</v-btn
+            >
           </td>
         </tr>
       </tbody>
@@ -72,10 +83,11 @@ export default {
   data() {
     return {
       dialog: false,
-      formValid: false,
-      newOrganization: {
-        name: '',
-        comment: '',
+      isEditMode: false,
+      TableOrganization: {
+        id: null,
+        name: "",
+        comment: "",
       },
       organizations: [],
     };
@@ -96,25 +108,35 @@ export default {
       });
   },
   methods: {
+    openAddDialog() {
+      this.isEditMode = false;
+      this.TableOrganization = { name: "", comment: "" };
+      this.dialog = true;
+    },
+    openEditDialog(item) {
+      this.isEditMode = true;
+      this.TableOrganization = { ...item };
+      this.dialog = true;
+    },
     addOrganization() {
-      if (this.newOrganization.name && this.newOrganization.comment) {
+      if (this.TableOrganization.name && this.TableOrganization.comment) {
         axios
           .post("http://localhost:3000/api/organizations", {
-            name: this.newOrganization.name,
-            comment: this.newOrganization.comment,
+            name: this.TableOrganization.name,
+            comment: this.TableOrganization.comment,
           })
           .then((response) => {
             if (response.data) {
               const newOrg = {
                 id: response.data.id,
-                name: this.newOrganization.name,
-                comment: this.newOrganization.comment,
+                name: this.TableOrganization.name,
+                comment: this.TableOrganization.comment,
               };
 
               this.organizations.push(newOrg);
               this.dialog = false;
-              this.newOrganization.name = '';
-              this.newOrganization.comment = '';
+              this.TableOrganization.name = "";
+              this.TableOrganization.comment = "";
             }
           })
           .catch((error) => {
@@ -122,8 +144,28 @@ export default {
           });
       }
     },
-    editOrganization(item) {
-      console.log("Изменить организацию", item);
+    updateOrganization() {
+      axios
+        .put(
+          `http://localhost:3000/api/organizations/${this.TableOrganization.id}`,
+          {
+            name: this.TableOrganization.name,
+            comment: this.TableOrganization.comment,
+          }
+        )
+        .then(() => {
+          const index = this.organizations.findIndex(
+            (org) => org.id === this.TableOrganization.id
+          );
+          if (index !== -1) {
+            this.organizations[index] = { ...this.TableOrganization };
+          }
+          this.dialog = false;
+          this.TableOrganization = { name: "", comment: "" };
+        })
+        .catch((error) => {
+          console.error("Ошибка при обновлении организации:", error);
+        });
     },
     deleteOrganization(id) {
       console.log("Удалить организацию с ID:", id);
