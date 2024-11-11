@@ -48,6 +48,17 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="deleteDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">Подтверждение удаления</v-card-title>
+        <v-card-text>Вы точно хотите удалить данную организацию?</v-card-text>
+        <v-card-actions>
+          <v-btn color="blue" text @click="deleteDialog = false">Отмена</v-btn>
+          <v-btn color="red" text @click="deleteOrganization()">Удалить</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-table>
       <thead>
         <tr>
@@ -66,7 +77,7 @@
             <v-btn color="blue" @click="openEditDialog(item)" small
               >Изменить</v-btn
             >
-            <v-btn color="red" @click="deleteOrganization(item.id)" small
+            <v-btn color="red" @click="openDeleteDialog(item.id)" small
               >Удалить</v-btn
             >
           </td>
@@ -84,6 +95,8 @@ export default {
     return {
       dialog: false,
       isEditMode: false,
+      deleteDialog: false,
+      deleteOrganizationId: null,
       TableOrganization: {
         id: null,
         name: "",
@@ -167,8 +180,25 @@ export default {
           console.error("Ошибка при обновлении организации:", error);
         });
     },
-    deleteOrganization(id) {
-      console.log("Удалить организацию с ID:", id);
+    openDeleteDialog(id) {
+      this.deleteOrganizationId = id;
+      this.deleteDialog = true;
+    },
+    deleteOrganization() {
+      if (this.deleteOrganizationId !== null) {
+        axios
+          .delete(`http://localhost:3000/api/organizations/${this.deleteOrganizationId}`)
+          .then(() => {
+            this.organizations = this.organizations.filter(
+              (org) => org.id !== this.deleteOrganizationId
+            );
+            this.deleteDialog = false;
+            this.deleteOrganizationId = null;
+          })
+          .catch((error) => {
+            console.error("Ошибка при удалении организации:", error);
+          });
+      }
     },
   },
 };

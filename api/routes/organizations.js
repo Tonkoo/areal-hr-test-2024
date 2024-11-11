@@ -51,4 +51,15 @@ router.put("/organizations/:id", async (req, res) => {
   }
 });
 
+router.delete("/organizations/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await client.query("DELETE FROM organizations WHERE id = $1", [id]);
+    res.sendStatus(204);
+  } catch (err) {
+    console.error("Error deleting organization:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
