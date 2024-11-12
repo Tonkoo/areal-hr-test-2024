@@ -52,6 +52,17 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="deleteDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">Подтверждение удаления</v-card-title>
+        <v-card-text>Вы точно хотите удалить данную должность?</v-card-text>
+        <v-card-actions>
+          <v-btn color="blue" text @click="deleteDialog = false">Отмена</v-btn>
+          <v-btn color="red" text @click="deletePosition()">Удалить</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-table>
       <thead>
         <tr>
@@ -70,7 +81,9 @@
             <v-btn color="blue" @click="openEditDialog(item)" small
               >Изменить</v-btn
             >
-            <v-btn color="red" @click="" small>Удалить</v-btn>
+            <v-btn color="red" @click="openDeleteDialog(item.id)" small
+              >Удалить</v-btn
+            >
           </td>
         </tr>
       </tbody>
@@ -86,6 +99,8 @@ export default {
     return {
       dialog: false,
       isEditMode: false,
+      deleteDialog: false,
+      deletePositionId: null,
       TablePosition: {
         id: null,
         position_name: "",
@@ -121,7 +136,7 @@ export default {
         });
     },
     openAddDialog() {
-      this.TablePosition = { name: "", department_id: null };
+      this.TablePosition = { position_name: "", department_id: null };
       this.isEditMode = false;
       this.dialog = true;
     },
@@ -163,6 +178,22 @@ export default {
         })
         .catch((error) => {
           console.error("Error updating position:", error);
+        });
+    },
+    openDeleteDialog(id) {
+      this.deletePositionId = id;
+      this.deleteDialog = true;
+    },
+    deletePosition() {
+      axios
+        .delete(`http://localhost:3000/api/positions/${this.deletePositionId}`)
+        .then(() => {
+          this.fetchPosition();
+          this.deleteDialog = false;
+          this.deletePositionId = null;
+        })
+        .catch((error) => {
+          console.error("Error deleting position:", error);
         });
     },
   },

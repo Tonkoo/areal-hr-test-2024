@@ -47,7 +47,7 @@ router.put("/departments/:id", async (req, res) => {
   const { name, comment, parent_id, organization_id } = req.body;
 
   if (!name || !comment || !organization_id) {
-    return res.status(400).json({ error: "Название, комментарий и ID организации обязательны" });
+    return res.status(400).json({ error: "Name, comment, and organization_id are required" });
   }
 
   try {
@@ -69,13 +69,13 @@ router.put("/departments/:id", async (req, res) => {
     const result = await client.query(query, values);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Отдел не найден" });
+      return res.status(404).json({ error: "Department not found" });
     }
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("Ошибка при обновлении отдела:", err);
-    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+    console.error("Error updating department:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -86,13 +86,12 @@ router.delete("/departments/:id", async (req, res) => {
     const result = await client.query("DELETE FROM departments WHERE id = $1 RETURNING *", [id]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Отдел не найден" });
+      return res.status(404).json({ error: "Department not found" });
     }
 
-    res.json({ message: "Отдел успешно удален", deletedDepartment: result.rows[0] });
   } catch (err) {
-    console.error("Ошибка при удалении отдела:", err);
-    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+    console.error("Error deleting department:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

@@ -13,17 +13,17 @@ router.get("/positions", async (req, res) => {
 });
 
 router.post("/positions", async (req, res) => {
-  const { name, department_id } = req.body;
+  const { position_name, department_id } = req.body;
 
-  if (!name || !department_id) {
-    return res.status(400).json({ error: "Name and department_id are required" });
+  if (!position_name || !department_id) {
+    return res.status(400).json({ error: "position_name and department_id are required" });
   }
 
   try {
     const result = await client.query(
       `INSERT INTO positions (name, department_id) 
        VALUES ($1, $2) RETURNING *`,
-      [name, department_id]
+      [position_name, department_id]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -55,6 +55,26 @@ router.put("/positions/:id", async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error("Error updating position:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/positions/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await client.query(
+      "DELETE FROM positions WHERE id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Position not found" });
+    }
+
+    res.json({ message: "Position deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting position:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

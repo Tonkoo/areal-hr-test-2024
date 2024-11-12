@@ -177,7 +177,7 @@ export default {
           this.TableOrganization = { name: "", comment: "" };
         })
         .catch((error) => {
-          console.error("Ошибка при обновлении организации:", error);
+          console.error("Error updating organization:", error);
         });
     },
     openDeleteDialog(id) {
@@ -196,7 +196,7 @@ export default {
             this.deleteOrganizationId = null;
           })
           .catch((error) => {
-            console.error("Ошибка при удалении организации:", error);
+            console.error("Error deleting organization:", error);
           });
       }
     },
