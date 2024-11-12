@@ -28,7 +28,7 @@
     <v-dialog v-model="dialog" max-width="700px">
       <v-card>
         <v-card-title class="headline">
-          {{ isSubDepartmentMode ? "Добавить подотдел" : "Добавить отдел" }}
+          {{ getDialogTitle() }}
         </v-card-title>
         <v-card-text>
           <v-form ref="form">
@@ -43,34 +43,30 @@
               required
             ></v-textarea>
             <v-select
-              v-if="isSubDepartmentMode"
+              v-if="isSubDepartmentMode || TableDepartment.parent_id"
               v-model="TableDepartment.parent_id"
-              :items="departments"
+              :items="filteredDepartments"
               item-title="department_name"
               item-value="department_id"
               label="Родительский отдел"
-              @update:focused="setOrganizationIdFromParent()"
+              @update:model-value="updateOrganizationId"
               required
             ></v-select>
             <v-select
-              v-if="!isSubDepartmentMode"
               v-model="TableDepartment.organization_id"
               :items="organizations"
               item-title="name"
               item-value="id"
               label="Организация"
+              :disabled="isSubDepartmentMode || TableDepartment.parent_id"
               required
             ></v-select>
           </v-form>
         </v-card-text>
         <v-card-actions>
           <v-btn color="blue" text @click="dialog = false">Отмена</v-btn>
-          <v-btn
-            color="blue"
-            text
-            @click="isSubDepartmentMode ? addSubDepartment() : addDepartment()"
-          >
-            {{ isSubDepartmentMode ? "Добавить подотдел" : "Добавить отдел" }}
+          <v-btn color="blue" text @click="saveDepartment">
+            {{ dialogMode === "add" ? "Добавить" : "Сохранить изменения" }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -88,14 +84,16 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in departments" :key="item.id">
+        <tr v-for="item in departments" :key="item.department_id">
           <td>{{ item.department_id }}</td>
           <td>{{ item.department_name }}</td>
           <td>{{ item.parent_department_name }}</td>
           <td>{{ item.department_comment }}</td>
           <td>{{ item.organization_name }}</td>
           <td>
-            <v-btn color="blue" @click="" small>Изменить</v-btn>
+            <v-btn color="blue" @click="openEditDialog(item)" small
+              >Изменить</v-btn
+            >
             <v-btn color="red" @click="" small>Удалить</v-btn>
           </td>
         </tr>
@@ -112,6 +110,7 @@ export default {
     return {
       dialog: false,
       isSubDepartmentMode: false,
+      dialogMode: "add",
       TableDepartment: {
         id: null,
         name: "",
@@ -127,6 +126,13 @@ export default {
     this.fetchDepartments();
     this.fetchOrganizations();
   },
+  computed: {
+    filteredDepartments() {
+      return this.departments.filter(
+        (dept) => dept.department_id !== this.TableDepartment.id
+      );
+    },
+  },
   methods: {
     fetchDepartments() {
       axios
@@ -135,7 +141,7 @@ export default {
           this.departments = response.data;
         })
         .catch((error) => {
-          console.error("Error fetching departments:", error);
+          console.error("Ошибка при получении отделов:", error);
         });
     },
     fetchOrganizations() {
@@ -145,11 +151,12 @@ export default {
           this.organizations = response.data;
         })
         .catch((error) => {
-          console.error("Error fetching organizations:", error);
+          console.error("Ошибка при получении организаций:", error);
         });
     },
     openAddDialog(isSubDepartmentMode) {
       this.isSubDepartmentMode = isSubDepartmentMode;
+      this.dialogMode = "add";
       this.TableDepartment = {
         name: "",
         comment: "",
@@ -158,78 +165,69 @@ export default {
       };
       this.dialog = true;
     },
-    addDepartment() {
+    openEditDialog(department) {
+      this.dialogMode = "edit";
+      this.isSubDepartmentMode = !!department.parent_department_name;
+      this.TableDepartment = {
+        id: department.department_id,
+        name: department.department_name,
+        comment: department.department_comment,
+        parent_id: department.parent_department_name
+          ? this.departments.find(
+              (d) => d.department_name === department.parent_department_name
+            ).department_id
+          : null,
+        organization_id: this.organizations.find(
+          (o) => o.name === department.organization_name
+        ).id,
+      };
+      this.dialog = true;
+    },
+    getDialogTitle() {
+      if (this.dialogMode === "add") {
+        return this.isSubDepartmentMode
+          ? "Добавить подотдел"
+          : "Добавить отдел";
+      } else {
+        return this.isSubDepartmentMode
+          ? "Изменить подотдел"
+          : "Изменить отдел";
+      }
+    },
+    updateOrganizationId() {
+      if (this.TableDepartment.parent_id) {
+        const parentDepartment = this.departments.find(
+          (d) => d.department_id === this.TableDepartment.parent_id
+        );
+        if (parentDepartment) {
+          this.TableDepartment.organization_id = this.organizations.find(
+            (o) => o.name === parentDepartment.organization_name
+          ).id;
+        }
+      }
+    },
+    saveDepartment() {
       if (
         this.TableDepartment.name &&
         this.TableDepartment.comment &&
         this.TableDepartment.organization_id
       ) {
-        axios
-          .post("http://localhost:3000/api/departments", this.TableDepartment)
-          .then((response) => {
-            this.departments.push(response.data);
+        const method = this.dialogMode === "add" ? "post" : "put";
+        const url =
+          this.dialogMode === "add"
+            ? "http://localhost:3000/api/departments"
+            : `http://localhost:3000/api/departments/${this.TableDepartment.id}`;
+
+        axios[method](url, this.TableDepartment)
+          .then(() => {
             this.dialog = false;
-            this.TableDepartment = {
-              name: "",
-              comment: "",
-              parent_id: null,
-              organization_id: null,
-            };
             this.fetchDepartments();
           })
           .catch((error) => {
-            console.error("Error adding department:", error);
-          });
-      }
-    },
-    setOrganizationIdFromParent() {
-      const parentId = this.TableDepartment.parent_id;
-      if (parentId) {
-        axios
-          .get(
-            `http://localhost:3000/api/get-organization-by-parent/${parentId}`
-          )
-          .then((response) => {
-            if (response.data && response.data.organization_id) {
-              this.TableDepartment.organization_id =
-                response.data.organization_id;
-            } else {
-              console.error("Organization ID not found in the response.");
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching organization by parent:", error);
-          });
-      }
-    },
-    addSubDepartment() {
-      if (
-        this.TableDepartment.name &&
-        this.TableDepartment.comment &&
-        this.TableDepartment.parent_id &&
-        this.TableDepartment.organization_id
-      ) {
-        axios
-          .post("http://localhost:3000/api/departments", this.TableDepartment)
-          .then((response) => {
-            this.departments.push(response.data);
-            this.dialog = false;
-            this.TableDepartment = {
-              name: "",
-              comment: "",
-              parent_id: null,
-              organization_id: null,
-            };
-            this.fetchDepartments();
-          })
-          .catch((error) => {
-            console.error(
-              "Error adding sub-department:",
-              error.response ? error.response.data : error
-            );
+            console.error("Ошибка при сохранении отдела:", error);
           });
       } else {
-        console.error("Not all data has been entered for the sub-department");
+        console.error("Не все данные введены");
       }
     },
   },
