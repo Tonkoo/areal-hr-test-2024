@@ -2,6 +2,7 @@ require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const organizationsRoutes = require('./routes/organizations');
 const departmentsRoutes = require('./routes/departments');
+const positionsRoutes = require('./routes/positions');
 const cors = require('cors');
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/api', organizationsRoutes);
 app.use('/api', departmentsRoutes);
+app.use('/api', positionsRoutes);
 
 
 app.listen(port, () => {
