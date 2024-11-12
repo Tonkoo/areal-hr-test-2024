@@ -72,6 +72,17 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="deleteDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">Подтверждение удаления</v-card-title>
+        <v-card-text>Вы точно хотите удалить данный отдел?</v-card-text>
+        <v-card-actions>
+          <v-btn color="blue" text @click="deleteDialog = false">Отмена</v-btn>
+          <v-btn color="red" text @click="deleteDepartment">Удалить</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-table>
       <thead>
         <tr>
@@ -94,7 +105,7 @@
             <v-btn color="blue" @click="openEditDialog(item)" small
               >Изменить</v-btn
             >
-            <v-btn color="red" @click="" small>Удалить</v-btn>
+            <v-btn color="red" @click="openDeleteDialog(item.department_id)" small>Удалить</v-btn>
           </td>
         </tr>
       </tbody>
@@ -109,6 +120,7 @@ export default {
   data() {
     return {
       dialog: false,
+      deleteDialog: false,
       isSubDepartmentMode: false,
       dialogMode: "add",
       TableDepartment: {
@@ -182,6 +194,24 @@ export default {
         ).id,
       };
       this.dialog = true;
+    },
+    openDeleteDialog(id) {
+      this.deleteDepartmentId = id;
+      this.deleteDialog = true;
+    },
+    deleteDepartment() {
+      axios
+        .delete(`http://localhost:3000/api/departments/${this.deleteDepartmentId}`)
+        .then(() => {
+          this.departments = this.departments.filter(
+            (dept) => dept.department_id !== this.deleteDepartmentId
+          );
+          this.deleteDialog = false;
+          this.deleteDepartmentId = null;
+        })
+        .catch((error) => {
+          console.error("Ошибка при удалении отдела:", error);
+        });
     },
     getDialogTitle() {
       if (this.dialogMode === "add") {

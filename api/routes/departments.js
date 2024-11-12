@@ -79,5 +79,21 @@ router.put("/departments/:id", async (req, res) => {
   }
 });
 
+router.delete("/departments/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await client.query("DELETE FROM departments WHERE id = $1 RETURNING *", [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Отдел не найден" });
+    }
+
+    res.json({ message: "Отдел успешно удален", deletedDepartment: result.rows[0] });
+  } catch (err) {
+    console.error("Ошибка при удалении отдела:", err);
+    res.status(500).json({ error: "Внутренняя ошибка сервера" });
+  }
+});
 
 module.exports = router;
