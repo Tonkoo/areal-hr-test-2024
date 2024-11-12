@@ -25,7 +25,7 @@
         <v-card-text>
           <v-form ref="form">
             <v-text-field
-              v-model="TablePosition.name"
+              v-model="TablePosition.position_name"
               label="Название должности"
               required
             ></v-text-field>
@@ -44,7 +44,7 @@
           <v-btn
             color="blue"
             text
-            @click="isEditMode ? updateOrganization() : addPosition()"
+            @click="isEditMode ? updatePosition() : addPosition()"
           >
             {{ isEditMode ? "Сохранить" : "Добавить" }}
           </v-btn>
@@ -67,7 +67,9 @@
           <td>{{ item.position_name }}</td>
           <td>{{ item.department_name }}</td>
           <td>
-            <v-btn color="blue" @click="" small>Изменить</v-btn>
+            <v-btn color="blue" @click="openEditDialog(item)" small
+              >Изменить</v-btn
+            >
             <v-btn color="red" @click="" small>Удалить</v-btn>
           </td>
         </tr>
@@ -83,9 +85,10 @@ export default {
   data() {
     return {
       dialog: false,
+      isEditMode: false,
       TablePosition: {
         id: null,
-        name: "",
+        position_name: "",
         department_id: null,
       },
       positions: [],
@@ -104,7 +107,7 @@ export default {
           this.positions = response.data;
         })
         .catch((error) => {
-          console.error("Ошибка при получении должностей:", error);
+          console.error("Error fetching positions:", error);
         });
     },
     fetchDepartments() {
@@ -114,17 +117,29 @@ export default {
           this.departments = response.data;
         })
         .catch((error) => {
-          console.error("Ошибка при получении отделов:", error);
+          console.error("Error fetching departments:", error);
         });
     },
     openAddDialog() {
       this.TablePosition = { name: "", department_id: null };
+      this.isEditMode = false;
+      this.dialog = true;
+    },
+    openEditDialog(item) {
+      this.isEditMode = true;
+      this.TablePosition = {
+        id: item.id,
+        position_name: item.position_name,
+        department_id: this.departments.find(
+          (d) => d.department_name === item.department_name
+        )?.department_id,
+      };
       this.dialog = true;
     },
     addPosition() {
       axios
         .post("http://localhost:3000/api/positions", {
-          name: this.TablePosition.name,
+          position_name: this.TablePosition.position_name,
           department_id: this.TablePosition.department_id,
         })
         .then((response) => {
@@ -133,7 +148,21 @@ export default {
           this.fetchPosition();
         })
         .catch((error) => {
-          console.error("Ошибка при добавлении должности:", error);
+          console.error("Error adding position:", error);
+        });
+    },
+    updatePosition() {
+      axios
+        .put(`http://localhost:3000/api/positions/${this.TablePosition.id}`, {
+          position_name: this.TablePosition.position_name,
+          department_id: this.TablePosition.department_id,
+        })
+        .then(() => {
+          this.dialog = false;
+          this.fetchPosition();
+        })
+        .catch((error) => {
+          console.error("Error updating position:", error);
         });
     },
   },
