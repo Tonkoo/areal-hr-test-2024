@@ -9,13 +9,48 @@
       <v-spacer></v-spacer>
       <v-btn
         color="deep-purple accent-4"
-        @click=""
+        @click="openAddDialog()"
         elevation="10"
         class="white--text"
       >
         Добавить
       </v-btn>
     </v-toolbar>
+
+    <v-dialog v-model="dialog" max-width="700px">
+      <v-card>
+        <v-card-title class="headline">{{
+          isEditMode ? "Изменить должность" : "Добавить должность"
+        }}</v-card-title>
+        <v-card-text>
+          <v-form ref="form">
+            <v-text-field
+              v-model="TablePosition.name"
+              label="Название должности"
+              required
+            ></v-text-field>
+            <v-select
+              v-model="TablePosition.department_id"
+              :items="departments"
+              item-title="department_name"
+              item-value="department_id"
+              label="Отдел"
+              required
+            ></v-select>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="blue" text @click="dialog = false">Отмена</v-btn>
+          <v-btn
+            color="blue"
+            text
+            @click="isEditMode ? updateOrganization() : addPosition()"
+          >
+            {{ isEditMode ? "Сохранить" : "Добавить" }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-table>
       <thead>
@@ -47,25 +82,66 @@ import axios from "axios";
 export default {
   data() {
     return {
+      dialog: false,
+      TablePosition: {
+        id: null,
+        name: "",
+        department_id: null,
+      },
       positions: [],
+      departments: [],
     };
   },
   mounted() {
-    axios
-      .get("http://localhost:3000/api/positions")
-      .then((response) => {
-        if (Array.isArray(response.data)) {
+    this.fetchPosition();
+    this.fetchDepartments();
+  },
+  methods: {
+    fetchPosition() {
+      axios
+        .get("http://localhost:3000/api/positions")
+        .then((response) => {
           this.positions = response.data;
-        } else {
-          console.error("Expected an array but got:", response.data);
-          this.positions = [];
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching positions:", error);
-      });
+        })
+        .catch((error) => {
+          console.error("Ошибка при получении должностей:", error);
+        });
+    },
+    fetchDepartments() {
+      axios
+        .get("http://localhost:3000/api/departments")
+        .then((response) => {
+          this.departments = response.data;
+        })
+        .catch((error) => {
+          console.error("Ошибка при получении отделов:", error);
+        });
+    },
+    openAddDialog() {
+      this.TablePosition = { name: "", department_id: null };
+      this.dialog = true;
+    },
+    addPosition() {
+      axios
+        .post("http://localhost:3000/api/positions", {
+          name: this.TablePosition.name,
+          department_id: this.TablePosition.department_id,
+        })
+        .then((response) => {
+          this.positions.push(response.data);
+          this.dialog = false;
+          this.fetchPosition();
+        })
+        .catch((error) => {
+          console.error("Ошибка при добавлении должности:", error);
+        });
+    },
   },
 };
 </script>
 
-<style></style>
+<style>
+.v-btn {
+  margin-right: 8px;
+}
+</style>
