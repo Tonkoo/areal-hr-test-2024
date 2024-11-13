@@ -41,8 +41,7 @@
             ></v-text-field>
             <v-date-picker
               v-model="TableEmployees.date_of_birth"
-              header="Дата рождения"
-              required
+              :max="maxDate"
             ></v-date-picker>
             <v-text-field
               v-model="TableEmployees.passport_series"
@@ -94,11 +93,11 @@
           </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="blue" text @click="">Отмена</v-btn>
+          <v-btn color="blue" text @click="dialog = false">Отмена</v-btn>
           <v-btn
             color="blue"
             text
-            @click="isEditMode ? updateOrganization() : addemployees() "
+            @click="isEditMode ? updateEmployees() : addEmployees()"
           >
             {{ isEditMode ? "Сохранить" : "Добавить" }}
           </v-btn>
@@ -143,7 +142,9 @@
           <td>
             <v-btn color="blue" @click="" small>Подробнее</v-btn>
             <v-btn color="blue" @click="" small>Файлы</v-btn>
-            <v-btn color="blue" @click="" small>Изменить</v-btn>
+            <v-btn color="blue" @click="openEditDialog(item)" small
+              >Изменить</v-btn
+            >
             <v-btn color="red" @click="" small>Уволить</v-btn>
           </td>
         </tr>
@@ -179,6 +180,7 @@ export default {
       employees: [],
       regions: [],
       citys: [],
+      maxDate: (new Date()).toISOString().split('T')[0], 
     };
   },
   mounted() {
@@ -220,10 +222,23 @@ export default {
 
     openAddDialog() {
       this.isEditMode = false;
-      this.TableEmployees = {last_name: "", first_name: "", middle_name: "", date_of_birth: null, passport_series: "", passport_number: "", region_id: null, city_id: null, street: "", house: "", building: "", apartment: null,};
+      this.TableEmployees = {
+        last_name: "",
+        first_name: "",
+        middle_name: "",
+        date_of_birth: null,
+        passport_series: "",
+        passport_number: "",
+        region_id: null,
+        city_id: null,
+        street: "",
+        house: "",
+        building: "",
+        apartment: null,
+      };
       this.dialog = true;
     },
-    addemployees() {
+    addEmployees() {
       axios
         .post("http://localhost:3000/api/employees", {
           last_name: this.TableEmployees.last_name,
@@ -245,9 +260,53 @@ export default {
           this.fetchEmployees();
         })
         .catch((error) => {
-          console.error("Error adding position:", error);
+          console.error("Error adding employee:", error);
         });
     },
+    openEditDialog(item) {
+      this.isEditMode = true;
+      this.TableEmployees = {
+        id: item.id,
+        last_name: item.last_name,
+        first_name: item.first_name,
+        middle_name: item.middle_name,
+        date_of_birth: new Date(item.date_of_birth),
+        passport_series: item.passport_series,
+        passport_number: item.passport_number,
+        passport_series: item.passport_series,
+        region_id: this.regions.find((r) => r.name === item.region)?.id,
+        city_id: this.citys.find((c) => c.name === item.city)?.id,
+        street: item.street,
+        house: item.house,
+        building: item.building,
+        apartment: item.apartment,
+      };
+      this.dialog = true;
+    },
+    updateEmployees(){
+      axios
+        .put(`http://localhost:3000/api/employees/${this.TableEmployees.id}`, {
+          last_name: this.TableEmployees.last_name,
+          first_name: this.TableEmployees.first_name,
+          middle_name: this.TableEmployees.middle_name,
+          date_of_birth: this.TableEmployees.date_of_birth,
+          passport_series: this.TableEmployees.passport_series,
+          passport_number: this.TableEmployees.passport_number,
+          region_id: this.TableEmployees.region_id,
+          city_id: this.TableEmployees.city_id,
+          street: this.TableEmployees.street,
+          house: this.TableEmployees.house,
+          building: this.TableEmployees.building,
+          apartment: this.TableEmployees.apartment,
+        })
+        .then(() => {
+          this.dialog = false;
+          this.fetchEmployees();
+        })
+        .catch((error) => {
+          console.error("Error updating employee:", error);
+        });
+    }
   },
 };
 </script>

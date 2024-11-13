@@ -18,7 +18,7 @@ export default {
 <template>
   <v-navigation-drawer app v-model="drawer" permanent>
     <v-list-item class="sidebar-header">
-      <v-list-item-title class="sidebar-title">Hr отдел</v-list-item-title>
+      <v-list-item-title class="sidebar-title">HR отдел</v-list-item-title>
     </v-list-item>
     <v-list>
       <v-list-item
