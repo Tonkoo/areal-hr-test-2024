@@ -108,6 +108,42 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="detailsDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="headline"
+          >Подробная информация о сотруднике</v-card-title
+        >
+        <v-card-text>
+          <v-list>
+            <v-list-item>
+              <v-list-item-title>Отдел</v-list-item-title>
+              <v-list-item-subtitle>{{
+                TableEmployees.department_name
+              }}</v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Должность</v-list-item-title>
+              <v-list-item-subtitle>{{
+                TableEmployees.position_name
+              }}</v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Зарплата</v-list-item-title>
+              <v-list-item-subtitle
+                >{{ TableEmployees.salary }} руб.</v-list-item-subtitle
+              >
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="detailsDialog = false"
+            >Закрыть</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-table>
       <thead>
         <tr>
@@ -143,7 +179,9 @@
           <td>{{ item.building }}</td>
           <td>{{ item.apartment }}</td>
           <td>
-            <v-btn color="blue" @click="" small>Подробнее</v-btn>
+            <v-btn color="blue" @click="openDetailsDialog(item)" small
+              >Подробнее</v-btn
+            >
             <v-btn color="blue" @click="" small>Файлы</v-btn>
             <v-btn color="blue" @click="openEditDialog(item)" small
               >Изменить</v-btn
@@ -164,6 +202,7 @@ export default {
     return {
       dialog: false,
       isEditMode: false,
+      detailsDialog: false,
       deleteDialog: false,
       TableEmployees: {
         id: null,
@@ -179,19 +218,24 @@ export default {
         house: "",
         building: "",
         apartment: null,
+        department_name: "",
+        position_name: "",
+        salary: 0,
       },
       employees: [],
       regions: [],
       citys: [],
-      maxDate: (new Date()).toISOString().split('T')[0], 
+      maxDate: new Date().toISOString().split("T")[0],
       citiesLoaded: false,
     };
   },
-  computed:{
+  computed: {
     filteredCities() {
       if (!this.TableEmployees.region_id) return [];
-      return this.citys.filter(city => city.region_id === this.TableEmployees.region_id);
-    }
+      return this.citys.filter(
+        (city) => city.region_id === this.TableEmployees.region_id
+      );
+    },
   },
   mounted() {
     this.fetchEmployees();
@@ -296,7 +340,7 @@ export default {
       };
       this.dialog = true;
     },
-    updateEmployees(){
+    updateEmployees() {
       axios
         .put(`http://localhost:3000/api/employees/${this.TableEmployees.id}`, {
           last_name: this.TableEmployees.last_name,
@@ -319,7 +363,15 @@ export default {
         .catch((error) => {
           console.error("Error updating employee:", error);
         });
-    }
+    },
+    openDetailsDialog(item) {
+      this.TableEmployees = {
+        department_name: item.department_name,
+        position_name: item.position_name,
+        salary: item.salary,
+      };
+      this.detailsDialog = true;
+    },
   },
 };
 </script>

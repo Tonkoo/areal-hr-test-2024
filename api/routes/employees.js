@@ -4,7 +4,7 @@ const client = require("../db");
 
 router.get("/employees", async (req, res) => {
   try {
-    const result = await client.query("SELECT employees.id, last_name, first_name, middle_name,  TO_CHAR(date_of_birth, 'yyyy-MM-dd') AS date_of_birth, passport_series, passport_number, regions.name as region, citys.name as city, street, house, building, apartment FROM employees join regions on employees.region_id = regions.id join citys on employees.city_id = citys.id");
+    const result = await client.query("SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'DD.MM.YYYY') AS date_of_birth, employees.passport_series, employees.passport_number, regions.name AS region, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.name AS department_name, positions.name AS position_name, recent_operations.salary FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN ( SELECT personnel_operations.*, ROW_NUMBER() OVER (PARTITION BY employee_id ORDER BY id DESC) AS row_num FROM personnel_operations) AS recent_operations ON employees.id = recent_operations.employee_id AND recent_operations.row_num = 1 JOIN departments ON recent_operations.department_id = departments.id JOIN positions ON recent_operations.position_id = positions.id;");
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching employees:", err);
