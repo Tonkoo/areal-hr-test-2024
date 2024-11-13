@@ -60,14 +60,17 @@
               item-value="id"
               label="Регион"
               required
+              @update:model-value="onRegionChange"
             ></v-select>
             <v-select
+              v-if="citiesLoaded"
               v-model="TableEmployees.city_id"
-              :items="citys"
+              :items="filteredCities"
               item-title="name"
               item-value="id"
               label="Город"
               required
+              :disabled="!TableEmployees.region_id"
             ></v-select>
             <v-text-field
               v-model="TableEmployees.street"
@@ -181,7 +184,14 @@ export default {
       regions: [],
       citys: [],
       maxDate: (new Date()).toISOString().split('T')[0], 
+      citiesLoaded: false,
     };
+  },
+  computed:{
+    filteredCities() {
+      if (!this.TableEmployees.region_id) return [];
+      return this.citys.filter(city => city.region_id === this.TableEmployees.region_id);
+    }
   },
   mounted() {
     this.fetchEmployees();
@@ -214,12 +224,15 @@ export default {
         .get("http://localhost:3000/api/citys")
         .then((response) => {
           this.citys = response.data;
+          this.citiesLoaded = true;
         })
         .catch((error) => {
           console.error("Ошибка при получении городов:", error);
         });
     },
-
+    onRegionChange() {
+      this.TableEmployees.city_id = null;
+    },
     openAddDialog() {
       this.isEditMode = false;
       this.TableEmployees = {
