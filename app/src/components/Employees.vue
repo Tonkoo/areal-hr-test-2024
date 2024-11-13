@@ -98,7 +98,7 @@
           <v-btn
             color="blue"
             text
-            @click="isEditMode ? updateOrganization() : addOrganization()"
+            @click="isEditMode ? updateOrganization() : addemployees() "
           >
             {{ isEditMode ? "Сохранить" : "Добавить" }}
           </v-btn>
@@ -220,7 +220,33 @@ export default {
 
     openAddDialog() {
       this.isEditMode = false;
+      this.TableEmployees = {last_name: "", first_name: "", middle_name: "", date_of_birth: null, passport_series: "", passport_number: "", region_id: null, city_id: null, street: "", house: "", building: "", apartment: null,};
       this.dialog = true;
+    },
+    addemployees() {
+      axios
+        .post("http://localhost:3000/api/employees", {
+          last_name: this.TableEmployees.last_name,
+          first_name: this.TableEmployees.first_name,
+          middle_name: this.TableEmployees.middle_name,
+          date_of_birth: this.TableEmployees.date_of_birth,
+          passport_series: this.TableEmployees.passport_series,
+          passport_number: this.TableEmployees.passport_number,
+          region_id: this.TableEmployees.region_id,
+          city_id: this.TableEmployees.city_id,
+          street: this.TableEmployees.street,
+          house: this.TableEmployees.house,
+          building: this.TableEmployees.building,
+          apartment: this.TableEmployees.apartment,
+        })
+        .then((response) => {
+          this.employees.push(response.data);
+          this.dialog = false;
+          this.fetchEmployees();
+        })
+        .catch((error) => {
+          console.error("Error adding position:", error);
+        });
     },
   },
 };
