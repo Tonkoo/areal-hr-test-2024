@@ -4,6 +4,8 @@ const organizationsRoutes = require('./routes/organizations');
 const departmentsRoutes = require('./routes/departments');
 const positionsRoutes = require('./routes/positions');
 const employeesRoutes = require('./routes/employees');
+const regionsRoutes = require('./routes/regions');
+const citysRoutes = require('./routes/citys');
 const cors = require('cors');
 
 const app = express();
@@ -15,6 +17,8 @@ app.use('/api', organizationsRoutes);
 app.use('/api', departmentsRoutes);
 app.use('/api', positionsRoutes);
 app.use('/api', employeesRoutes);
+app.use('/api', regionsRoutes);
+app.use('/api', citysRoutes);
 
 
 app.listen(port, () => {
