@@ -7,7 +7,8 @@ export default {
         { id: 1, name: 'Главная', route: '/' },
         { id: 2, name: 'Организации', route: '/organizations' },
         { id: 3, name: 'Отделы', route: '/departments' },
-        { id: 4, name: 'Должности', route: '/positions' }
+        { id: 4, name: 'Должности', route: '/positions' },
+        { id: 5, name: 'Сотрудники', route: '/employees' },
       ]
     };
   }
