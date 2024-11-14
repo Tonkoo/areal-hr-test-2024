@@ -100,14 +100,17 @@
               item-value="department_id"
               label="Отдел"
               required
+              @update:model-value="onDepartmentsChange"
             ></v-select>
             <v-select
+              v-if="positionsLoaded"
               v-model="TableEmployees.position_id"
-              :items="positions"
+              :items="filteredPositions"
               item-title="position_name"
               item-value="id"
               label="Должность"
               required
+              :disabled="!TableEmployees.department_id"
             ></v-select>
             <v-text-field
               v-model="TableEmployees.salary"
@@ -253,6 +256,7 @@ export default {
       positions: [],
       maxDate: new Date().toISOString().split("T")[0],
       citiesLoaded: false,
+      positionsLoaded: false,
     };
   },
   computed: {
@@ -260,6 +264,12 @@ export default {
       if (!this.TableEmployees.region_id) return [];
       return this.citys.filter(
         (city) => city.region_id === this.TableEmployees.region_id
+      );
+    },
+    filteredPositions() {   
+      if (!this.TableEmployees.department_id) return [];
+      return this.positions.filter(
+        (positions) => positions.department_id === this.TableEmployees.department_id
       );
     },
   },
@@ -278,7 +288,7 @@ export default {
           this.employees = response.data;
         })
         .catch((error) => {
-          console.error("Ошибка при получении сотрудников:", error);
+          console.error("Error retrieving employees:", error);
         });
     },
     fetchRegions() {
@@ -288,7 +298,7 @@ export default {
           this.regions = response.data;
         })
         .catch((error) => {
-          console.error("Ошибка при получении регионов:", error);
+          console.error("Error retrieving regions:", error);
         });
     },
     fetchCitys() {
@@ -299,7 +309,7 @@ export default {
           this.citiesLoaded = true;
         })
         .catch((error) => {
-          console.error("Ошибка при получении городов:", error);
+          console.error("Error retrieving cities:", error);
         });
     },
     fetchDepartments() {
@@ -309,7 +319,7 @@ export default {
           this.departments = response.data;
         })
         .catch((error) => {
-          console.error("Ошибка при получении отделов:", error);
+          console.error("Error retrieving departments:", error);
         });
     },
     fetchPositions() {
@@ -317,13 +327,17 @@ export default {
         .get("http://localhost:3000/api/positions")
         .then((response) => {
           this.positions = response.data;
+          this.positionsLoaded = true;
         })
         .catch((error) => {
-          console.error("Ошибка при получении должностей:", error);
+          console.error("Error retrieving positions:", error);
         });
     },
     onRegionChange() {
       this.TableEmployees.city_id = null;
+    },
+    onDepartmentsChange() {
+      this.TableEmployees.position_id = null;
     },
     openAddDialog() {
       this.isEditMode = false;
@@ -340,6 +354,11 @@ export default {
         house: "",
         building: "",
         apartment: null,
+        department_name: "",
+        position_name: "",
+        department_id: null,
+        position_id: null,
+        salary: 0,
       };
       this.dialog = true;
     },
@@ -372,6 +391,8 @@ export default {
         });
     },
     openEditDialog(item) {
+      console.log(item.date_of_birth);
+      
       this.isEditMode = true;
       this.TableEmployees = {
         id: item.id,
@@ -388,7 +409,15 @@ export default {
         house: item.house,
         building: item.building,
         apartment: item.apartment,
+        department_id: this.departments.find(
+          (d) => d.department_name === item.department_name
+        )?.department_id,
+        position_id: this.positions.find((p) => p.position_name === item.position_name)
+          ?.id,
+        salary: parseFloat(item.salary.replace(/[$,]/g, '')),
       };
+      console.log(this.TableEmployees.date_of_birth);
+      
       this.dialog = true;
     },
     updateEmployees() {
@@ -406,6 +435,9 @@ export default {
           house: this.TableEmployees.house,
           building: this.TableEmployees.building,
           apartment: this.TableEmployees.apartment,
+          department_id: this.TableEmployees.department_id,
+          position_id: this.TableEmployees.position_id,
+          salary: this.TableEmployees.salary,
         })
         .then(() => {
           this.dialog = false;
