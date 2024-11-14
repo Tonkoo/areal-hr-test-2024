@@ -13,21 +13,35 @@ router.get("/employees", async (req, res) => {
 });
 
 router.post("/employees", async (req, res) => {
-  const { last_name, first_name, middle_name, date_of_birth, passport_series, passport_number, region_id, city_id, street, house, building, apartment} = req.body;
+  const { last_name, first_name, middle_name, date_of_birth, passport_series, passport_number, region_id, city_id, street, house, building, apartment, department_id, position_id, salary } = req.body;
 
-  if (!last_name || !first_name || !middle_name || !date_of_birth || !passport_series || !passport_number || !region_id || !city_id || !street || !house || !building || !apartment ) {
+  if (!last_name || !first_name || !middle_name || !date_of_birth || !passport_series || !passport_number || !region_id || !city_id || !street || !house || !building || !apartment || !department_id || !position_id || !salary) {
     return res.status(400).json({ error: "All fields must be filled" });
   }
 
   try {
-    const result = await client.query(
+    await client.query('BEGIN');
+
+    const employeeResult = await client.query(
       `INSERT INTO employees (last_name, first_name, middle_name, date_of_birth, passport_series, passport_number, region_id, city_id, street, house, building, apartment) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9 ,$10, $11, $12) RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
       [last_name, first_name, middle_name, date_of_birth, passport_series, passport_number, region_id, city_id, street, house, building, apartment]
     );
-    res.status(201).json(result.rows[0]);
+
+    const employeeId = employeeResult.rows[0].id;
+
+    await client.query(
+      `INSERT INTO personnel_operations (employee_id, type_operation_id, department_id, position_id, salary) 
+       VALUES ($1, 1, $2, $3, $4)`,
+      [employeeId, department_id, position_id, salary]
+    );
+
+    await client.query('COMMIT');
+
+    res.status(201).json({ id: employeeId, message: "Employee added successfully" });
   } catch (err) {
-    console.error("Error adding employees:", err);
+    await client.query('ROLLBACK');
+    console.error("Error adding employee:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

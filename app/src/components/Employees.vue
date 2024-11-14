@@ -93,6 +93,28 @@
               label="Квартира"
               required
             ></v-text-field>
+            <v-select
+              v-model="TableEmployees.department_id"
+              :items="departments"
+              item-title="department_name"
+              item-value="department_id"
+              label="Отдел"
+              required
+            ></v-select>
+            <v-select
+              v-model="TableEmployees.position_id"
+              :items="positions"
+              item-title="position_name"
+              item-value="id"
+              label="Должность"
+              required
+            ></v-select>
+            <v-text-field
+              v-model="TableEmployees.salary"
+              label="Зарплата"
+              type="number"
+              required
+            ></v-text-field>
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -220,11 +242,15 @@ export default {
         apartment: null,
         department_name: "",
         position_name: "",
+        department_id: null,
+        position_id: null,
         salary: 0,
       },
       employees: [],
       regions: [],
       citys: [],
+      departments: [],
+      positions: [],
       maxDate: new Date().toISOString().split("T")[0],
       citiesLoaded: false,
     };
@@ -241,6 +267,8 @@ export default {
     this.fetchEmployees();
     this.fetchRegions();
     this.fetchCitys();
+    this.fetchDepartments();
+    this.fetchPositions();
   },
   methods: {
     fetchEmployees() {
@@ -272,6 +300,26 @@ export default {
         })
         .catch((error) => {
           console.error("Ошибка при получении городов:", error);
+        });
+    },
+    fetchDepartments() {
+      axios
+        .get("http://localhost:3000/api/departments")
+        .then((response) => {
+          this.departments = response.data;
+        })
+        .catch((error) => {
+          console.error("Ошибка при получении отделов:", error);
+        });
+    },
+    fetchPositions() {
+      axios
+        .get("http://localhost:3000/api/positions")
+        .then((response) => {
+          this.positions = response.data;
+        })
+        .catch((error) => {
+          console.error("Ошибка при получении должностей:", error);
         });
     },
     onRegionChange() {
@@ -310,6 +358,9 @@ export default {
           house: this.TableEmployees.house,
           building: this.TableEmployees.building,
           apartment: this.TableEmployees.apartment,
+          department_id: this.TableEmployees.department_id,
+          position_id: this.TableEmployees.position_id,
+          salary: this.TableEmployees.salary,
         })
         .then((response) => {
           this.employees.push(response.data);
