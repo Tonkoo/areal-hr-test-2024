@@ -169,6 +169,25 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="dismissDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">Уволить сотрудника</v-card-title>
+        <v-card-text>
+          Вы уверены, что хотите уволить сотрудника
+          {{ selectedEmployee.last_name }} {{ selectedEmployee.first_name }}?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="dismissDialog = false"
+            >Отмена</v-btn
+          >
+          <v-btn color="red darken-1" text @click="dismissEmployee"
+            >Уволить</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-table>
       <thead>
         <tr>
@@ -185,6 +204,7 @@
           <th>Дом</th>
           <th>Корпус</th>
           <th>Квартира</th>
+          <th>Статус</th>
           <th>Действие</th>
         </tr>
       </thead>
@@ -203,15 +223,32 @@
           <td>{{ item.house }}</td>
           <td>{{ item.building }}</td>
           <td>{{ item.apartment }}</td>
+          <td>{{ item.type_operation_id === 2 ? "Уволен" : "Работает" }}</td>
           <td>
             <v-btn color="blue" @click="openDetailsDialog(item)" small
               >Подробнее</v-btn
             >
-            <v-btn color="blue" @click="" small>Файлы</v-btn>
-            <v-btn color="blue" @click="openEditDialog(item)" small
+            <v-btn
+              color="blue"
+              @click=""
+              small
+              :disabled="item.type_operation_id === 2"
+              >Файлы</v-btn
+            >
+            <v-btn
+              color="blue"
+              @click="openEditDialog(item)"
+              small
+              :disabled="item.type_operation_id === 2"
               >Изменить</v-btn
             >
-            <v-btn color="red" @click="" small>Уволить</v-btn>
+            <v-btn
+              color="red"
+              @click="openDismissDialog(item)"
+              small
+              :disabled="item.type_operation_id === 2"
+              >Уволить</v-btn
+            >
           </td>
         </tr>
       </tbody>
@@ -228,7 +265,7 @@ export default {
       dialog: false,
       isEditMode: false,
       detailsDialog: false,
-      deleteDialog: false,
+      dismissDialog: false,
       TableEmployees: {
         id: null,
         last_name: "",
@@ -257,6 +294,7 @@ export default {
       maxDate: new Date().toISOString().split("T")[0],
       citiesLoaded: false,
       positionsLoaded: false,
+      selectedEmployee: null,
     };
   },
   computed: {
@@ -266,10 +304,11 @@ export default {
         (city) => city.region_id === this.TableEmployees.region_id
       );
     },
-    filteredPositions() {   
+    filteredPositions() {
       if (!this.TableEmployees.department_id) return [];
       return this.positions.filter(
-        (positions) => positions.department_id === this.TableEmployees.department_id
+        (positions) =>
+          positions.department_id === this.TableEmployees.department_id
       );
     },
   },
@@ -392,7 +431,7 @@ export default {
     },
     openEditDialog(item) {
       console.log(item.date_of_birth);
-      
+
       this.isEditMode = true;
       this.TableEmployees = {
         id: item.id,
@@ -412,12 +451,13 @@ export default {
         department_id: this.departments.find(
           (d) => d.department_name === item.department_name
         )?.department_id,
-        position_id: this.positions.find((p) => p.position_name === item.position_name)
-          ?.id,
-        salary: parseFloat(item.salary.replace(/[$,]/g, '')),
+        position_id: this.positions.find(
+          (p) => p.position_name === item.position_name
+        )?.id,
+        salary: parseFloat(item.salary.replace(/[$,]/g, "")),
       };
       console.log(this.TableEmployees.date_of_birth);
-      
+
       this.dialog = true;
     },
     updateEmployees() {
@@ -454,6 +494,25 @@ export default {
         salary: item.salary,
       };
       this.detailsDialog = true;
+    },
+    openDismissDialog(item) {
+      this.selectedEmployee = item;
+      this.dismissDialog = true;
+    },
+    dismissEmployee() {
+      axios
+        .post(
+          `http://localhost:3000/api/employees/${this.selectedEmployee.id}`
+        )
+        .then(() => {
+          this.dismissDialog = false;
+          this.fetchEmployees();
+        })
+        .catch((error) => {
+          console.log(this.selectedEmployee.id);
+          
+          console.error("Error dismissing employee:", error);
+        });
     },
   },
 };

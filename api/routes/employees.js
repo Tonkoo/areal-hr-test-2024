@@ -4,7 +4,7 @@ const client = require("../db");
 
 router.get("/employees", async (req, res) => {
   try {
-    const result = await client.query("SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number, regions.name AS region, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.name AS department_name, positions.name AS position_name, recent_operations.salary FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN ( SELECT personnel_operations.*, ROW_NUMBER() OVER (PARTITION BY employee_id ORDER BY id DESC) AS row_num FROM personnel_operations) AS recent_operations ON employees.id = recent_operations.employee_id AND recent_operations.row_num = 1 JOIN departments ON recent_operations.department_id = departments.id JOIN positions ON recent_operations.position_id = positions.id;");
+    const result = await client.query("SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number, regions.name AS region, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.name AS department_name, positions.name AS position_name, recent_operations.salary, recent_operations.type_operation_id FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN ( SELECT personnel_operations.*, ROW_NUMBER() OVER (PARTITION BY employee_id ORDER BY id DESC) AS row_num FROM personnel_operations) AS recent_operations ON employees.id = recent_operations.employee_id AND recent_operations.row_num = 1 JOIN departments ON recent_operations.department_id = departments.id JOIN positions ON recent_operations.position_id = positions.id;");
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching employees:", err);
@@ -106,6 +106,33 @@ router.put("/employees/:id", async (req, res) => {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error("Error updating employee data:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/employees/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await client.query('BEGIN');
+
+    const lastOperationData = await client.query(
+      "SELECT * FROM personnel_operations WHERE employee_id = $1 ORDER BY id DESC LIMIT 1",
+      [id]
+    );
+    const lastOperation = lastOperationData.rows[0];
+
+    await client.query(
+      `INSERT INTO personnel_operations (employee_id, type_operation_id, department_id, position_id, salary) 
+       VALUES ($1, 2, $2, $3, $4)`,
+      [id, lastOperation.department_id, lastOperation.position_id, lastOperation.salary]
+    );
+
+    await client.query('COMMIT');
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Error when terminating the employee:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
