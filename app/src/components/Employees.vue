@@ -590,6 +590,26 @@ export default {
           console.error("Error fetching employee files:", error);
         });
     },
+    uploadFile() {
+      if (!this.newFile) return;
+
+      const formData = new FormData();
+      formData.append('file', this.newFile);
+      formData.append('name', this.newFile.name);
+
+      axios.post(`http://localhost:3000/api/files/${this.selectedEmployee.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+        .then(() => {
+          this.fetchEmployeeFiles(this.selectedEmployee.id);
+          this.newFile = null;
+        })
+        .catch(error => {
+          console.error("Error uploading file:", error);
+        });
+    },
   },
 };
 </script>

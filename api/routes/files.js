@@ -1,19 +1,57 @@
 const express = require("express");
 const router = express.Router();
 const client = require("../db");
+const multer = require("multer");
+const path = require("path");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
 
 router.get("/files/:employeeId", async (req, res) => {
-    try {
-      const { employeeId } = req.params;
-      const result = await client.query(
-        "SELECT ef.id as file_id, ps.name as file_name, ps.file as filepath FROM employeesfiles ef JOIN passport_scan ps ON ef.passport_scan_id = ps.id WHERE ef.employee_id = $1",
-        [employeeId]
-      );
-      res.json(result.rows);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "An error occurred while fetching files" });
-    }
-  });
+  try {
+    const { employeeId } = req.params;
+    const result = await client.query(
+      "SELECT ef.id as file_id, ps.name as file_name, ps.file as filepath FROM employeesfiles ef JOIN passport_scan ps ON ef.passport_scan_id = ps.id WHERE ef.employee_id = $1",
+      [employeeId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "An error occurred while fetching files" });
+  }
+});
+
+router.post("/files/:employeeId", upload.single('file'), async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const { name } = req.body;
+    const file = req.file.path;
+
+    const passportScanResult = await client.query(
+      "INSERT INTO passport_scan (name, file) VALUES ($1, $2) RETURNING id",
+      [name, file]
+    );
+
+    const passportScanId = passportScanResult.rows[0].id;
+
+    await client.query(
+      "INSERT INTO employeesfiles (employee_id, passport_scan_id) VALUES ($1, $2)",
+      [employeeId, passportScanId]
+    );
+
+    res.status(201).json({ message: "File added successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "An error occurred while adding the file" });
+  }
+});
 
 module.exports = router;
