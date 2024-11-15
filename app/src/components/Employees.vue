@@ -188,6 +188,66 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="filesDialog" max-width="600px">
+    <v-card>
+      <v-card-title class="text-h5 bg-primary">
+        <span class="white--text">Файлы сотрудника</span>
+      </v-card-title>
+
+      <v-card-text class="pt-4">
+        <div v-if="employeeFiles.length > 0">
+          <v-list>
+            <v-list-item v-for="file in employeeFiles" :key="file.id">
+              <v-list-item-content class="d-flex align-center justify-space-between">
+                <v-list-item-title class="text-subtitle-1">
+                  {{ file.file_name }}
+                </v-list-item-title>
+                <v-btn
+                  icon
+                  small
+                  color="error"
+                  @click="deleteFile(file.id)"
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </div>
+        <v-alert
+          v-else
+          type="info"
+          text
+          class="mb-4"
+        >
+          У сотрудника пока нет загруженных файлов
+        </v-alert>     
+        <v-file-input
+          v-model="newFile"
+          show-size
+          truncate-length="25"
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          label="Выберите файл для загрузки"
+          prepend-icon="mdi-paperclip"
+          @change="uploadFile"
+          class="mt-2"
+        >
+        </v-file-input>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          text
+          @click="filesDialog = false"
+        >
+          Закрыть
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
     <v-table>
       <thead>
         <tr>
@@ -230,7 +290,7 @@
             >
             <v-btn
               color="blue"
-              @click=""
+              @click="openFilesDialog(item)"
               small
               :disabled="item.type_operation_id === 2"
               >Файлы</v-btn
@@ -266,6 +326,7 @@ export default {
       isEditMode: false,
       detailsDialog: false,
       dismissDialog: false,
+      filesDialog: false,
       TableEmployees: {
         id: null,
         last_name: "",
@@ -295,6 +356,8 @@ export default {
       citiesLoaded: false,
       positionsLoaded: false,
       selectedEmployee: null,
+      employeeFiles: [],
+      newFile: null,
     };
   },
   computed: {
@@ -501,17 +564,30 @@ export default {
     },
     dismissEmployee() {
       axios
-        .post(
-          `http://localhost:3000/api/employees/${this.selectedEmployee.id}`
-        )
+        .post(`http://localhost:3000/api/employees/${this.selectedEmployee.id}`)
         .then(() => {
           this.dismissDialog = false;
           this.fetchEmployees();
         })
         .catch((error) => {
           console.log(this.selectedEmployee.id);
-          
+
           console.error("Error dismissing employee:", error);
+        });
+    },
+    openFilesDialog(employee) {
+      this.selectedEmployee = employee;
+      this.fetchEmployeeFiles(employee.id);
+      this.filesDialog = true;
+    },
+    fetchEmployeeFiles(employeeId) {
+      axios
+        .get(`http://localhost:3000/api/files/${employeeId}`)
+        .then((response) => {
+          this.employeeFiles = response.data;
+        })
+        .catch((error) => {
+          console.error("Error fetching employee files:", error);
         });
     },
   },
