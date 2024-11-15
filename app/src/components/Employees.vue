@@ -580,7 +580,6 @@ export default {
     },
     uploadFile() {
       if (!this.newFile) return;
-
       const formData = new FormData();
       formData.append("file", this.newFile);
       formData.append("name", this.newFile.name);

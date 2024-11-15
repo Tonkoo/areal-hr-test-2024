@@ -73,6 +73,7 @@ router.delete("/files/:fileId", async (req, res) => {
         return res.status(500).json({ error: "The file has been removed from the database but was not deleted from the file system" });
       }
     });
+    res.status(200).json({ message: "File successfully deleted" });
 
   } catch (err) {
     console.error(err);
