@@ -3,6 +3,7 @@ const router = express.Router();
 const client = require("../db");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -57,11 +58,22 @@ router.post("/files/:employeeId", upload.single('file'), async (req, res) => {
 router.delete("/files/:fileId", async (req, res) => {
   try {
     const { fileId } = req.params;
+    const { filepath } = req.query;
+
+    if (!filepath) {
+      return res.status(400).json({ error: "The file path is not specified" });
+    }
 
     await client.query("DELETE FROM employeesfiles WHERE passport_scan_id = $1", [fileId]);
     await client.query("DELETE FROM passport_scan WHERE id = $1", [fileId]);
 
-    res.json({ message: "File deleted successfully" });
+    fs.unlink(filepath, (err) => {
+      if (err) {
+        console.error("Error deleting file:", err);
+        return res.status(500).json({ error: "The file has been removed from the database but was not deleted from the file system" });
+      }
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "An error occurred while deleting the file" });

@@ -189,64 +189,52 @@
     </v-dialog>
 
     <v-dialog v-model="filesDialog" max-width="600px">
-    <v-card>
-      <v-card-title class="text-h5 bg-primary">
-        <span class="white--text">Файлы сотрудника</span>
-      </v-card-title>
+      <v-card>
+        <v-card-title class="text-h5 bg-primary">
+          <span class="white--text">Файлы сотрудника</span>
+        </v-card-title>
 
-      <v-card-text class="pt-4">
-        <div v-if="employeeFiles.length > 0">
-          <v-list>
-            <v-list-item v-for="file in employeeFiles" :key="file.file_id">
-              <v-list-item-content class="d-flex align-center justify-space-between">
-                <v-list-item-title class="text-subtitle-1">
-                  {{ file.file_name }}
-                </v-list-item-title>
-                <v-btn
-                  icon
-                  small
-                  color="error"
-                  @click="deleteFile(file.file_id)"
+        <v-card-text class="pt-4">
+          <div v-if="employeeFiles.length > 0">
+            <v-list>
+              <v-list-item v-for="file in employeeFiles" :key="file.file_id">
+                <v-list-item-content
+                  class="d-flex align-center justify-space-between"
                 >
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </div>
-        <v-alert
-          v-else
-          type="info"
-          text
-          class="mb-4"
-        >
-          У сотрудника пока нет загруженных файлов
-        </v-alert>     
-        <v-file-input
-          v-model="newFile"
-          show-size
-          truncate-length="25"
-          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-          label="Выберите файл для загрузки"
-          prepend-icon="mdi-paperclip"
-          @change="uploadFile"
-          class="mt-2"
-        >
-        </v-file-input>
-      </v-card-text>
+                  <v-list-item-title class="text-subtitle-1">
+                    {{ file.file_name }}
+                  </v-list-item-title>
+                  <v-btn icon small color="error" @click="deleteFile(file)">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </div>
+          <v-alert v-else type="info" text class="mb-4">
+            У сотрудника пока нет загруженных файлов
+          </v-alert>
+          <v-file-input
+            v-model="newFile"
+            show-size
+            truncate-length="25"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            label="Выберите файл для загрузки"
+            prepend-icon="mdi-paperclip"
+            @change="uploadFile"
+            class="mt-2"
+          >
+          </v-file-input>
+        </v-card-text>
 
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="primary"
-          text
-          @click="filesDialog = false"
-        >
-          Закрыть
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="filesDialog = false">
+            Закрыть
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-table>
       <thead>
@@ -594,31 +582,39 @@ export default {
       if (!this.newFile) return;
 
       const formData = new FormData();
-      formData.append('file', this.newFile);
-      formData.append('name', this.newFile.name);
+      formData.append("file", this.newFile);
+      formData.append("name", this.newFile.name);
 
-      axios.post(`http://localhost:3000/api/files/${this.selectedEmployee.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
+      axios
+        .post(
+          `http://localhost:3000/api/files/${this.selectedEmployee.id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        )
         .then(() => {
           this.fetchEmployeeFiles(this.selectedEmployee.id);
           this.newFile = null;
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error uploading file:", error);
         });
     },
-    deleteFile(fileId) {
-      console.log(fileId);
-      
-      axios.delete(`http://localhost:3000/api/files/${fileId}`)
+    deleteFile(file) {
+      axios
+        .delete(`http://localhost:3000/api/files/${file.file_id}`, {
+          params: {
+            filepath: file.filepath
+          }
+        })
         .then(() => {
           this.fetchEmployeeFiles(this.selectedEmployee.id);
         })
-        .catch(error => {
-          console.error("Error deleting file:", error);
+        .catch((error) => {
+          console.error("Ошибка при удалении файла:", error);
         });
     },
   },
