@@ -197,7 +197,7 @@
       <v-card-text class="pt-4">
         <div v-if="employeeFiles.length > 0">
           <v-list>
-            <v-list-item v-for="file in employeeFiles" :key="file.id">
+            <v-list-item v-for="file in employeeFiles" :key="file.file_id">
               <v-list-item-content class="d-flex align-center justify-space-between">
                 <v-list-item-title class="text-subtitle-1">
                   {{ file.file_name }}
@@ -206,7 +206,7 @@
                   icon
                   small
                   color="error"
-                  @click="deleteFile(file.id)"
+                  @click="deleteFile(file.file_id)"
                 >
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
@@ -608,6 +608,17 @@ export default {
         })
         .catch(error => {
           console.error("Error uploading file:", error);
+        });
+    },
+    deleteFile(fileId) {
+      console.log(fileId);
+      
+      axios.delete(`http://localhost:3000/api/files/${fileId}`)
+        .then(() => {
+          this.fetchEmployeeFiles(this.selectedEmployee.id);
+        })
+        .catch(error => {
+          console.error("Error deleting file:", error);
         });
     },
   },

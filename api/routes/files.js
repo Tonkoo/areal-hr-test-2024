@@ -54,4 +54,18 @@ router.post("/files/:employeeId", upload.single('file'), async (req, res) => {
   }
 });
 
+router.delete("/files/:fileId", async (req, res) => {
+  try {
+    const { fileId } = req.params;
+
+    await client.query("DELETE FROM employeesfiles WHERE passport_scan_id = $1", [fileId]);
+    await client.query("DELETE FROM passport_scan WHERE id = $1", [fileId]);
+
+    res.json({ message: "File deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "An error occurred while deleting the file" });
+  }
+});
+
 module.exports = router;
