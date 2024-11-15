@@ -7,6 +7,7 @@ const employeesRoutes = require('./routes/employees');
 const regionsRoutes = require('./routes/regions');
 const citysRoutes = require('./routes/citys');
 const filesRoutes = require('./routes/files');
+const operationsRoutes = require('./routes/operations');
 const cors = require('cors');
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api', employeesRoutes);
 app.use('/api', regionsRoutes);
 app.use('/api', citysRoutes);
 app.use('/api', filesRoutes);
+app.use('/api', operationsRoutes);
 
 
 app.listen(port, () => {

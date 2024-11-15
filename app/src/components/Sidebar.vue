@@ -9,6 +9,7 @@ export default {
         { id: 3, name: 'Отделы', route: '/departments' },
         { id: 4, name: 'Должности', route: '/positions' },
         { id: 5, name: 'Сотрудники', route: '/employees' },
+        { id: 6, name: 'Кадровые операции', route: '/operations' },
       ]
     };
   }
