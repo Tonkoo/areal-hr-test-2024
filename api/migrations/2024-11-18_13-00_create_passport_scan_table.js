@@ -13,8 +13,8 @@ exports.up = (pgm) => {
     });
     pgm.sql(`
       INSERT INTO passport_scan (name, path, employee_id) VALUES
-        ('Иванов И.И. Паспорт', '/files/ivanov.jpg', 1),
-        ('Петров П.П. Паспорт', '/files/petrov.jpg', 2);
+        ('Иванов И.И. Паспорт', '..\\uploads\\1731938456221.pdf', 1),
+        ('Петров П.П. Паспорт', '..\\uploads\\1731938461207.pdf', 2);
     `);
   };
   
