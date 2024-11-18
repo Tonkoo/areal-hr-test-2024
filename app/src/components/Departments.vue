@@ -153,7 +153,7 @@ export default {
           this.departments = response.data;
         })
         .catch((error) => {
-          console.error("Ошибка при получении отделов:", error);
+          console.error("Error fetching departments:", error);
         });
     },
     fetchOrganizations() {
@@ -163,7 +163,7 @@ export default {
           this.organizations = response.data;
         })
         .catch((error) => {
-          console.error("Ошибка при получении организаций:", error);
+          console.error("Error fetching organizations:", error);
         });
     },
     openAddDialog(isSubDepartmentMode) {
@@ -210,7 +210,7 @@ export default {
           this.deleteDepartmentId = null;
         })
         .catch((error) => {
-          console.error("Ошибка при удалении отдела:", error);
+          console.error("Error deleting department:", error);
         });
     },
     getDialogTitle() {
@@ -254,10 +254,10 @@ export default {
             this.fetchDepartments();
           })
           .catch((error) => {
-            console.error("Ошибка при сохранении отдела:", error);
+            console.error("Error saving department:", error);
           });
       } else {
-        console.error("Не все данные введены");
+        console.error("Not all data has been entered");
       }
     },
   },
