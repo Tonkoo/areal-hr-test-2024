@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const client = require("../db");
+const { getPositions, addPosition, updatePosition, deletePosition } = require("../controllers/db_positions");
 
 router.get("/positions", async (req, res) => {
   try {
-    const result = await client.query("SELECT positions.id, positions.name as position_name, departments.name as department_name, department_id FROM positions join departments on positions.department_id = departments.id");
-    res.json(result.rows);
+    const positions = await getPositions();
+    res.json(positions);
   } catch (err) {
-    console.error("Error fetching departments:", err);
+    console.error("Error fetching positions:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -20,12 +20,8 @@ router.post("/positions", async (req, res) => {
   }
 
   try {
-    const result = await client.query(
-      `INSERT INTO positions (name, department_id) 
-       VALUES ($1, $2) RETURNING *`,
-      [position_name, department_id]
-    );
-    res.status(201).json(result.rows[0]);
+    const newPosition = await addPosition(position_name, department_id);
+    res.status(201).json(newPosition);
   } catch (err) {
     console.error("Error adding position:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -41,18 +37,8 @@ router.put("/positions/:id", async (req, res) => {
   }
 
   try {
-    const result = await client.query(
-      `UPDATE positions 
-       SET name = $1, department_id = $2
-       WHERE id = $3 RETURNING *`,
-      [position_name, department_id, id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Position not found" });
-    }
-
-    res.json(result.rows[0]);
+    const updatedPosition = await updatePosition(id, position_name, department_id);
+    res.status(201).json(updatedPosition);
   } catch (err) {
     console.error("Error updating position:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -63,16 +49,8 @@ router.delete("/positions/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const result = await client.query(
-      "DELETE FROM positions WHERE id = $1 RETURNING *",
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Position not found" });
-    }
-
-    res.json({ message: "Position deleted successfully" });
+    const deltedPosition = await deletePosition(id);
+    res.status(201).json(deltedPosition);
   } catch (err) {
     console.error("Error deleting position:", err);
     res.status(500).json({ error: "Internal server error" });

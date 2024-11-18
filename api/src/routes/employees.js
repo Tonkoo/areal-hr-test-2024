@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const client = require("../db");
 const {
   getEmployees,
   addEmployee,
@@ -79,7 +78,6 @@ router.post("/employees", async (req, res) => {
       .status(201)
       .json({ id: employeeId, message: "Employee added successfully" });
   } catch (err) {
-    await client.query("ROLLBACK");
     console.error("Error adding employee:", err);
     res.status(500).json({ error: "Internal server error" });
   }
