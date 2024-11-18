@@ -4,9 +4,9 @@ async function getRegions() {
   try {
     const result = await client.query("SELECT * FROM regions");
     return result.rows;
-  } catch (error) {
-    console.error("Error fetching regions:", error);
-    throw error;
+  } catch (err) {
+    console.error("Error fetching regions:", err);
+    throw err;
   }
 }
 

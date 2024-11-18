@@ -6,9 +6,9 @@ async function getDepartments() {
       "SELECT d.id AS department_id, d.name AS department_name, pd.name AS parent_department_name, d.comment AS department_comment, o.name AS organization_name FROM departments AS d LEFT JOIN departments AS pd ON d.parent_id = pd.id  LEFT JOIN organizations AS o ON d.organization_id = o.id ORDER BY o.name, d.id;"
     );
     return result.rows;
-  } catch (error) {
-    console.error("Error fetching regions:", error);
-    throw error;
+  } catch (err) {
+    console.error("Error fetching departments:", err);
+    throw err;
   }
 }
 
@@ -29,9 +29,9 @@ async function addDepartment(name, comment, parent_id, organization_id) {
 
     const result = await client.query(query, values);
     return result.rows[0];
-  } catch (error) {
-    console.error("Error adding department:", error);
-    throw error;
+  } catch (err) {
+    console.error("Error adding department:", err);
+    throw err;
   }
 }
 
@@ -62,9 +62,9 @@ async function updateDepartment(id, name, comment, parent_id, organization_id) {
     await client.query(updateSubDepartmentsQuery, [organization_id, id]);
 
     return updatedDepartment;
-  } catch (error) {
-    console.error("Error updating department:", error);
-    throw error;
+  } catch (err) {
+    console.error("Error updating department:", err);
+    throw err;
   }
 }
 
@@ -75,9 +75,9 @@ async function deleteDepartment(id) {
       [id]
     );
     return result.rows[0];
-  } catch (error) {
-    console.error("Error deleting department:", error);
-    throw error;
+  } catch (err) {
+    console.error("Error deleting department:", err);
+    throw err;
   }
 }
 
