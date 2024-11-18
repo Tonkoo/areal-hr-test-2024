@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "migrate": "node-pg-migrate up --envPath=../.env"
+    "migrate:up": "node-pg-migrate up --envPath=../.env",
+    "migrate:down": "node-pg-migrate down --envPath=../.env",
+    "migrate:create": "node-pg-migrate create --envPath=../.env"
   },
   "author": "Tonkoo12",
   "license": "ISC",
