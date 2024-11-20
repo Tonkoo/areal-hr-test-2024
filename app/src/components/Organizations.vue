@@ -16,37 +16,14 @@
         Добавить
       </v-btn>
     </v-toolbar>
-    <v-dialog v-model="dialog" max-width="700px">
-      <v-card>
-        <v-card-title class="headline">{{
-          isEditMode ? "Изменить организацию" : "Добавить организацию"
-        }}</v-card-title>
-        <v-card-text>
-          <v-form ref="form">
-            <v-text-field
-              v-model="TableOrganization.name"
-              label="Название организации"
-              required
-            ></v-text-field>
-            <v-textarea
-              v-model="TableOrganization.comment"
-              label="Комментарий"
-              required
-            ></v-textarea>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="blue" text @click="dialog = false">Отмена</v-btn>
-          <v-btn
-            color="blue"
-            text
-            @click="isEditMode ? updateOrganization() : addOrganization()"
-          >
-            {{ isEditMode ? "Сохранить" : "Добавить" }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    
+    <organization-form
+      :dialog="dialog"
+      :isEditMode="isEditMode"
+      :organization="TableOrganization"
+      @update:dialog="dialog = $event"
+      @save="handleSaveOrganization"
+    />
 
     <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card>
@@ -89,8 +66,12 @@
 
 <script>
 import api from "@/api/axios";
+import OrganizationForm from "@/modules/organizations/components/OrganizationForm.vue";
 
 export default {
+  components: {
+    OrganizationForm,
+  },
   data() {
     return {
       dialog: false,
@@ -131,6 +112,13 @@ export default {
       this.TableOrganization = { ...item };
       this.dialog = true;
     },
+    handleSaveOrganization(organization) {
+      if (this.isEditMode) {
+        this.updateOrganization(organization);
+      } else {
+        this.addOrganization(organization);
+      }
+    },
     addOrganization() {
       if (this.TableOrganization.name && this.TableOrganization.comment) {
         api
@@ -159,13 +147,10 @@ export default {
     },
     updateOrganization() {
       api
-        .put(
-          `organizations/${this.TableOrganization.id}`,
-          {
-            name: this.TableOrganization.name,
-            comment: this.TableOrganization.comment,
-          }
-        )
+        .put(`organizations/${this.TableOrganization.id}`, {
+          name: this.TableOrganization.name,
+          comment: this.TableOrganization.comment,
+        })
         .then(() => {
           const index = this.organizations.findIndex(
             (org) => org.id === this.TableOrganization.id
