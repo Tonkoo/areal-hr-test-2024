@@ -43,39 +43,6 @@
       @delete="deleteDepartment"
     />
 
-    <!-- <v-table>
-      <thead>
-        <tr>
-          <th>Код</th>
-          <th>Отдел</th>
-          <th>Родитель</th>
-          <th>Комментарий</th>
-          <th>Организация</th>
-          <th>Действие</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in departments" :key="item.department_id">
-          <td>{{ item.department_id }}</td>
-          <td>{{ item.department_name }}</td>
-          <td>{{ item.parent_department_name }}</td>
-          <td>{{ item.department_comment }}</td>
-          <td>{{ item.organization_name }}</td>
-          <td>
-            <v-btn color="blue" @click="openEditDialog(item)" small
-              >Изменить</v-btn
-            >
-            <v-btn
-              color="red"
-              @click="openDeleteDialog(item.department_id)"
-              small
-              >Удалить</v-btn
-            >
-          </td>
-        </tr>
-      </tbody>
-    </v-table> -->
-
     <DepartmentTable
       :departments="departments"
       @edit="openEditDialog"
@@ -85,16 +52,17 @@
 </template>
 
 <script>
-import api from "@/api/axios";
 import DepartmentForm from "@/modules/departments/components/DepartmentForm.vue";
 import DepartmentDeleteDialog from "@/modules/departments/components/DepartmentDeleteDialog.vue";
 import DepartmentTable from "@/modules/departments/components/DepartmentTable.vue";
+import DepartmentApi from "@/modules/departments/api/DepartmentApi";
+import OrganizationsApi from "@/modules/organizations/api/OrganizationsApi";
 
 export default {
-  components:{
+  components: {
     DepartmentForm,
     DepartmentDeleteDialog,
-    DepartmentTable
+    DepartmentTable,
   },
   data() {
     return {
@@ -126,23 +94,21 @@ export default {
   },
   methods: {
     fetchDepartments() {
-      api
-        .get("/departments")
-        .then((response) => {
-          this.departments = response.data;
+      DepartmentApi.getDepartments()
+        .then((data) => {
+          this.departments = data;
         })
-        .catch((error) => {
-          console.error("Error fetching departments:", error);
+        .catch((err) => {
+          console.error("Error fetching departments:", err);
         });
     },
     fetchOrganizations() {
-      api
-        .get("/organizations")
-        .then((response) => {
-          this.organizations = response.data;
+      OrganizationsApi.getOrganizations()
+        .then((data) => {
+          this.organizations = data;
         })
-        .catch((error) => {
-          console.error("Error fetching organizations:", error);
+        .catch((err) => {
+          console.error("Error fetching organizations:", err);
         });
     },
     openAddDialog(isSubDepartmentMode) {
@@ -179,12 +145,9 @@ export default {
       this.deleteDialog = true;
     },
     deleteDepartment() {
-      api
-        .delete(`departments/${this.deleteDepartmentId}`)
+      DepartmentApi.deleteDepartment(this.deleteDepartmentId)
         .then(() => {
-          this.departments = this.departments.filter(
-            (dept) => dept.department_id !== this.deleteDepartmentId
-          );
+          this.fetchDepartments();
           this.deleteDialog = false;
           this.deleteDepartmentId = null;
         })
@@ -209,13 +172,14 @@ export default {
         this.TableDepartment.comment &&
         this.TableDepartment.organization_id
       ) {
-        const method = this.dialogMode === "add" ? "post" : "put";
-        const url =
-          this.dialogMode === "add"
-            ? "/departments"
-            : `departments/${this.TableDepartment.id}`;
+        const method =
+          this.dialogMode === "add" ? "addDepartment" : "updateDepartment";
+        const departmentData = this.TableDepartment;
 
-        api[method](url, this.TableDepartment)
+        DepartmentApi[method](
+          this.dialogMode === "add" ? departmentData : departmentData.id,
+          departmentData
+        )
           .then(() => {
             this.dialog = false;
             this.fetchDepartments();
