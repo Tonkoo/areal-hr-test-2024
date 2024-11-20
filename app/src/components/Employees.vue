@@ -38,24 +38,12 @@
     @update:detailsDialog="detailsDialog = $event"
     />
 
-    <v-dialog v-model="dismissDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="headline">Уволить сотрудника</v-card-title>
-        <v-card-text>
-          Вы уверены, что хотите уволить сотрудника
-          {{ selectedEmployee.last_name }} {{ selectedEmployee.first_name }}?
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="dismissDialog = false"
-            >Отмена</v-btn
-          >
-          <v-btn color="red darken-1" text @click="dismissEmployee"
-            >Уволить</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <EmployeesDismissDialog
+      :dismissDialog = "dismissDialog"
+      :TableEmployees = "TableEmployees"
+      @update:dismissDialog="dismissDialog = $event"
+      @dismiss = "dismissEmployee"
+    />
 
     <v-dialog v-model="filesDialog" max-width="600px">
       <v-card>
@@ -177,11 +165,13 @@
 import api from "@/api/axios";
 import EmployeesForm from "@/modules/employees/components/EmployeesForm.vue";
 import EmployeesDetailsDialog from "@/modules/employees/components/EmployeesDetailsDialog.vue";
+import EmployeesDismissDialog from "@/modules/employees/components/EmployeesDismissDialog.vue";
 
 export default {
   components:{
     EmployeesForm,
-    EmployeesDetailsDialog
+    EmployeesDetailsDialog,
+    EmployeesDismissDialog
   },
   data() {
     return {
@@ -218,7 +208,6 @@ export default {
       maxDate: new Date().toISOString().split("T")[0],
       citiesLoaded: false,
       positionsLoaded: false,
-      selectedEmployee: null,
       employeeFiles: [],
       newFile: null,
     };
@@ -420,24 +409,24 @@ export default {
       this.detailsDialog = true;
     },
     openDismissDialog(item) {
-      this.selectedEmployee = item;
+      this.TableEmployees = item;
       this.dismissDialog = true;
     },
     dismissEmployee() {
       api
-        .post(`/employees/${this.selectedEmployee.id}`)
+        .post(`/employees/${this.TableEmployees.id}`)
         .then(() => {
           this.dismissDialog = false;
           this.fetchEmployees();
         })
         .catch((error) => {
-          console.log(this.selectedEmployee.id);
+          console.log(this.TableEmployees.id);
 
           console.error("Error dismissing employee:", error);
         });
     },
     openFilesDialog(employee) {
-      this.selectedEmployee = employee;
+      this.TableEmployees = employee;
       this.fetchEmployeeFiles(employee.id);
       this.filesDialog = true;
     },
@@ -458,7 +447,7 @@ export default {
       formData.append("name", this.newFile.name);
       api
         .post(
-          `/files/${this.selectedEmployee.id}`,
+          `/files/${this.TableEmployees.id}`,
           formData,
           {
             headers: {
@@ -467,7 +456,7 @@ export default {
           }
         )
         .then(() => {
-          this.fetchEmployeeFiles(this.selectedEmployee.id);
+          this.fetchEmployeeFiles(this.TableEmployees.id);
           this.newFile = null;
         })
         .catch((error) => {
@@ -482,7 +471,7 @@ export default {
           }
         })
         .then(() => {
-          this.fetchEmployeeFiles(this.selectedEmployee.id);
+          this.fetchEmployeeFiles(this.TableEmployees.id);
         })
         .catch((error) => {
           console.error("Ошибка при удалении файла:", error);
