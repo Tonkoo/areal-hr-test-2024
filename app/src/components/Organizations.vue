@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api/axios";
 
 export default {
   data() {
@@ -106,8 +106,8 @@ export default {
     };
   },
   mounted() {
-    axios
-      .get("http://localhost:3000/api/organizations")
+    api
+      .get("/organizations")
       .then((response) => {
         if (Array.isArray(response.data)) {
           this.organizations = response.data;
@@ -133,8 +133,8 @@ export default {
     },
     addOrganization() {
       if (this.TableOrganization.name && this.TableOrganization.comment) {
-        axios
-          .post("http://localhost:3000/api/organizations", {
+        api
+          .post("/organizations", {
             name: this.TableOrganization.name,
             comment: this.TableOrganization.comment,
           })
@@ -158,9 +158,9 @@ export default {
       }
     },
     updateOrganization() {
-      axios
+      api
         .put(
-          `http://localhost:3000/api/organizations/${this.TableOrganization.id}`,
+          `organizations/${this.TableOrganization.id}`,
           {
             name: this.TableOrganization.name,
             comment: this.TableOrganization.comment,
@@ -186,8 +186,8 @@ export default {
     },
     deleteOrganization() {
       if (this.deleteOrganizationId !== null) {
-        axios
-          .delete(`http://localhost:3000/api/organizations/${this.deleteOrganizationId}`)
+        api
+          .delete(`organizations/${this.deleteOrganizationId}`)
           .then(() => {
             this.organizations = this.organizations.filter(
               (org) => org.id !== this.deleteOrganizationId
