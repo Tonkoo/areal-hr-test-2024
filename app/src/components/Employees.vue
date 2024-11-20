@@ -17,121 +17,20 @@
       </v-btn>
     </v-toolbar>
 
-    <v-dialog v-model="dialog" max-width="700px">
-      <v-card>
-        <v-card-title class="headline">{{
-          isEditMode ? "Изменить данные сотрудника" : "Добавить сотрудника"
-        }}</v-card-title>
-        <v-card-text>
-          <v-form ref="form">
-            <v-text-field
-              v-model="TableEmployees.last_name"
-              label="Фамилия"
-              required
-            ></v-text-field>
-            <v-text-field
-              v-model="TableEmployees.first_name"
-              label="Имя"
-              required
-            ></v-text-field>
-            <v-text-field
-              v-model="TableEmployees.middle_name"
-              label="Отчество"
-              required
-            ></v-text-field>
-            <v-date-picker
-              v-model="TableEmployees.date_of_birth"
-              :max="maxDate"
-            ></v-date-picker>
-            <v-text-field
-              v-model="TableEmployees.passport_series"
-              label="Серия паспорта"
-              required
-            ></v-text-field>
-            <v-text-field
-              v-model="TableEmployees.passport_number"
-              label="Номер паспорта"
-              required
-            ></v-text-field>
-            <v-select
-              v-model="TableEmployees.region_id"
-              :items="regions"
-              item-title="name"
-              item-value="id"
-              label="Регион"
-              required
-              @update:model-value="onRegionChange"
-            ></v-select>
-            <v-select
-              v-if="citiesLoaded"
-              v-model="TableEmployees.city_id"
-              :items="filteredCities"
-              item-title="name"
-              item-value="id"
-              label="Город"
-              required
-              :disabled="!TableEmployees.region_id"
-            ></v-select>
-            <v-text-field
-              v-model="TableEmployees.street"
-              label="Улица"
-              required
-            ></v-text-field>
-            <v-text-field
-              v-model="TableEmployees.house"
-              label="Дом"
-              required
-            ></v-text-field>
-            <v-text-field
-              v-model="TableEmployees.building"
-              label="Корпус"
-              required
-            ></v-text-field>
-            <v-text-field
-              v-model="TableEmployees.apartment"
-              type="number"
-              label="Квартира"
-              required
-            ></v-text-field>
-            <v-select
-              v-model="TableEmployees.department_id"
-              :items="departments"
-              item-title="department_name"
-              item-value="department_id"
-              label="Отдел"
-              required
-              @update:model-value="onDepartmentsChange"
-            ></v-select>
-            <v-select
-              v-if="positionsLoaded"
-              v-model="TableEmployees.position_id"
-              :items="filteredPositions"
-              item-title="position_name"
-              item-value="id"
-              label="Должность"
-              required
-              :disabled="!TableEmployees.department_id"
-            ></v-select>
-            <v-text-field
-              v-model="TableEmployees.salary"
-              label="Зарплата"
-              type="number"
-              required
-            ></v-text-field>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="blue" text @click="dialog = false">Отмена</v-btn>
-          <v-btn
-            color="blue"
-            text
-            @click="isEditMode ? updateEmployees() : addEmployees()"
-          >
-            {{ isEditMode ? "Сохранить" : "Добавить" }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <employeesForm
+      :dialog="dialog"
+      :isEditMode="isEditMode"
+      :TableEmployees="TableEmployees"
+      :maxDate="maxDate"
+      :regions="regions"
+      :citiesLoaded="citiesLoaded"
+      :filteredCities="filteredCities"
+      :departments="departments"
+      :filteredPositions="filteredPositions"
+      :positionsLoaded="positionsLoaded"
+      @save="handleSaveOrganization"
+      @update:dialog="dialog = $event"
+      />
 
     <v-dialog v-model="detailsDialog" max-width="500px">
       <v-card>
@@ -305,9 +204,13 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api/axios";
+import employeesForm from "@/modules/employees/components/employeesForm.vue";
 
 export default {
+  components:{
+    employeesForm
+  },
   data() {
     return {
       dialog: false,
@@ -372,8 +275,8 @@ export default {
   },
   methods: {
     fetchEmployees() {
-      axios
-        .get("http://localhost:3000/api/employees")
+      api
+        .get("/employees")
         .then((response) => {
           this.employees = response.data;
         })
@@ -382,8 +285,8 @@ export default {
         });
     },
     fetchRegions() {
-      axios
-        .get("http://localhost:3000/api/regions")
+      api
+        .get("/regions")
         .then((response) => {
           this.regions = response.data;
         })
@@ -392,8 +295,8 @@ export default {
         });
     },
     fetchCitys() {
-      axios
-        .get("http://localhost:3000/api/citys")
+      api
+        .get("/citys")
         .then((response) => {
           this.citys = response.data;
           this.citiesLoaded = true;
@@ -403,8 +306,8 @@ export default {
         });
     },
     fetchDepartments() {
-      axios
-        .get("http://localhost:3000/api/departments")
+      api
+        .get("/departments")
         .then((response) => {
           this.departments = response.data;
         })
@@ -413,8 +316,8 @@ export default {
         });
     },
     fetchPositions() {
-      axios
-        .get("http://localhost:3000/api/positions")
+      api
+        .get("/positions")
         .then((response) => {
           this.positions = response.data;
           this.positionsLoaded = true;
@@ -422,12 +325,6 @@ export default {
         .catch((error) => {
           console.error("Error retrieving positions:", error);
         });
-    },
-    onRegionChange() {
-      this.TableEmployees.city_id = null;
-    },
-    onDepartmentsChange() {
-      this.TableEmployees.position_id = null;
     },
     openAddDialog() {
       this.isEditMode = false;
@@ -452,9 +349,16 @@ export default {
       };
       this.dialog = true;
     },
+    handleSaveOrganization(employee){
+      if (this.isEditMode) {
+        this.updateEmployees(employee);
+      } else {
+        this.addEmployees(employee);
+      }
+    },
     addEmployees() {
-      axios
-        .post("http://localhost:3000/api/employees", {
+      api
+        .post("/employees", {
           last_name: this.TableEmployees.last_name,
           first_name: this.TableEmployees.first_name,
           middle_name: this.TableEmployees.middle_name,
@@ -481,8 +385,6 @@ export default {
         });
     },
     openEditDialog(item) {
-      console.log(item.date_of_birth);
-
       this.isEditMode = true;
       this.TableEmployees = {
         id: item.id,
@@ -507,13 +409,12 @@ export default {
         )?.id,
         salary: parseFloat(item.salary.replace(/[$,]/g, "")),
       };
-      console.log(this.TableEmployees.date_of_birth);
 
       this.dialog = true;
     },
     updateEmployees() {
-      axios
-        .put(`http://localhost:3000/api/employees/${this.TableEmployees.id}`, {
+      api
+        .put(`/employees/${this.TableEmployees.id}`, {
           last_name: this.TableEmployees.last_name,
           first_name: this.TableEmployees.first_name,
           middle_name: this.TableEmployees.middle_name,
@@ -551,8 +452,8 @@ export default {
       this.dismissDialog = true;
     },
     dismissEmployee() {
-      axios
-        .post(`http://localhost:3000/api/employees/${this.selectedEmployee.id}`)
+      api
+        .post(`/employees/${this.selectedEmployee.id}`)
         .then(() => {
           this.dismissDialog = false;
           this.fetchEmployees();
@@ -569,8 +470,8 @@ export default {
       this.filesDialog = true;
     },
     fetchEmployeeFiles(employeeId) {
-      axios
-        .get(`http://localhost:3000/api/files/${employeeId}`)
+      api
+        .get(`/files/${employeeId}`)
         .then((response) => {
           this.employeeFiles = response.data;
         })
@@ -583,10 +484,9 @@ export default {
       const formData = new FormData();
       formData.append("file", this.newFile);
       formData.append("name", this.newFile.name);
-
-      axios
+      api
         .post(
-          `http://localhost:3000/api/files/${this.selectedEmployee.id}`,
+          `/files/${this.selectedEmployee.id}`,
           formData,
           {
             headers: {
@@ -603,8 +503,8 @@ export default {
         });
     },
     deleteFile(file) {
-      axios
-        .delete(`http://localhost:3000/api/files/${file.file_id}`, {
+      api
+        .delete(`/files/${file.file_id}`, {
           params: {
             filepath: file.filepath
           }
