@@ -43,7 +43,7 @@
       @delete="deleteDepartment"
     />
 
-    <v-table>
+    <!-- <v-table>
       <thead>
         <tr>
           <th>Код</th>
@@ -74,7 +74,13 @@
           </td>
         </tr>
       </tbody>
-    </v-table>
+    </v-table> -->
+
+    <DepartmentTable
+      :departments="departments"
+      @edit="openEditDialog"
+      @delete="openDeleteDialog"
+    />
   </v-container>
 </template>
 
@@ -82,11 +88,13 @@
 import api from "@/api/axios";
 import DepartmentForm from "@/modules/departments/components/DepartmentForm.vue";
 import DepartmentDeleteDialog from "@/modules/departments/components/DepartmentDeleteDialog.vue";
+import DepartmentTable from "@/modules/departments/components/DepartmentTable.vue";
 
 export default {
   components:{
     DepartmentForm,
-    DepartmentDeleteDialog
+    DepartmentDeleteDialog,
+    DepartmentTable
   },
   data() {
     return {
