@@ -41,10 +41,11 @@
 </template>
 
 <script>
-import api from "@/api/axios";
 import PositionForm from "@/modules/positions/components/PositionForm.vue";
 import PositionDeleteDialog from "@/modules/positions/components/PositionDeleteDialog.vue";
 import PositionTable from "@/modules/positions/components/PositionTable.vue";
+import PositionApi from "@/modules/positions/api/PositionApi";
+import DepartmentApi from "@/modules/departments/api/DepartmentApi";
 
 export default {
   components: {
@@ -73,23 +74,23 @@ export default {
   },
   methods: {
     fetchPosition() {
-      api
-        .get("/positions")
-        .then((response) => {
-          this.positions = response.data;
+      PositionApi.getPosition()
+        .then((data) => {
+          this.positions = data;
         })
-        .catch((error) => {
-          console.error("Error fetching positions:", error);
+        .catch((err) => {
+          console.error("Error fetching positions:", err);
+          this.positions = [];
         });
     },
     fetchDepartments() {
-      api
-        .get("/departments")
-        .then((response) => {
-          this.departments = response.data;
+      DepartmentApi.getDepartments()
+        .then((data) => {
+          this.departments = data;
         })
-        .catch((error) => {
-          console.error("Error fetching departments:", error);
+        .catch((err) => {
+          console.error("Error fetching departments:", err);
+          this.departments = [];
         });
     },
     openAddDialog() {
@@ -116,32 +117,34 @@ export default {
       }
     },
     addPosition() {
-      api
-        .post("/positions", {
+      if (this.TablePosition.position_name && this.TablePosition.department_id) {
+        PositionApi.addPosition({
           position_name: this.TablePosition.position_name,
-          department_id: this.TablePosition.department_id,
+          department_id: this.TablePosition.department_id
         })
-        .then((response) => {
-          this.positions.push(response.data);
-          this.dialog = false;
-          this.fetchPosition();
-        })
-        .catch((error) => {
-          console.error("Error adding position:", error);
-        });
+          .then(() => {
+            this.fetchPosition();
+            this.dialog = false;
+            this.TablePosition.position_name = "";
+            this.TablePosition.department_id = null;
+          })
+          .catch((err) => {
+            console.error("Error adding position:", err);
+          });
+      }
     },
     updatePosition() {
-      api
-        .put(`/positions/${this.TablePosition.id}`, {
-          position_name: this.TablePosition.position_name,
-          department_id: this.TablePosition.department_id,
-        })
+      PositionApi.updatePosition(this.TablePosition.id, {
+        position_name: this.TablePosition.position_name,
+        department_id: this.TablePosition.department_id,
+      })
         .then(() => {
-          this.dialog = false;
           this.fetchPosition();
+          this.dialog = false;
+          this.TablePosition = { id: null, position_name: "", department_id: null };
         })
-        .catch((error) => {
-          console.error("Error updating position:", error);
+        .catch((err) => {
+          console.error("Error updating position:", err);
         });
     },
     openDeleteDialog(id) {
@@ -149,16 +152,17 @@ export default {
       this.deleteDialog = true;
     },
     deletePosition() {
-      api
-        .delete(`/positions/${this.deletePositionId}`)
-        .then(() => {
-          this.fetchPosition();
-          this.deleteDialog = false;
-          this.deletePositionId = null;
-        })
-        .catch((error) => {
-          console.error("Error deleting position:", error);
-        });
+      if (this.deletePositionId !== null) {
+        PositionApi.deletePosition(this.deletePositionId)
+          .then(() => {
+            this.fetchPosition();
+            this.deleteDialog = false;
+            this.deletePositionId = null;
+          })
+          .catch((err) => {
+            console.error("Error deleting position:", err);
+          });
+      }
     },
   },
 };
