@@ -17,7 +17,7 @@
       </v-btn>
     </v-toolbar>
 
-    <employeesForm
+    <EmployeesForm
       :dialog="dialog"
       :isEditMode="isEditMode"
       :TableEmployees="TableEmployees"
@@ -32,41 +32,11 @@
       @update:dialog="dialog = $event"
       />
 
-    <v-dialog v-model="detailsDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="headline"
-          >Подробная информация о сотруднике</v-card-title
-        >
-        <v-card-text>
-          <v-list>
-            <v-list-item>
-              <v-list-item-title>Отдел</v-list-item-title>
-              <v-list-item-subtitle>{{
-                TableEmployees.department_name
-              }}</v-list-item-subtitle>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title>Должность</v-list-item-title>
-              <v-list-item-subtitle>{{
-                TableEmployees.position_name
-              }}</v-list-item-subtitle>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title>Зарплата</v-list-item-title>
-              <v-list-item-subtitle
-                >{{ TableEmployees.salary }} руб.</v-list-item-subtitle
-              >
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="detailsDialog = false"
-            >Закрыть</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <EmployeesDetailsDialog
+    :detailsDialog="detailsDialog"
+    :TableEmployees="TableEmployees"
+    @update:detailsDialog="detailsDialog = $event"
+    />
 
     <v-dialog v-model="dismissDialog" max-width="500px">
       <v-card>
@@ -205,11 +175,13 @@
 
 <script>
 import api from "@/api/axios";
-import employeesForm from "@/modules/employees/components/employeesForm.vue";
+import EmployeesForm from "@/modules/employees/components/EmployeesForm.vue";
+import EmployeesDetailsDialog from "@/modules/employees/components/EmployeesDetailsDialog.vue";
 
 export default {
   components:{
-    employeesForm
+    EmployeesForm,
+    EmployeesDetailsDialog
   },
   data() {
     return {
