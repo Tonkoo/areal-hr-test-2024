@@ -17,40 +17,14 @@
       </v-btn>
     </v-toolbar>
 
-    <v-dialog v-model="dialog" max-width="700px">
-      <v-card>
-        <v-card-title class="headline">{{
-          isEditMode ? "Изменить должность" : "Добавить должность"
-        }}</v-card-title>
-        <v-card-text>
-          <v-form ref="form">
-            <v-text-field
-              v-model="TablePosition.position_name"
-              label="Название должности"
-              required
-            ></v-text-field>
-            <v-select
-              v-model="TablePosition.department_id"
-              :items="departments"
-              item-title="department_name"
-              item-value="department_id"
-              label="Отдел"
-              required
-            ></v-select>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="blue" text @click="dialog = false">Отмена</v-btn>
-          <v-btn
-            color="blue"
-            text
-            @click="isEditMode ? updatePosition() : addPosition()"
-          >
-            {{ isEditMode ? "Сохранить" : "Добавить" }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <PositionForm
+      :dialog="dialog"
+      :isEditMode="isEditMode"
+      :TablePosition="TablePosition"
+      :departments ="departments"
+      @update:dialog="dialog = $event"
+      @save="handleSavePosition"
+    />
 
     <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card>
@@ -92,9 +66,13 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api/axios";
+import PositionForm from "@/modules/positions/components/PositionForm.vue";
 
 export default {
+  components:{
+    PositionForm
+  },
   data() {
     return {
       dialog: false,
@@ -116,8 +94,8 @@ export default {
   },
   methods: {
     fetchPosition() {
-      axios
-        .get("http://localhost:3000/api/positions")
+      api
+        .get("/positions")
         .then((response) => {
           this.positions = response.data;
         })
@@ -126,8 +104,8 @@ export default {
         });
     },
     fetchDepartments() {
-      axios
-        .get("http://localhost:3000/api/departments")
+      api
+        .get("/departments")
         .then((response) => {
           this.departments = response.data;
         })
@@ -151,9 +129,16 @@ export default {
       };
       this.dialog = true;
     },
+    handleSavePosition(position){
+      if (this.isEditMode) {
+        this.updatePosition(position);
+      } else {
+        this.addPosition(position);
+      }
+    },
     addPosition() {
-      axios
-        .post("http://localhost:3000/api/positions", {
+      api
+        .post("/positions", {
           position_name: this.TablePosition.position_name,
           department_id: this.TablePosition.department_id,
         })
@@ -167,8 +152,8 @@ export default {
         });
     },
     updatePosition() {
-      axios
-        .put(`http://localhost:3000/api/positions/${this.TablePosition.id}`, {
+      api
+        .put(`/positions/${this.TablePosition.id}`, {
           position_name: this.TablePosition.position_name,
           department_id: this.TablePosition.department_id,
         })
@@ -185,8 +170,8 @@ export default {
       this.deleteDialog = true;
     },
     deletePosition() {
-      axios
-        .delete(`http://localhost:3000/api/positions/${this.deletePositionId}`)
+      api
+        .delete(`/positions/${this.deletePositionId}`)
         .then(() => {
           this.fetchPosition();
           this.deleteDialog = false;
