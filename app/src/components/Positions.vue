@@ -32,31 +32,11 @@
       @delete="deletePosition"
     />
 
-    <v-table>
-      <thead>
-        <tr>
-          <th>Код</th>
-          <th>Должность</th>
-          <th>Отдел</th>
-          <th>Действие</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in positions" :key="item.id">
-          <td>{{ item.id }}</td>
-          <td>{{ item.position_name }}</td>
-          <td>{{ item.department_name }}</td>
-          <td>
-            <v-btn color="blue" @click="openEditDialog(item)" small
-              >Изменить</v-btn
-            >
-            <v-btn color="red" @click="openDeleteDialog(item.id)" small
-              >Удалить</v-btn
-            >
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
+    <PositionTable
+      :positions="positions"
+      @edit="openEditDialog"
+      @delete="openDeleteDialog"
+    />
   </v-container>
 </template>
 
@@ -64,11 +44,13 @@
 import api from "@/api/axios";
 import PositionForm from "@/modules/positions/components/PositionForm.vue";
 import PositionDeleteDialog from "@/modules/positions/components/PositionDeleteDialog.vue";
+import PositionTable from "@/modules/positions/components/PositionTable.vue";
 
 export default {
   components: {
     PositionForm,
     PositionDeleteDialog,
+    PositionTable
   },
   data() {
     return {
