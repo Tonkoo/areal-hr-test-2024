@@ -17,7 +17,7 @@
       </v-btn>
     </v-toolbar>
     
-    <organization-form
+    <OrganizationForm
       :dialog="dialog"
       :isEditMode="isEditMode"
       :organization="TableOrganization"
@@ -25,7 +25,7 @@
       @save="handleSaveOrganization"
     />
 
-    <v-dialog v-model="deleteDialog" max-width="500px">
+    <!-- <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card>
         <v-card-title class="headline">Подтверждение удаления</v-card-title>
         <v-card-text>Вы точно хотите удалить данную организацию?</v-card-text>
@@ -34,7 +34,13 @@
           <v-btn color="red" text @click="deleteOrganization()">Удалить</v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
+
+    <OrganizationDeleteDialog
+      :deleteDialog="deleteDialog"
+      @update:deleteDialog="deleteDialog = $event"
+      @delete="deleteOrganization"
+    />
 
     <v-table>
       <thead>
@@ -67,10 +73,12 @@
 <script>
 import api from "@/api/axios";
 import OrganizationForm from "@/modules/organizations/components/OrganizationForm.vue";
+import OrganizationDeleteDialog from "@/modules/organizations/components/OrganizationDeleteDialog.vue";
 
 export default {
   components: {
     OrganizationForm,
+    OrganizationDeleteDialog,
   },
   data() {
     return {
