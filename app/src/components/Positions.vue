@@ -21,21 +21,16 @@
       :dialog="dialog"
       :isEditMode="isEditMode"
       :TablePosition="TablePosition"
-      :departments ="departments"
+      :departments="departments"
       @update:dialog="dialog = $event"
       @save="handleSavePosition"
     />
 
-    <v-dialog v-model="deleteDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="headline">Подтверждение удаления</v-card-title>
-        <v-card-text>Вы точно хотите удалить данную должность?</v-card-text>
-        <v-card-actions>
-          <v-btn color="blue" text @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="red" text @click="deletePosition()">Удалить</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <PositionDeleteDialog
+      :deleteDialog="deleteDialog"
+      @update:deleteDialog="deleteDialog = $event"
+      @delete="deletePosition"
+    />
 
     <v-table>
       <thead>
@@ -68,10 +63,12 @@
 <script>
 import api from "@/api/axios";
 import PositionForm from "@/modules/positions/components/PositionForm.vue";
+import PositionDeleteDialog from "@/modules/positions/components/PositionDeleteDialog.vue";
 
 export default {
-  components:{
-    PositionForm
+  components: {
+    PositionForm,
+    PositionDeleteDialog,
   },
   data() {
     return {
@@ -129,7 +126,7 @@ export default {
       };
       this.dialog = true;
     },
-    handleSavePosition(position){
+    handleSavePosition(position) {
       if (this.isEditMode) {
         this.updatePosition(position);
       } else {
