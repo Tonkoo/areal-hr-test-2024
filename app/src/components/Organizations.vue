@@ -16,7 +16,7 @@
         Добавить
       </v-btn>
     </v-toolbar>
-    
+
     <OrganizationForm
       :dialog="dialog"
       :isEditMode="isEditMode"
@@ -25,48 +25,17 @@
       @save="handleSaveOrganization"
     />
 
-    <!-- <v-dialog v-model="deleteDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="headline">Подтверждение удаления</v-card-title>
-        <v-card-text>Вы точно хотите удалить данную организацию?</v-card-text>
-        <v-card-actions>
-          <v-btn color="blue" text @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="red" text @click="deleteOrganization()">Удалить</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog> -->
-
     <OrganizationDeleteDialog
       :deleteDialog="deleteDialog"
       @update:deleteDialog="deleteDialog = $event"
       @delete="deleteOrganization"
     />
 
-    <v-table>
-      <thead>
-        <tr>
-          <th>Код</th>
-          <th>Организация</th>
-          <th>Комментарий</th>
-          <th>Действие</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in organizations" :key="item.id">
-          <td>{{ item.id }}</td>
-          <td>{{ item.name }}</td>
-          <td>{{ item.comment }}</td>
-          <td>
-            <v-btn color="blue" @click="openEditDialog(item)" small
-              >Изменить</v-btn
-            >
-            <v-btn color="red" @click="openDeleteDialog(item.id)" small
-              >Удалить</v-btn
-            >
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
+    <OrganizationTable
+      :organizations="organizations"
+      @edit="openEditDialog"
+      @delete="openDeleteDialog"
+    />
   </v-container>
 </template>
 
@@ -74,11 +43,13 @@
 import api from "@/api/axios";
 import OrganizationForm from "@/modules/organizations/components/OrganizationForm.vue";
 import OrganizationDeleteDialog from "@/modules/organizations/components/OrganizationDeleteDialog.vue";
+import OrganizationTable from "@/modules/organizations/components/OrganizationTable.vue";
 
 export default {
   components: {
     OrganizationForm,
     OrganizationDeleteDialog,
+    OrganizationTable,
   },
   data() {
     return {
@@ -105,8 +76,8 @@ export default {
           this.organizations = [];
         }
       })
-      .catch((error) => {
-        console.error("Error fetching organizations:", error);
+      .catch((err) => {
+        console.error("Error fetching organizations:", err);
       });
   },
   methods: {
@@ -148,8 +119,8 @@ export default {
               this.TableOrganization.comment = "";
             }
           })
-          .catch((error) => {
-            console.error("Error saving organization:", error);
+          .catch((err) => {
+            console.error("Error saving organization:", err);
           });
       }
     },
@@ -169,8 +140,8 @@ export default {
           this.dialog = false;
           this.TableOrganization = { name: "", comment: "" };
         })
-        .catch((error) => {
-          console.error("Error updating organization:", error);
+        .catch((err) => {
+          console.error("Error updating organization:", err);
         });
     },
     openDeleteDialog(id) {
@@ -188,8 +159,8 @@ export default {
             this.deleteDialog = false;
             this.deleteOrganizationId = null;
           })
-          .catch((error) => {
-            console.error("Error deleting organization:", error);
+          .catch((err) => {
+            console.error("Error deleting organization:", err);
           });
       }
     },
