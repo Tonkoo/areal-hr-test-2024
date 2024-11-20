@@ -40,10 +40,10 @@
 </template>
 
 <script>
-import api from "@/api/axios";
 import OrganizationForm from "@/modules/organizations/components/OrganizationForm.vue";
 import OrganizationDeleteDialog from "@/modules/organizations/components/OrganizationDeleteDialog.vue";
 import OrganizationTable from "@/modules/organizations/components/OrganizationTable.vue";
+import OrganizationsApi from "@/modules/organizations/api/OrganizationsApi";
 
 export default {
   components: {
@@ -66,21 +66,19 @@ export default {
     };
   },
   mounted() {
-    api
-      .get("/organizations")
-      .then((response) => {
-        if (Array.isArray(response.data)) {
-          this.organizations = response.data;
-        } else {
-          console.error("Expected an array but got:", response.data);
-          this.organizations = [];
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching organizations:", err);
-      });
+    this.fetchOrganizations();
   },
   methods: {
+    fetchOrganizations() {
+      OrganizationsApi.getOrganizations()
+        .then((data) => {
+          this.organizations = data;
+        })
+        .catch((err) => {
+          console.error("Error fetching organizations:", err);
+          this.organizations = [];
+        });
+    },
     openAddDialog() {
       this.isEditMode = false;
       this.TableOrganization = { name: "", comment: "" };
@@ -100,43 +98,28 @@ export default {
     },
     addOrganization() {
       if (this.TableOrganization.name && this.TableOrganization.comment) {
-        api
-          .post("/organizations", {
-            name: this.TableOrganization.name,
-            comment: this.TableOrganization.comment,
-          })
-          .then((response) => {
-            if (response.data) {
-              const newOrg = {
-                id: response.data.id,
-                name: this.TableOrganization.name,
-                comment: this.TableOrganization.comment,
-              };
-
-              this.organizations.push(newOrg);
-              this.dialog = false;
-              this.TableOrganization.name = "";
-              this.TableOrganization.comment = "";
-            }
+        OrganizationsApi.addOrganization({
+          name: this.TableOrganization.name,
+          comment: this.TableOrganization.comment,
+        })
+          .then(() => {
+            this.fetchOrganizations();
+            this.dialog = false;
+            this.TableOrganization.name = "";
+            this.TableOrganization.comment = "";
           })
           .catch((err) => {
-            console.error("Error saving organization:", err);
+            console.error("Error adding organization:", err);
           });
       }
     },
     updateOrganization() {
-      api
-        .put(`organizations/${this.TableOrganization.id}`, {
-          name: this.TableOrganization.name,
-          comment: this.TableOrganization.comment,
-        })
+      OrganizationsApi.updateOrganization(this.TableOrganization.id, {
+        name: this.TableOrganization.name,
+        comment: this.TableOrganization.comment,
+      })
         .then(() => {
-          const index = this.organizations.findIndex(
-            (org) => org.id === this.TableOrganization.id
-          );
-          if (index !== -1) {
-            this.organizations[index] = { ...this.TableOrganization };
-          }
+          this.fetchOrganizations();
           this.dialog = false;
           this.TableOrganization = { name: "", comment: "" };
         })
@@ -150,12 +133,9 @@ export default {
     },
     deleteOrganization() {
       if (this.deleteOrganizationId !== null) {
-        api
-          .delete(`organizations/${this.deleteOrganizationId}`)
+        OrganizationsApi.deleteOrganization(this.deleteOrganizationId)
           .then(() => {
-            this.organizations = this.organizations.filter(
-              (org) => org.id !== this.deleteOrganizationId
-            );
+            this.fetchOrganizations();
             this.deleteDialog = false;
             this.deleteOrganizationId = null;
           })
