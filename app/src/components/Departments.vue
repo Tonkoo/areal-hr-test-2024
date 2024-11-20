@@ -25,7 +25,7 @@
       </v-btn>
     </v-toolbar>
 
-    <v-dialog v-model="dialog" max-width="700px">
+    <!-- <v-dialog v-model="dialog" max-width="700px">
       <v-card>
         <v-card-title class="headline">
           {{ getDialogTitle() }}
@@ -70,7 +70,19 @@
           </v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
+
+    <DepartmentForm
+      :dialog="dialog"
+      :is-sub-department-mode="isSubDepartmentMode"
+      :departments="departments"
+      :TableDepartment="TableDepartment"
+      :organizations="organizations"
+      :filtered-departments="filteredDepartments"
+      :is-add-mode="dialogMode === 'add'"
+      @update:dialog="dialog = $event"
+      @save="saveDepartment"
+    />
 
     <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card>
@@ -105,7 +117,12 @@
             <v-btn color="blue" @click="openEditDialog(item)" small
               >Изменить</v-btn
             >
-            <v-btn color="red" @click="openDeleteDialog(item.department_id)" small>Удалить</v-btn>
+            <v-btn
+              color="red"
+              @click="openDeleteDialog(item.department_id)"
+              small
+              >Удалить</v-btn
+            >
           </td>
         </tr>
       </tbody>
@@ -114,9 +131,13 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api/axios";
+import DepartmentForm from "@/modules/departments/components/DepartmentForm.vue";
 
 export default {
+  components:{
+    DepartmentForm
+  },
   data() {
     return {
       dialog: false,
@@ -147,8 +168,8 @@ export default {
   },
   methods: {
     fetchDepartments() {
-      axios
-        .get("http://localhost:3000/api/departments")
+      api
+        .get("/departments")
         .then((response) => {
           this.departments = response.data;
         })
@@ -157,8 +178,8 @@ export default {
         });
     },
     fetchOrganizations() {
-      axios
-        .get("http://localhost:3000/api/organizations")
+      api
+        .get("/organizations")
         .then((response) => {
           this.organizations = response.data;
         })
@@ -200,8 +221,8 @@ export default {
       this.deleteDialog = true;
     },
     deleteDepartment() {
-      axios
-        .delete(`http://localhost:3000/api/departments/${this.deleteDepartmentId}`)
+      api
+        .delete(`departments/${this.deleteDepartmentId}`)
         .then(() => {
           this.departments = this.departments.filter(
             (dept) => dept.department_id !== this.deleteDepartmentId
@@ -245,10 +266,10 @@ export default {
         const method = this.dialogMode === "add" ? "post" : "put";
         const url =
           this.dialogMode === "add"
-            ? "http://localhost:3000/api/departments"
-            : `http://localhost:3000/api/departments/${this.TableDepartment.id}`;
+            ? "/departments"
+            : `departments/${this.TableDepartment.id}`;
 
-        axios[method](url, this.TableDepartment)
+        api[method](url, this.TableDepartment)
           .then(() => {
             this.dialog = false;
             this.fetchDepartments();
