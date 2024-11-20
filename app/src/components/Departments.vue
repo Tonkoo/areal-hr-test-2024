@@ -25,53 +25,6 @@
       </v-btn>
     </v-toolbar>
 
-    <!-- <v-dialog v-model="dialog" max-width="700px">
-      <v-card>
-        <v-card-title class="headline">
-          {{ getDialogTitle() }}
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="form">
-            <v-text-field
-              v-model="TableDepartment.name"
-              label="Название отдела"
-              required
-            ></v-text-field>
-            <v-textarea
-              v-model="TableDepartment.comment"
-              label="Комментарий"
-              required
-            ></v-textarea>
-            <v-select
-              v-if="isSubDepartmentMode || TableDepartment.parent_id"
-              v-model="TableDepartment.parent_id"
-              :items="filteredDepartments"
-              item-title="department_name"
-              item-value="department_id"
-              label="Родительский отдел"
-              @update:model-value="updateOrganizationId"
-              required
-            ></v-select>
-            <v-select
-              v-model="TableDepartment.organization_id"
-              :items="organizations"
-              item-title="name"
-              item-value="id"
-              label="Организация"
-              :disabled="isSubDepartmentMode || TableDepartment.parent_id"
-              required
-            ></v-select>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="blue" text @click="dialog = false">Отмена</v-btn>
-          <v-btn color="blue" text @click="saveDepartment">
-            {{ dialogMode === "add" ? "Добавить" : "Сохранить изменения" }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog> -->
-
     <DepartmentForm
       :dialog="dialog"
       :is-sub-department-mode="isSubDepartmentMode"
@@ -84,16 +37,11 @@
       @save="saveDepartment"
     />
 
-    <v-dialog v-model="deleteDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="headline">Подтверждение удаления</v-card-title>
-        <v-card-text>Вы точно хотите удалить данный отдел?</v-card-text>
-        <v-card-actions>
-          <v-btn color="blue" text @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="red" text @click="deleteDepartment">Удалить</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <DepartmentDeleteDialog
+      :deleteDialog="deleteDialog"
+      @update:deleteDialog="deleteDialog = $event"
+      @delete="deleteDepartment"
+    />
 
     <v-table>
       <thead>
@@ -133,10 +81,12 @@
 <script>
 import api from "@/api/axios";
 import DepartmentForm from "@/modules/departments/components/DepartmentForm.vue";
+import DepartmentDeleteDialog from "@/modules/departments/components/DepartmentDeleteDialog.vue";
 
 export default {
   components:{
-    DepartmentForm
+    DepartmentForm,
+    DepartmentDeleteDialog
   },
   data() {
     return {
@@ -243,18 +193,6 @@ export default {
         return this.isSubDepartmentMode
           ? "Изменить подотдел"
           : "Изменить отдел";
-      }
-    },
-    updateOrganizationId() {
-      if (this.TableDepartment.parent_id) {
-        const parentDepartment = this.departments.find(
-          (d) => d.department_id === this.TableDepartment.parent_id
-        );
-        if (parentDepartment) {
-          this.TableDepartment.organization_id = this.organizations.find(
-            (o) => o.name === parentDepartment.organization_name
-          ).id;
-        }
       }
     },
     saveDepartment() {
