@@ -1,14 +1,5 @@
 <template>
-  <v-container
-    fluid
-    class="d-flex flex-column"
-    style="height: 100vh; padding: 0"
-  >
-    <v-toolbar flat>
-      <v-toolbar-title>Кадровые операции</v-toolbar-title>
-    </v-toolbar>
-
-    <v-table>
+  <v-table>
       <thead>
         <tr>
           <th>Код</th>
@@ -30,36 +21,15 @@
         </tr>
       </tbody>
     </v-table>
-  </v-container>
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
-  data() {
-    return {
-      operations: [],
-    };
-  },
-  mounted() {
-    this.fetchOperations();
-  },
-  methods: {
-    fetchOperations() {
-      axios
-        .get("http://localhost:3000/api/operations")
-        .then((response) => {
-          this.operations = response.data;
-        })
-        .catch((error) => {
-          console.error("Error fetching operations:", error);
-        });
+  props: {
+    operations: {
+      type: Array,
+      required: true,
     },
   },
 };
 </script>
-
-<style>
-
-</style>
