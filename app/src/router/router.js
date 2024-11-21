@@ -3,7 +3,7 @@ import Home from "../components/Home.vue";
 import Organizations from "../pages/Organizations.vue";
 import Departments from "../pages/Departments.vue";
 import Positions from "../pages/Positions.vue";
-import Employees from "../components/Employees.vue";
+import Employees from "../pages/Employees.vue";
 import Operations from "../components/Operations.vue";
 
 const routes = [

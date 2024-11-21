@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import api from '@/api/axios';
+import EmployeesApi from '../api/EmployeesApi';
 
 export default {
   props: {
@@ -82,51 +82,28 @@ export default {
       this.$emit("update:filesDialog", false);
     },
     fetchEmployeeFiles() {
-      api
-        .get(`/files/${this.TableEmployees.id}`)
-        .then((response) => {
-          this.employeeFiles = response.data;
+      EmployeesApi.getEmployeeFiles(this.TableEmployees.id)
+        .then((data) => {
+          this.employeeFiles = data;
         })
-        .catch((error) => {
-          console.error("Error fetching employee files:", error);
-        });
+        .catch((error) => console.error("Error fetching employee files:", error));
     },
     uploadFile() {
       if (!this.newFile) return;
-      const formData = new FormData();
-      formData.append("file", this.newFile);
-      formData.append("name", this.newFile.name);
-      api
-        .post(
-          `/files/${this.TableEmployees.id}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        )
+
+      EmployeesApi.uploadEmployeeFile(this.TableEmployees.id, this.newFile)
         .then(() => {
-          this.fetchEmployeeFiles(this.TableEmployees.id);
+          this.fetchEmployeeFiles();
           this.newFile = null;
         })
-        .catch((error) => {
-          console.error("Error uploading file:", error);
-        });
+        .catch((error) => console.error("Error uploading file:", error));
     },
     deleteFile(file) {
-      api
-        .delete(`/files/${file.file_id}`, {
-          params: {
-            filepath: file.filepath
-          }
-        })
+      EmployeesApi.deleteEmployeeFile(file.file_id, file.filepath)
         .then(() => {
           this.fetchEmployeeFiles();
         })
-        .catch((error) => {
-          console.error("Ошибка при удалении файла:", error);
-        });
+        .catch((error) => console.error("Error deleting file:", error));
     },
   },
 };

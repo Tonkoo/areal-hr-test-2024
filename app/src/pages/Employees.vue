@@ -30,27 +30,27 @@
       :positionsLoaded="positionsLoaded"
       @save="handleSaveOrganization"
       @update:dialog="dialog = $event"
-      />
+    />
 
     <EmployeesDetailsDialog
-    :detailsDialog="detailsDialog"
-    :TableEmployees="TableEmployees"
-    @update:detailsDialog="detailsDialog = $event"
+      :detailsDialog="detailsDialog"
+      :TableEmployees="TableEmployees"
+      @update:detailsDialog="detailsDialog = $event"
     />
 
     <EmployeesDismissDialog
-      :dismissDialog = "dismissDialog"
-      :TableEmployees = "TableEmployees"
+      :dismissDialog="dismissDialog"
+      :TableEmployees="TableEmployees"
       @update:dismissDialog="dismissDialog = $event"
-      @dismiss = "dismissEmployee"
+      @dismiss="dismissEmployee"
     />
 
     <EmployeesFilesDialog
       :filesDialog="filesDialog"
-      :TableEmployees = "TableEmployees"
+      :TableEmployees="TableEmployees"
       @update:filesDialog="filesDialog = $event"
     />
-    
+
     <EmployeesTable
       :employees="employees"
       @edit="openEditDialog"
@@ -62,20 +62,22 @@
 </template>
 
 <script>
-import api from "@/api/axios";
 import EmployeesForm from "@/modules/employees/components/EmployeesForm.vue";
 import EmployeesDetailsDialog from "@/modules/employees/components/EmployeesDetailsDialog.vue";
 import EmployeesDismissDialog from "@/modules/employees/components/EmployeesDismissDialog.vue";
 import EmployeesFilesDialog from "@/modules/employees/components/EmployeesFilesDialog.vue";
 import EmployeesTable from "@/modules/employees/components/EmployeesTable.vue";
+import EmployeesApi from "@/modules/employees/api/EmployeesApi";
+import DepartmentApi from "@/modules/departments/api/DepartmentApi";
+import PositionApi from "@/modules/positions/api/PositionApi";
 
 export default {
-  components:{
+  components: {
     EmployeesForm,
     EmployeesDetailsDialog,
     EmployeesDismissDialog,
     EmployeesFilesDialog,
-    EmployeesTable
+    EmployeesTable,
   },
   data() {
     return {
@@ -138,56 +140,41 @@ export default {
   },
   methods: {
     fetchEmployees() {
-      api
-        .get("/employees")
-        .then((response) => {
-          this.employees = response.data;
+      EmployeesApi.getEmployees()
+        .then((data) => {
+          this.employees = data;
         })
-        .catch((error) => {
-          console.error("Error retrieving employees:", error);
-        });
+        .catch((err) => console.error(err));
     },
     fetchRegions() {
-      api
-        .get("/regions")
-        .then((response) => {
-          this.regions = response.data;
+      EmployeesApi.getRegions()
+        .then((data) => {
+          this.regions = data;
         })
-        .catch((error) => {
-          console.error("Error retrieving regions:", error);
-        });
+        .catch((err) => console.error(err));
     },
     fetchCitys() {
-      api
-        .get("/citys")
-        .then((response) => {
-          this.citys = response.data;
+      EmployeesApi.getCities()
+        .then((data) => {
+          this.citys = data;
           this.citiesLoaded = true;
         })
-        .catch((error) => {
-          console.error("Error retrieving cities:", error);
-        });
+        .catch((err) => console.error(err));
     },
     fetchDepartments() {
-      api
-        .get("/departments")
-        .then((response) => {
-          this.departments = response.data;
+      DepartmentApi.getDepartments()
+        .then((data) => {
+          this.departments = data;
         })
-        .catch((error) => {
-          console.error("Error retrieving departments:", error);
-        });
+        .catch((err) => console.error(err));
     },
     fetchPositions() {
-      api
-        .get("/positions")
-        .then((response) => {
-          this.positions = response.data;
+      PositionApi.getPosition()
+        .then((data) => {
+          this.positions = data;
           this.positionsLoaded = true;
         })
-        .catch((error) => {
-          console.error("Error retrieving positions:", error);
-        });
+        .catch((err) => console.error(err));
     },
     openAddDialog() {
       this.isEditMode = false;
@@ -212,7 +199,7 @@ export default {
       };
       this.dialog = true;
     },
-    handleSaveOrganization(employee){
+    handleSaveOrganization(employee) {
       if (this.isEditMode) {
         this.updateEmployees(employee);
       } else {
@@ -220,32 +207,13 @@ export default {
       }
     },
     addEmployees() {
-      api
-        .post("/employees", {
-          last_name: this.TableEmployees.last_name,
-          first_name: this.TableEmployees.first_name,
-          middle_name: this.TableEmployees.middle_name,
-          date_of_birth: this.TableEmployees.date_of_birth,
-          passport_series: this.TableEmployees.passport_series,
-          passport_number: this.TableEmployees.passport_number,
-          region_id: this.TableEmployees.region_id,
-          city_id: this.TableEmployees.city_id,
-          street: this.TableEmployees.street,
-          house: this.TableEmployees.house,
-          building: this.TableEmployees.building,
-          apartment: this.TableEmployees.apartment,
-          department_id: this.TableEmployees.department_id,
-          position_id: this.TableEmployees.position_id,
-          salary: this.TableEmployees.salary,
-        })
-        .then((response) => {
-          this.employees.push(response.data);
-          this.dialog = false;
+      const employeeData = { ...this.TableEmployees };
+      EmployeesApi.addEmployee(employeeData)
+        .then(() => {
           this.fetchEmployees();
+          this.dialog = false;
         })
-        .catch((error) => {
-          console.error("Error adding employee:", error);
-        });
+        .catch((err) => console.error(err));
     },
     openEditDialog(item) {
       this.isEditMode = true;
@@ -276,31 +244,14 @@ export default {
       this.dialog = true;
     },
     updateEmployees() {
-      api
-        .put(`/employees/${this.TableEmployees.id}`, {
-          last_name: this.TableEmployees.last_name,
-          first_name: this.TableEmployees.first_name,
-          middle_name: this.TableEmployees.middle_name,
-          date_of_birth: this.TableEmployees.date_of_birth,
-          passport_series: this.TableEmployees.passport_series,
-          passport_number: this.TableEmployees.passport_number,
-          region_id: this.TableEmployees.region_id,
-          city_id: this.TableEmployees.city_id,
-          street: this.TableEmployees.street,
-          house: this.TableEmployees.house,
-          building: this.TableEmployees.building,
-          apartment: this.TableEmployees.apartment,
-          department_id: this.TableEmployees.department_id,
-          position_id: this.TableEmployees.position_id,
-          salary: this.TableEmployees.salary,
-        })
+      EmployeesApi.updateEmployee(this.TableEmployees.id, {
+        ...this.TableEmployees,
+      })
         .then(() => {
           this.dialog = false;
           this.fetchEmployees();
         })
-        .catch((error) => {
-          console.error("Error updating employee:", error);
-        });
+        .catch((err) => console.error(err));
     },
     openDetailsDialog(item) {
       this.TableEmployees = {
@@ -315,17 +266,12 @@ export default {
       this.dismissDialog = true;
     },
     dismissEmployee() {
-      api
-        .post(`/employees/${this.TableEmployees.id}`)
+      EmployeesApi.dismissEmployee(this.TableEmployees.id)
         .then(() => {
           this.dismissDialog = false;
           this.fetchEmployees();
         })
-        .catch((error) => {
-          console.log(this.TableEmployees.id);
-
-          console.error("Error dismissing employee:", error);
-        });
+        .catch((err) => console.error(err));
     },
     openFilesDialog(item) {
       this.TableEmployees = item;
