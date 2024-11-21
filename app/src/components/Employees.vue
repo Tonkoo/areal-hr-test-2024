@@ -50,72 +50,14 @@
       :TableEmployees = "TableEmployees"
       @update:filesDialog="filesDialog = $event"
     />
-
-    <v-table>
-      <thead>
-        <tr>
-          <th>Код</th>
-          <th>Фамилия</th>
-          <th>Имя</th>
-          <th>Отчество</th>
-          <th>Дата рождения</th>
-          <th>Серия паспорта</th>
-          <th>Номер паспорта</th>
-          <th>Регион</th>
-          <th>Город</th>
-          <th>Улица</th>
-          <th>Дом</th>
-          <th>Корпус</th>
-          <th>Квартира</th>
-          <th>Статус</th>
-          <th>Действие</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in employees" :key="item.id">
-          <td>{{ item.id }}</td>
-          <td>{{ item.last_name }}</td>
-          <td>{{ item.first_name }}</td>
-          <td>{{ item.middle_name }}</td>
-          <td>{{ item.date_of_birth }}</td>
-          <td>{{ item.passport_series }}</td>
-          <td>{{ item.passport_number }}</td>
-          <td>{{ item.region }}</td>
-          <td>{{ item.city }}</td>
-          <td>{{ item.street }}</td>
-          <td>{{ item.house }}</td>
-          <td>{{ item.building }}</td>
-          <td>{{ item.apartment }}</td>
-          <td>{{ item.type_operation_id === 2 ? "Уволен" : "Работает" }}</td>
-          <td>
-            <v-btn color="blue" @click="openDetailsDialog(item)" small
-              >Подробнее</v-btn
-            >
-            <v-btn
-              color="blue"
-              @click="openFilesDialog(item)"
-              small
-              :disabled="item.type_operation_id === 2"
-              >Файлы</v-btn
-            >
-            <v-btn
-              color="blue"
-              @click="openEditDialog(item)"
-              small
-              :disabled="item.type_operation_id === 2"
-              >Изменить</v-btn
-            >
-            <v-btn
-              color="red"
-              @click="openDismissDialog(item)"
-              small
-              :disabled="item.type_operation_id === 2"
-              >Уволить</v-btn
-            >
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
+    
+    <EmployeesTable
+      :employees="employees"
+      @edit="openEditDialog"
+      @dismiss="openDismissDialog"
+      @DetailsDialog="openDetailsDialog"
+      @FilesDialog="openFilesDialog"
+    />
   </v-container>
 </template>
 
@@ -125,13 +67,15 @@ import EmployeesForm from "@/modules/employees/components/EmployeesForm.vue";
 import EmployeesDetailsDialog from "@/modules/employees/components/EmployeesDetailsDialog.vue";
 import EmployeesDismissDialog from "@/modules/employees/components/EmployeesDismissDialog.vue";
 import EmployeesFilesDialog from "@/modules/employees/components/EmployeesFilesDialog.vue";
+import EmployeesTable from "@/modules/employees/components/EmployeesTable.vue";
 
 export default {
   components:{
     EmployeesForm,
     EmployeesDetailsDialog,
     EmployeesDismissDialog,
-    EmployeesFilesDialog
+    EmployeesFilesDialog,
+    EmployeesTable
   },
   data() {
     return {
