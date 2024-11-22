@@ -29,24 +29,25 @@
       :dialog="dialog"
       :is-sub-department-mode="isSubDepartmentMode"
       :departments="departments"
+      :dialogMode="dialogMode"
       :TableDepartment="TableDepartment"
-      :organizations="organizations"
-      :filtered-departments="filteredDepartments"
       :is-add-mode="dialogMode === 'add'"
       @update:dialog="dialog = $event"
-      @save="saveDepartment"
+      @save="refreshDepartment"
     />
 
     <DepartmentDeleteDialog
       :deleteDialog="deleteDialog"
+      :deleteDepartmentId="deleteDepartmentId"
       @update:deleteDialog="deleteDialog = $event"
-      @delete="deleteDepartment"
+      @delete="refreshDepartment"
     />
 
     <DepartmentTable
-      :departments="departments"
+      ref="departmentTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
+      @updateDepartments="handleUpdateDepartments"
     />
   </v-container>
 </template>
@@ -55,8 +56,6 @@
 import DepartmentForm from "@/modules/departments/components/DepartmentForm.vue";
 import DepartmentDeleteDialog from "@/modules/departments/components/DepartmentDeleteDialog.vue";
 import DepartmentTable from "@/modules/departments/components/DepartmentTable.vue";
-import DepartmentApi from "@/modules/departments/api/DepartmentApi";
-import OrganizationsApi from "@/modules/organizations/api/OrganizationsApi";
 
 export default {
   components: {
@@ -77,39 +76,16 @@ export default {
         parent_id: null,
         organization_id: null,
       },
+      deleteDepartmentId: 0,
       departments: [],
-      organizations: [],
     };
   },
-  mounted() {
-    this.fetchDepartments();
-    this.fetchOrganizations();
-  },
-  computed: {
-    filteredDepartments() {
-      return this.departments.filter(
-        (dept) => dept.department_id !== this.TableDepartment.id
-      );
-    },
-  },
   methods: {
-    fetchDepartments() {
-      DepartmentApi.getDepartments()
-        .then((data) => {
-          this.departments = data;
-        })
-        .catch((err) => {
-          console.error("Error fetching departments:", err);
-        });
+    handleUpdateDepartments(departments) {
+      this.departments = departments;
     },
-    fetchOrganizations() {
-      OrganizationsApi.getOrganizations()
-        .then((data) => {
-          this.organizations = data;
-        })
-        .catch((err) => {
-          console.error("Error fetching organizations:", err);
-        });
+    refreshDepartment() {
+      this.$refs.departmentTable.fetchDepartments();
     },
     openAddDialog(isSubDepartmentMode) {
       this.isSubDepartmentMode = isSubDepartmentMode;
@@ -129,67 +105,14 @@ export default {
         id: department.department_id,
         name: department.department_name,
         comment: department.department_comment,
-        parent_id: department.parent_department_name
-          ? this.departments.find(
-              (d) => d.department_name === department.parent_department_name
-            ).department_id
-          : null,
-        organization_id: this.organizations.find(
-          (o) => o.name === department.organization_name
-        ).id,
+        parent_id: department.parent_department_name,
+        organization_id: department.organization_name,
       };
       this.dialog = true;
     },
     openDeleteDialog(id) {
       this.deleteDepartmentId = id;
       this.deleteDialog = true;
-    },
-    deleteDepartment() {
-      DepartmentApi.deleteDepartment(this.deleteDepartmentId)
-        .then(() => {
-          this.fetchDepartments();
-          this.deleteDialog = false;
-          this.deleteDepartmentId = null;
-        })
-        .catch((error) => {
-          console.error("Error deleting department:", error);
-        });
-    },
-    getDialogTitle() {
-      if (this.dialogMode === "add") {
-        return this.isSubDepartmentMode
-          ? "Добавить подотдел"
-          : "Добавить отдел";
-      } else {
-        return this.isSubDepartmentMode
-          ? "Изменить подотдел"
-          : "Изменить отдел";
-      }
-    },
-    saveDepartment() {
-      if (
-        this.TableDepartment.name &&
-        this.TableDepartment.comment &&
-        this.TableDepartment.organization_id
-      ) {
-        const method =
-          this.dialogMode === "add" ? "addDepartment" : "updateDepartment";
-        const departmentData = this.TableDepartment;
-
-        DepartmentApi[method](
-          this.dialogMode === "add" ? departmentData : departmentData.id,
-          departmentData
-        )
-          .then(() => {
-            this.dialog = false;
-            this.fetchDepartments();
-          })
-          .catch((error) => {
-            console.error("Error saving department:", error);
-          });
-      } else {
-        console.error("Not all data has been entered");
-      }
     },
   },
 };

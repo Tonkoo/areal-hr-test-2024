@@ -9,18 +9,18 @@
       <v-card-text>
         <v-form ref="form">
           <v-text-field
-            v-model="TableDepartment.name"
+            v-model="localDepartments.name"
             label="Название отдела"
             required
           ></v-text-field>
           <v-textarea
-            v-model="TableDepartment.comment"
+            v-model="localDepartments.comment"
             label="Комментарий"
             required
           ></v-textarea>
           <v-select
             v-if="isSubDepartmentMode || TableDepartment.parent_id"
-            v-model="TableDepartment.parent_id"
+            v-model="localDepartments.parent_id"
             :items="filteredDepartments"
             item-title="department_name"
             item-value="department_id"
@@ -29,7 +29,7 @@
             required
           ></v-select>
           <v-select
-            v-model="TableDepartment.organization_id"
+            v-model="localDepartments.organization_id"
             :items="organizations"
             item-title="name"
             item-value="id"
@@ -50,6 +50,8 @@
 </template>
 
 <script>
+import DepartmentApi from "../api/DepartmentApi";
+import OrganizationsApi from "@/modules/organizations/api/OrganizationsApi";
 export default {
   props: {
     dialog: {
@@ -68,23 +70,28 @@ export default {
       type: Array,
       required: true,
     },
-    organizations: {
-      type: Array,
-      required: true,
-    },
-    filteredDepartments: {
-      type: Array,
-      required: true,
-    },
     isAddMode: {
       type: Boolean,
+      required: true,
+    },
+    dialogMode: {
+      type: String,
       required: true,
     },
   },
   data() {
     return {
-      departmentData: { ...this.TableDepartment },
+      localDepartments: { ...this.TableDepartment },
+      organizations: [],
     };
+  },
+  watch: {
+    TableDepartment: {
+      handler(newDepartment) {
+        this.localDepartments = { ...newDepartment };
+      },
+      deep: true,
+    },
   },
   emits: ["update:dialog", "save"],
   computed: {
@@ -97,21 +104,52 @@ export default {
         ? "Изменить подотдел"
         : "Изменить отдел";
     },
+    filteredDepartments() {
+      return this.departments.filter(
+        (dept) => dept.department_id !== this.TableDepartment.id
+      );
+    },
+  },
+  mounted() {
+    this.fetchOrganizations();
   },
   methods: {
+    fetchOrganizations() {
+      OrganizationsApi.getOrganizations()
+        .then((data) => {
+          this.organizations = data;
+        })
+        .catch((err) => {
+          console.error("Error fetching organizations:", err);
+        });
+    },
     closeDialog() {
       this.$emit("update:dialog", false);
     },
     saveDepartment() {
-      this.$emit("save");
+      const method =
+        this.dialogMode === "add" ? "addDepartment" : "updateDepartment";
+      const departmentData = this.localDepartments;
+
+      DepartmentApi[method](
+        this.dialogMode === "add" ? departmentData : departmentData.id,
+        departmentData
+      )
+        .then(() => {
+          this.$emit("save");
+          this.closeDialog();
+        })
+        .catch((error) => {
+          console.error("Error saving department:", error);
+        });
     },
     updateOrganizationId() {
-      if (this.TableDepartment.parent_id) {
+      if (this.localDepartments.parent_id) {
         const parentDepartment = this.departments.find(
-          (d) => d.department_id === this.TableDepartment.parent_id
+          (d) => d.department_id === this.localDepartments.parent_id
         );
         if (parentDepartment) {
-          this.TableDepartment.organization_id = this.organizations.find(
+          this.localDepartments.organization_id = this.organizations.find(
             (o) => o.name === parentDepartment.organization_name
           ).id;
         }
