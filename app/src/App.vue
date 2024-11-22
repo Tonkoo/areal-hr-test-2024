@@ -1,10 +1,10 @@
 <script>
-import Sidebar from './shared/components/Sidebar.vue';
+import Sidebar from "./shared/components/SideBar.vue";
 
 export default {
   components: {
-    Sidebar
-  }
+    Sidebar,
+  },
 };
 </script>
 
@@ -17,6 +17,4 @@ export default {
   </v-app>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

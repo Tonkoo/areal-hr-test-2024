@@ -4,15 +4,15 @@ export default {
     return {
       drawer: true,
       menuItems: [
-        { id: 1, name: 'Главная', route: '/' },
-        { id: 2, name: 'Организации', route: '/organizations' },
-        { id: 3, name: 'Отделы', route: '/departments' },
-        { id: 4, name: 'Должности', route: '/positions' },
-        { id: 5, name: 'Сотрудники', route: '/employees' },
-        { id: 6, name: 'Кадровые операции', route: '/operations' },
-      ]
+        { id: 1, name: "Главная", route: "/" },
+        { id: 2, name: "Организации", route: "/organizations" },
+        { id: 3, name: "Отделы", route: "/departments" },
+        { id: 4, name: "Должности", route: "/positions" },
+        { id: 5, name: "Сотрудники", route: "/employees" },
+        { id: 6, name: "Кадровые операции", route: "/operations" },
+      ],
     };
-  }
+  },
 };
 </script>
 
@@ -36,7 +36,7 @@ export default {
 
 <style scoped>
 .sidebar-header {
-  background-color: #1976D2;
+  background-color: #1976d2;
   color: white;
   padding: 16px;
   display: flex;

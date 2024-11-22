@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import EmployeesForm from "@/modules/employees/components/EmployeesForm.vue";
+import EmployeesForm from "@/modules/employees/components/employeesForm.vue";
 import EmployeesDetailsDialog from "@/modules/employees/components/EmployeesDetailsDialog.vue";
 import EmployeesDismissDialog from "@/modules/employees/components/EmployeesDismissDialog.vue";
 import EmployeesFilesDialog from "@/modules/employees/components/EmployeesFilesDialog.vue";
@@ -225,7 +225,6 @@ export default {
         date_of_birth: new Date(item.date_of_birth),
         passport_series: item.passport_series,
         passport_number: item.passport_number,
-        passport_series: item.passport_series,
         region_id: this.regions.find((r) => r.name === item.region)?.id,
         city_id: this.citys.find((c) => c.name === item.city)?.id,
         street: item.street,

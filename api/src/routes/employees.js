@@ -1,23 +1,23 @@
-const express = require("express");
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 const {
   getEmployees,
   addEmployee,
   updateEmployee,
   deleteEmployee,
-} = require("../controllers/db_employee");
+} = require('../controllers/db_employee')
 
-router.get("/employees", async (req, res) => {
+router.get('/employees', async (req, res) => {
   try {
-    const employees = await getEmployees();
-    res.json(employees);
+    const employees = await getEmployees()
+    res.json(employees)
   } catch (err) {
-    console.error("Error fetching employees:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error fetching employees:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-});
+})
 
-router.post("/employees", async (req, res) => {
+router.post('/employees', async (req, res) => {
   const {
     last_name,
     first_name,
@@ -34,7 +34,7 @@ router.post("/employees", async (req, res) => {
     department_id,
     position_id,
     salary,
-  } = req.body;
+  } = req.body
 
   if (
     !last_name ||
@@ -53,7 +53,7 @@ router.post("/employees", async (req, res) => {
     !position_id ||
     !salary
   ) {
-    return res.status(400).json({ error: "All fields must be filled" });
+    return res.status(400).json({ error: 'All fields must be filled' })
   }
 
   try {
@@ -72,19 +72,19 @@ router.post("/employees", async (req, res) => {
       apartment,
       department_id,
       position_id,
-      salary
-    );
+      salary,
+    )
     res
       .status(201)
-      .json({ id: employeeId, message: "Employee added successfully" });
+      .json({ id: employeeId, message: 'Employee added successfully' })
   } catch (err) {
-    console.error("Error adding employee:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error adding employee:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-});
+})
 
-router.put("/employees/:id", async (req, res) => {
-  const { id } = req.params;
+router.put('/employees/:id', async (req, res) => {
+  const { id } = req.params
   const {
     last_name,
     first_name,
@@ -101,7 +101,7 @@ router.put("/employees/:id", async (req, res) => {
     department_id,
     position_id,
     salary,
-  } = req.body;
+  } = req.body
 
   try {
     const message = await updateEmployee(
@@ -120,25 +120,25 @@ router.put("/employees/:id", async (req, res) => {
       apartment,
       department_id,
       position_id,
-      salary
-    );
-    res.json({ message });
+      salary,
+    )
+    res.json({ message })
   } catch (err) {
-    console.error("Error updating employee data:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error updating employee data:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-});
+})
 
-router.post("/employees/:id", async (req, res) => {
-  const { id } = req.params;
+router.post('/employees/:id', async (req, res) => {
+  const { id } = req.params
 
   try {
-    const message = await deleteEmployee(id);
-    res.json({ message });
+    const message = await deleteEmployee(id)
+    res.json({ message })
   } catch (err) {
-    console.error("Error when terminating the employee:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error when terminating the employee:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-});
+})
 
-module.exports = router;
+module.exports = router

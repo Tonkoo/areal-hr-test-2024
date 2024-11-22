@@ -81,6 +81,11 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      departmentData: { ...this.TableDepartment },
+    };
+  },
   emits: ["update:dialog", "save"],
   computed: {
     getDialogTitle() {
@@ -95,7 +100,7 @@ export default {
   },
   methods: {
     closeDialog() {
-        this.$emit("update:dialog", false);
+      this.$emit("update:dialog", false);
     },
     saveDepartment() {
       this.$emit("save");

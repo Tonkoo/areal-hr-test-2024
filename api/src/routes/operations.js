@@ -1,17 +1,15 @@
-const express = require("express");
-const router = express.Router();
-const { getOperations } = require("../controllers/db_operations")
+const express = require('express')
+const router = express.Router()
+const { getOperations } = require('../controllers/db_operations')
 
-
-router.get("/operations", async (req, res) => {
+router.get('/operations', async (req, res) => {
   try {
-    const operations = await getOperations();
-    res.json(operations);
+    const operations = await getOperations()
+    res.json(operations)
   } catch (err) {
-    console.error("Error fetching operations:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error fetching operations:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-});
+})
 
-
-module.exports = router;
+module.exports = router
