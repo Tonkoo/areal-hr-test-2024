@@ -22,17 +22,18 @@
       :isEditMode="isEditMode"
       :organization="TableOrganization"
       @update:dialog="dialog = $event"
-      @save="handleSaveOrganization"
+      @save="refreshOrganizations"
     />
 
     <OrganizationDeleteDialog
       :deleteDialog="deleteDialog"
+      :deleteOrganizationId="deleteOrganizationId"
       @update:deleteDialog="deleteDialog = $event"
-      @delete="deleteOrganization"
+      @delete="refreshOrganizations"
     />
 
     <OrganizationTable
-      :organizations="organizations"
+      ref="organizationTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
     />
@@ -43,7 +44,6 @@
 import OrganizationForm from "@/modules/organizations/components/OrganizationForm.vue";
 import OrganizationDeleteDialog from "@/modules/organizations/components/OrganizationDeleteDialog.vue";
 import OrganizationTable from "@/modules/organizations/components/OrganizationTable.vue";
-import OrganizationsApi from "@/modules/organizations/api/OrganizationsApi";
 
 export default {
   components: {
@@ -56,7 +56,7 @@ export default {
       dialog: false,
       isEditMode: false,
       deleteDialog: false,
-      deleteOrganizationId: null,
+      deleteOrganizationId: 0,
       TableOrganization: {
         id: null,
         name: "",
@@ -65,19 +65,9 @@ export default {
       organizations: [],
     };
   },
-  mounted() {
-    this.fetchOrganizations();
-  },
   methods: {
-    fetchOrganizations() {
-      OrganizationsApi.getOrganizations()
-        .then((data) => {
-          this.organizations = data;
-        })
-        .catch((err) => {
-          console.error("Error fetching organizations:", err);
-          this.organizations = [];
-        });
+    refreshOrganizations() {
+      this.$refs.organizationTable.fetchOrganizations();
     },
     openAddDialog() {
       this.isEditMode = false;
@@ -89,60 +79,9 @@ export default {
       this.TableOrganization = { ...item };
       this.dialog = true;
     },
-    handleSaveOrganization(organization) {
-      if (this.isEditMode) {
-        this.updateOrganization(organization);
-      } else {
-        this.addOrganization(organization);
-      }
-    },
-    addOrganization() {
-      if (this.TableOrganization.name && this.TableOrganization.comment) {
-        OrganizationsApi.addOrganization({
-          name: this.TableOrganization.name,
-          comment: this.TableOrganization.comment,
-        })
-          .then(() => {
-            this.fetchOrganizations();
-            this.dialog = false;
-            this.TableOrganization.name = "";
-            this.TableOrganization.comment = "";
-          })
-          .catch((err) => {
-            console.error("Error adding organization:", err);
-          });
-      }
-    },
-    updateOrganization() {
-      OrganizationsApi.updateOrganization(this.TableOrganization.id, {
-        name: this.TableOrganization.name,
-        comment: this.TableOrganization.comment,
-      })
-        .then(() => {
-          this.fetchOrganizations();
-          this.dialog = false;
-          this.TableOrganization = { name: "", comment: "" };
-        })
-        .catch((err) => {
-          console.error("Error updating organization:", err);
-        });
-    },
     openDeleteDialog(id) {
       this.deleteOrganizationId = id;
       this.deleteDialog = true;
-    },
-    deleteOrganization() {
-      if (this.deleteOrganizationId !== null) {
-        OrganizationsApi.deleteOrganization(this.deleteOrganizationId)
-          .then(() => {
-            this.fetchOrganizations();
-            this.deleteDialog = false;
-            this.deleteOrganizationId = null;
-          })
-          .catch((err) => {
-            console.error("Error deleting organization:", err);
-          });
-      }
     },
   },
 };

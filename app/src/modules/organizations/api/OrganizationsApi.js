@@ -21,6 +21,9 @@ export default {
       .post("/organizations", organization)
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          throw err.response.data.errors;
+        }
         console.error("Error saving organization:", err);
         throw err;
       });
@@ -28,8 +31,11 @@ export default {
   updateOrganization(id, organization) {
     return api
       .put(`/organizations/${id}`, organization)
-      .then(() => id)
+      .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          throw err.response.data.errors;
+        }
         console.error("Error updating organization:", err);
         throw err;
       });
@@ -42,5 +48,5 @@ export default {
         console.error("Error deleting organization:", err);
         throw err;
       });
-  }
+  },
 };

@@ -1,11 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const {
+  organizationSchema,
+} = require('../controllers/organizations/dto/validationOrganizations')
+const {
   getOrganizations,
   addOrganization,
   updateOrganization,
   deleteOrganization,
-} = require('../controllers/db_organizations')
+} = require('../controllers/organizations/db_organizations')
 
 router.get('/organizations', async (req, res) => {
   try {
@@ -18,13 +21,23 @@ router.get('/organizations', async (req, res) => {
 })
 
 router.post('/organizations', async (req, res) => {
-  const { name, comment } = req.body
-  if (!name || !comment) {
-    return res.status(400).json({ error: 'Name and comment are required' })
-  }
-
   try {
+    const { error, value } = organizationSchema.validate(req.body, {
+      abortEarly: false,
+    })
+
+    if (error) {
+      const errorMessages = error.details.reduce((acc, detail) => {
+        acc[detail.path[0]] = detail.message
+        return acc
+      }, {})
+      return res.status(400).json({ errors: errorMessages })
+    }
+
+    const { name, comment } = value
+
     const newOrganization = await addOrganization(name, comment)
+
     res.status(201).json(newOrganization)
   } catch (err) {
     console.error('Error saving organization:', err)
@@ -33,9 +46,22 @@ router.post('/organizations', async (req, res) => {
 })
 
 router.put('/organizations/:id', async (req, res) => {
-  const { id } = req.params
-  const { name, comment } = req.body
   try {
+    const { error, value } = organizationSchema.validate(req.body, {
+      abortEarly: false,
+    })
+
+    if (error) {
+      const errorMessages = error.details.reduce((acc, detail) => {
+        acc[detail.path[0]] = detail.message
+        return acc
+      }, {})
+      return res.status(400).json({ errors: errorMessages })
+    }
+
+    const { id } = req.params
+    const { name, comment } = value
+
     const updatedOrganizations = await updateOrganization(id, name, comment)
     res.status(201).json(updatedOrganizations)
   } catch (err) {

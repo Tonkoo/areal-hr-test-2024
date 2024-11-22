@@ -11,14 +11,16 @@
       <v-card-text>
         <v-form ref="form">
           <v-text-field
-            v-model="organization.name"
+            v-model="localOrganization.name"
             label="Название организации"
             required
+            :error-messages="errors.name"
           ></v-text-field>
           <v-textarea
-            v-model="organization.comment"
+            v-model="localOrganization.comment"
             label="Комментарий"
             required
+            :error-messages="errors.comment"
           ></v-textarea>
         </v-form>
       </v-card-text>
@@ -33,6 +35,8 @@
 </template>
 
 <script>
+import OrganizationsApi from "@/modules/organizations/api/OrganizationsApi";
+
 export default {
   props: {
     dialog: {
@@ -49,13 +53,60 @@ export default {
     },
   },
   emits: ["update:dialog", "save"],
+  data() {
+    return {
+      localOrganization: { ...this.organization },
+      errors: {},
+    };
+  },
+  watch: {
+    organization: {
+      handler(newOrganization) {
+        this.localOrganization = { ...newOrganization };
+      },
+      deep: true,
+    },
+  },
   methods: {
     closeDialog() {
       this.$emit("update:dialog", false);
     },
     saveOrganization() {
-      this.$emit("save", this.organization);
-      this.closeDialog();
+      if (this.isEditMode) {
+        this.updateOrganization();
+      } else {
+        this.addOrganization();
+      }
+    },
+    addOrganization() {
+      OrganizationsApi.addOrganization({
+        name: this.localOrganization.name,
+        comment: this.localOrganization.comment,
+      })
+        .then(() => {
+          this.errors = [];
+          this.$emit("update:dialog", false);
+          this.$emit("save");
+        })
+        .catch((err) => {
+          this.errors = err;
+          console.error("Error adding organization:", err);
+        });
+    },
+    updateOrganization() {
+      OrganizationsApi.updateOrganization(this.localOrganization.id, {
+        name: this.localOrganization.name,
+        comment: this.localOrganization.comment,
+      })
+        .then(() => {
+          this.errors = [];
+          this.$emit("update:dialog", false);
+          this.$emit("save");
+        })
+        .catch((err) => {
+          this.errors = err;
+          console.error("Error updating organization:", err);
+        });
     },
   },
 };

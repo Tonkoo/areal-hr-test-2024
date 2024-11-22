@@ -14,8 +14,12 @@
         <td>{{ item.name }}</td>
         <td>{{ item.comment }}</td>
         <td>
-          <v-btn color="blue" @click="openEditDialog(item)" small>Изменить</v-btn>
-          <v-btn color="red" @click="openDeleteDialog(item.id)" small>Удалить</v-btn>
+          <v-btn color="blue" @click="openEditDialog(item)" small
+            >Изменить</v-btn
+          >
+          <v-btn color="red" @click="openDeleteDialog(item.id)" small
+            >Удалить</v-btn
+          >
         </td>
       </tr>
     </tbody>
@@ -23,12 +27,15 @@
 </template>
 
 <script>
+import OrganizationsApi from "../api/OrganizationsApi";
 export default {
-  props: {
-    organizations: {
-      type: Array,
-      required: true,
-    },
+  data() {
+    return {
+      organizations: [],
+    };
+  },
+  mounted() {
+    this.fetchOrganizations();
   },
   methods: {
     openEditDialog(item) {
@@ -36,6 +43,16 @@ export default {
     },
     openDeleteDialog(id) {
       this.$emit("delete", id);
+    },
+    fetchOrganizations() {
+      OrganizationsApi.getOrganizations()
+        .then((data) => {
+          this.organizations = data;
+        })
+        .catch((err) => {
+          console.error("Error fetching organizations:", err);
+          this.organizations = [];
+        });
     },
   },
 };

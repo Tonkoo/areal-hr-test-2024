@@ -1,5 +1,9 @@
 <template>
-  <v-dialog :model-value="deleteDialog" @update:model-value="$emit('update:deleteDialog', $event)" max-width="500px">
+  <v-dialog
+    :model-value="deleteDialog"
+    @update:model-value="$emit('update:deleteDialog', $event)"
+    max-width="500px"
+  >
     <v-card>
       <v-card-title class="headline">Подтверждение удаления</v-card-title>
       <v-card-text>Вы точно хотите удалить данную организацию?</v-card-text>
@@ -12,21 +16,45 @@
 </template>
 
 <script>
+import OrganizationsApi from "../api/OrganizationsApi";
 export default {
   props: {
     deleteDialog: {
       type: Boolean,
       required: true,
     },
+    deleteOrganizationId: {
+      type: Number,
+      required: true,
+    },
   },
-  emits: ['update:deleteDialog', 'delete'],
+  emits: ["update:deleteDialog", "delete"],
+  data() {
+    return {
+      localdeleteOrganizationId: this.deleteOrganizationId,
+    };
+  },
+  watch: {
+    deleteOrganizationId(newId) {
+      this.localdeleteOrganizationId = newId;
+    },
+  },
   methods: {
     closeDialog() {
-      this.$emit('update:deleteDialog', false);
+      this.$emit("update:deleteDialog", false);
     },
     deleteOrganization() {
-      this.$emit('delete');
-      this.closeDialog();
+      if (this.localdeleteOrganizationId !== null) {
+        OrganizationsApi.deleteOrganization(this.localdeleteOrganizationId)
+          .then(() => {
+            this.$emit("delete");
+            this.closeDialog();
+            this.localdeleteOrganizationId = null;
+          })
+          .catch((err) => {
+            console.error("Error deleting organization:", err);
+          });
+      }
     },
   },
 };
