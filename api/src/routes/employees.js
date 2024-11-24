@@ -5,7 +5,7 @@ const {
   addEmployee,
   updateEmployee,
   deleteEmployee,
-} = require('../controllers/db_employee')
+} = require('../controllers/employee/db_employee')
 
 router.get('/employees', async (req, res) => {
   try {

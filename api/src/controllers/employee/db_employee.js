@@ -1,9 +1,9 @@
-const client = require('../db')
+const client = require('../../db')
 
 async function getEmployees() {
   try {
     const result = await client.query(
-      "SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number, regions.name AS region, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.name AS department_name, positions.name AS position_name, recent_operations.salary, recent_operations.type_operation_id FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN ( SELECT personnel_operations.*, ROW_NUMBER() OVER (PARTITION BY employee_id ORDER BY id DESC) AS row_num FROM personnel_operations) AS recent_operations ON employees.id = recent_operations.employee_id AND recent_operations.row_num = 1 JOIN departments ON recent_operations.department_id = departments.id JOIN positions ON recent_operations.position_id = positions.id;",
+      "SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number, regions.id as region_id, regions.name AS region, citys.id as city_id, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.id as department_id, departments.name AS department_name, positions.id as position_id, positions.name AS position_name, employee_details.salary FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN employee_details on employees.id = employee_details.id join departments on employee_details.department_id = departments.id join positions on employee_details.position_id = positions.id",
     )
     return result.rows
   } catch (err) {
@@ -54,8 +54,8 @@ async function addEmployee(
     const employeeId = employeeResult.rows[0].id
 
     await client.query(
-      `INSERT INTO personnel_operations (employee_id, type_operation_id, department_id, position_id, salary) 
-       VALUES ($1, 1, $2, $3, $4)`,
+      `INSERT INTO employee_details (id, department_id, position_id, salary) 
+       VALUES ($1, $2, $3, $4)`,
       [employeeId, department_id, position_id, salary],
     )
 
@@ -112,35 +112,14 @@ async function updateEmployee(
       ],
     )
 
-    const lastOperationData = await client.query(
-      'SELECT * FROM personnel_operations WHERE employee_id = $1 ORDER BY id DESC LIMIT 1',
-      [id],
+    await client.query(
+      `UPDATE employee_details 
+        SET department_id = $1, 
+        position_id = $2, 
+        salary = $3 
+       WHERE id = $4`,
+      [department_id, position_id, salary, id],
     )
-    const lastOperation = lastOperationData.rows[0]
-
-    if (salary !== lastOperation.salary) {
-      await client.query(
-        `INSERT INTO personnel_operations (employee_id, type_operation_id, department_id, position_id, salary) 
-         VALUES ($1, 3, $2, $3, $4)`,
-        [id, department_id, position_id, salary],
-      )
-    }
-
-    if (department_id !== lastOperation.department_id) {
-      await client.query(
-        `INSERT INTO personnel_operations (employee_id, type_operation_id, department_id, position_id, salary) 
-         VALUES ($1, 4, $2, $3, $4)`,
-        [id, department_id, position_id, salary],
-      )
-    }
-
-    if (position_id !== lastOperation.position_id) {
-      await client.query(
-        `INSERT INTO personnel_operations (employee_id, type_operation_id, department_id, position_id, salary) 
-         VALUES ($1, 5, $2, $3, $4)`,
-        [id, department_id, position_id, salary],
-      )
-    }
 
     await client.query('COMMIT')
     return 'Employee data successfully updated'
