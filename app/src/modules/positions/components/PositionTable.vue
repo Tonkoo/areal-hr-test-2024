@@ -27,14 +27,27 @@
 </template>
 
 <script>
+import PositionApi from "../api/PositionApi";
 export default {
-  props: {
-    positions: {
-      type: Array,
-      required: true,
-    },
+  data() {
+    return {
+      positions: [],
+    };
+  },
+  mounted() {
+    this.fetchPosition();
   },
   methods: {
+    fetchPosition() {
+      PositionApi.getPosition()
+        .then((data) => {
+          this.positions = data;
+        })
+        .catch((err) => {
+          console.error("Error fetching positions:", err);
+          this.positions = [];
+        });
+    },
     openEditDialog(item) {
       this.$emit("edit", item);
     },

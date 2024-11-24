@@ -44,17 +44,15 @@ export default {
       this.$emit("update:deleteDialog", false);
     },
     deleteOrganization() {
-      if (this.localdeleteOrganizationId !== null) {
-        OrganizationsApi.deleteOrganization(this.localdeleteOrganizationId)
-          .then(() => {
-            this.$emit("delete");
-            this.closeDialog();
-            this.localdeleteOrganizationId = null;
-          })
-          .catch((err) => {
-            console.error("Error deleting organization:", err);
-          });
-      }
+      OrganizationsApi.deleteOrganization(this.localdeleteOrganizationId)
+        .then(() => {
+          this.$emit("delete");
+          this.closeDialog();
+          this.localdeleteOrganizationId = null;
+        })
+        .catch((err) => {
+          console.error("Error deleting organization:", err);
+        });
     },
   },
 };

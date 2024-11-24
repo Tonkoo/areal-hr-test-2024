@@ -16,11 +16,26 @@
 </template>
 
 <script>
+import PositionApi from "../api/PositionApi";
 export default {
   props: {
     deleteDialog: {
       type: Boolean,
       required: true,
+    },
+    deletePositionId: {
+      type: Number,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      localdeletePositionId: this.deletePositionId,
+    };
+  },
+  watch: {
+    deletePositionId(newId) {
+      this.localdeletePositionId = newId;
     },
   },
   emits: ["update:deleteDialog", "delete"],
@@ -29,8 +44,15 @@ export default {
       this.$emit("update:deleteDialog", false);
     },
     deletePosition() {
-      this.$emit("delete");
-      this.closeDialog();
+      PositionApi.deletePosition(this.localdeletePositionId)
+        .then(() => {
+          this.$emit("delete");
+          this.closeDialog();
+          this.localdeletePositionId = null;
+        })
+        .catch((err) => {
+          console.error("Error deleting position:", err);
+        });
     },
   },
 };

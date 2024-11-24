@@ -11,12 +11,12 @@
       <v-card-text>
         <v-form ref="form">
           <v-text-field
-            v-model="TablePosition.position_name"
+            v-model="localPosition.position_name"
             label="Название должности"
             required
           ></v-text-field>
           <v-select
-            v-model="TablePosition.department_id"
+            v-model="localPosition.department_id"
             :items="departments"
             item-title="department_name"
             item-value="department_id"
@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import PositionApi from "../api/PositionApi";
+import DepartmentApi from "@/modules/departments/api/DepartmentApi";
 export default {
   props: {
     dialog: {
@@ -50,19 +52,70 @@ export default {
       type: Object,
       required: true,
     },
-    departments: {
-      type: Array,
-      required: true,
+  },
+  data() {
+    return {
+      localPosition: { ...this.TablePosition },
+      departments: [],
+    };
+  },
+  watch: {
+    TablePosition: {
+      handler(newPosition) {
+        this.localPosition = { ...newPosition };
+      },
+      deep: true,
     },
   },
   emits: ["update:dialog", "save"],
+  mounted() {
+    this.fetchDepartments();
+  },
   methods: {
+    fetchDepartments() {
+      DepartmentApi.getDepartments()
+        .then((data) => {
+          this.departments = data;
+        })
+        .catch((err) => {
+          console.error("Error fetching departments:", err);
+          this.departments = [];
+        });
+    },
     closeDialog() {
       this.$emit("update:dialog", false);
     },
     savePosition() {
-      this.$emit("save", this.TablePosition);
-      this.closeDialog();
+      if (this.isEditMode) this.updatePosition();
+      else this.addPosition();
+    },
+    addPosition() {
+      PositionApi.addPosition({
+        position_name: this.localPosition.position_name,
+        department_id: this.localPosition.department_id,
+      })
+        .then(() => {
+          this.$emit("save");
+          this.closeDialog();
+          this.localPosition = [];
+        })
+        .catch((err) => {
+          console.error("Error adding position:", err);
+        });
+    },
+    updatePosition() {
+      PositionApi.updatePosition(this.localPosition.id, {
+        position_name: this.localPosition.position_name,
+        department_id: this.localPosition.department_id,
+      })
+        .then(() => {
+          this.$emit("save");
+          this.closeDialog();
+          this.localPosition = [];
+        })
+        .catch((err) => {
+          console.error("Error updating position:", err);
+        });
     },
   },
 };
