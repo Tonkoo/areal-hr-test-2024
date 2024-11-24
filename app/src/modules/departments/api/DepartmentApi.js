@@ -17,6 +17,7 @@ export default {
       });
   },
   addDepartment(department) {
+    console.log(department);
     return api
       .post("/departments", department)
       .then((response) => response.data)

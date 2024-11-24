@@ -52,7 +52,6 @@ router.put('/departments/:id', async (req, res) => {
       abortEarly: false,
     })
     if (error) {
-      console.log(123214)
       const errorMessages = error.details.reduce((acc, detail) => {
         acc[detail.path[0]] = detail.message
         return acc

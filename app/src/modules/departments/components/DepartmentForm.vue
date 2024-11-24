@@ -89,22 +89,6 @@ export default {
   watch: {
     TableDepartment: {
       handler(newDepartment) {
-        if (newDepartment.organization_id) {
-          const organization = this.organizations.find(
-            (org) => org.name === newDepartment.organization_id
-          );
-          if (organization) {
-            newDepartment.organization_id = organization.id;
-          }
-        }
-        if (newDepartment.parent_id) {
-          const parentDepartment = this.departments.find(
-            (dept) => dept.department_name === newDepartment.parent_id
-          );
-          if (parentDepartment) {
-            newDepartment.parent_id = parentDepartment.department_id;
-          }
-        }
         this.localDepartments = { ...newDepartment };
       },
       deep: true,
@@ -165,6 +149,7 @@ export default {
             this.$emit("save");
           })
           .catch((err) => {
+            console.log(this.localDepartments);
             this.errors = err;
             console.error("Error adding department:", err);
           });

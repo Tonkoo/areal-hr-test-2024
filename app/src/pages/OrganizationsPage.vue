@@ -71,7 +71,7 @@ export default {
     },
     openAddDialog() {
       this.isEditMode = false;
-      this.TableOrganization = { name: "", comment: "" };
+      this.TableOrganization = [];
       this.dialog = true;
     },
     openEditDialog(item) {

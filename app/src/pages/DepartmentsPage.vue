@@ -104,8 +104,8 @@ export default {
         id: department.department_id,
         name: department.department_name,
         comment: department.department_comment,
-        parent_id: department.parent_department_name,
-        organization_id: department.organization_name,
+        parent_id: department.parent_id,
+        organization_id: department.organization_id,
       };
       this.dialog = true;
     },

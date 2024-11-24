@@ -94,6 +94,7 @@ export default {
       else this.addPosition();
     },
     addPosition() {
+      console.log(this.localPosition);
       PositionApi.addPosition({
         name: this.localPosition.position_name,
         department_id: this.localPosition.department_id,

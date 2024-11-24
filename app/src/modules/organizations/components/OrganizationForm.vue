@@ -13,14 +13,14 @@
           <v-text-field
             v-model="localOrganization.name"
             label="Название организации"
-            required
             :error-messages="errors.name"
+            required
           ></v-text-field>
           <v-textarea
             v-model="localOrganization.comment"
             label="Комментарий"
-            required
             :error-messages="errors.comment"
+            required
           ></v-textarea>
         </v-form>
       </v-card-text>
@@ -80,6 +80,8 @@ export default {
       }
     },
     addOrganization() {
+      console.log(this.localOrganization);
+
       OrganizationsApi.addOrganization({
         name: this.localOrganization.name,
         comment: this.localOrganization.comment,

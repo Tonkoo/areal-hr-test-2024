@@ -9,7 +9,7 @@ const positionSchema = Joi.object({
     'any.required': 'Название обязательно для заполнения',
   }),
   department_id: Joi.number().integer().required().messages({
-    'any.required': 'Название отдела обязательно для заполнения',
+    'any.required': 'Поле "Отдел" обязательно для заполнения',
     'number.base': 'ID отдела не может быть пустым',
   }),
 })
