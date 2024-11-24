@@ -13,6 +13,7 @@
           <v-text-field
             v-model="localPosition.position_name"
             label="Название должности"
+            :error-messages="errors.name"
             required
           ></v-text-field>
           <v-select
@@ -21,6 +22,7 @@
             item-title="department_name"
             item-value="department_id"
             label="Отдел"
+            :error-messages="errors.department_id"
             required
           ></v-select>
         </v-form>
@@ -57,6 +59,7 @@ export default {
     return {
       localPosition: { ...this.TablePosition },
       departments: [],
+      errors: {},
     };
   },
   watch: {
@@ -83,6 +86,7 @@ export default {
         });
     },
     closeDialog() {
+      this.errors = [];
       this.$emit("update:dialog", false);
     },
     savePosition() {
@@ -91,29 +95,33 @@ export default {
     },
     addPosition() {
       PositionApi.addPosition({
-        position_name: this.localPosition.position_name,
+        name: this.localPosition.position_name,
         department_id: this.localPosition.department_id,
       })
         .then(() => {
+          this.errors = [];
           this.$emit("save");
           this.closeDialog();
           this.localPosition = [];
         })
         .catch((err) => {
+          this.errors = err;
           console.error("Error adding position:", err);
         });
     },
     updatePosition() {
       PositionApi.updatePosition(this.localPosition.id, {
-        position_name: this.localPosition.position_name,
+        name: this.localPosition.position_name,
         department_id: this.localPosition.department_id,
       })
         .then(() => {
+          this.errors = [];
           this.$emit("save");
           this.closeDialog();
           this.localPosition = [];
         })
         .catch((err) => {
+          this.errors = err;
           console.error("Error updating position:", err);
         });
     },

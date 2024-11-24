@@ -1,4 +1,4 @@
-const client = require('../db')
+const client = require('../../db')
 
 async function getPositions() {
   try {
@@ -11,12 +11,12 @@ async function getPositions() {
     throw err
   }
 }
-async function addPosition(position_name, department_id) {
+async function addPosition(name, department_id) {
   try {
     const result = await client.query(
       `INSERT INTO positions (name, department_id) 
        VALUES ($1, $2) RETURNING *`,
-      [position_name, department_id],
+      [name, department_id],
     )
     return result.rows[0]
   } catch (err) {
@@ -24,13 +24,13 @@ async function addPosition(position_name, department_id) {
     throw err
   }
 }
-async function updatePosition(id, position_name, department_id) {
+async function updatePosition(id, name, department_id) {
   try {
     const result = await client.query(
       `UPDATE positions 
        SET name = $1, department_id = $2
        WHERE id = $3 RETURNING *`,
-      [position_name, department_id, id],
+      [name, department_id, id],
     )
     if (result.rows.length === 0) {
       return { error: 'Position not found' }
