@@ -69,6 +69,7 @@ export default {
   },
   methods: {
     closeDialog() {
+      this.errors = [];
       this.$emit("update:dialog", false);
     },
     saveOrganization() {

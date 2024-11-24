@@ -6,6 +6,7 @@ const {
   updateDepartment,
   deleteDepartment,
 } = require('../controllers/departments/db_departments')
+const departmentSchema = require('../controllers/departments/dto/validationdDepartments')
 
 router.get('/departments', async (req, res) => {
   try {
@@ -18,15 +19,20 @@ router.get('/departments', async (req, res) => {
 })
 
 router.post('/departments', async (req, res) => {
-  const { name, comment, parent_id, organization_id } = req.body
-
-  if (!name || !comment || !organization_id) {
-    return res
-      .status(400)
-      .json({ error: 'Name, comment, and organization_id are required' })
-  }
-
   try {
+    const { error, value } = departmentSchema.validate(req.body, {
+      abortEarly: false,
+    })
+
+    if (error) {
+      const errorMessages = error.details.reduce((acc, detail) => {
+        acc[detail.path[0]] = detail.message
+        return acc
+      }, {})
+      return res.status(400).json({ errors: errorMessages })
+    }
+
+    const { name, comment, parent_id, organization_id } = value
     const newDepartment = await addDepartment(
       name,
       comment,
@@ -41,16 +47,22 @@ router.post('/departments', async (req, res) => {
 })
 
 router.put('/departments/:id', async (req, res) => {
-  const { id } = req.params
-  const { name, comment, parent_id, organization_id } = req.body
-
-  if (!name || !comment || !organization_id) {
-    return res
-      .status(400)
-      .json({ error: 'Name, comment, and organization_id are required' })
-  }
-
   try {
+    const { error, value } = departmentSchema.validate(req.body, {
+      abortEarly: false,
+    })
+    if (error) {
+      console.log(123214)
+      const errorMessages = error.details.reduce((acc, detail) => {
+        acc[detail.path[0]] = detail.message
+        return acc
+      }, {})
+      return res.status(400).json({ errors: errorMessages })
+    }
+
+    const { id } = req.params
+    const { name, comment, parent_id, organization_id } = value
+
     const updatedDepartment = await updateDepartment(
       id,
       name,

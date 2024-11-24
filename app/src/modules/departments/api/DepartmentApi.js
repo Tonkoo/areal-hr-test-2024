@@ -21,6 +21,9 @@ export default {
       .post("/departments", department)
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          throw err.response.data.errors;
+        }
         console.error("Error adding department:", err);
         throw err;
       });
@@ -28,8 +31,11 @@ export default {
   updateDepartment(id, department) {
     return api
       .put(`/departments/${id}`, department)
-      .then(() => id)
+      .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          throw err.response.data.errors;
+        }
         console.error("Error updating department:", err);
         throw err;
       });

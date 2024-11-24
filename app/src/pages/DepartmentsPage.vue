@@ -27,11 +27,10 @@
 
     <DepartmentForm
       :dialog="dialog"
+      :isAddMode="isAddMode"
       :is-sub-department-mode="isSubDepartmentMode"
       :departments="departments"
-      :dialogMode="dialogMode"
       :TableDepartment="TableDepartment"
-      :is-add-mode="dialogMode === 'add'"
       @update:dialog="dialog = $event"
       @save="refreshDepartment"
     />
@@ -68,7 +67,6 @@ export default {
       dialog: false,
       deleteDialog: false,
       isSubDepartmentMode: false,
-      dialogMode: "add",
       TableDepartment: {
         id: null,
         name: "",
@@ -78,6 +76,7 @@ export default {
       },
       deleteDepartmentId: 0,
       departments: [],
+      isAddMode: false,
     };
   },
   methods: {
@@ -88,8 +87,8 @@ export default {
       this.$refs.departmentTable.fetchDepartments();
     },
     openAddDialog(isSubDepartmentMode) {
+      this.isAddMode = true;
       this.isSubDepartmentMode = isSubDepartmentMode;
-      this.dialogMode = "add";
       this.TableDepartment = {
         name: "",
         comment: "",
@@ -99,7 +98,7 @@ export default {
       this.dialog = true;
     },
     openEditDialog(department) {
-      this.dialogMode = "edit";
+      this.isAddMode = false;
       this.isSubDepartmentMode = !!department.parent_department_name;
       this.TableDepartment = {
         id: department.department_id,

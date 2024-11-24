@@ -11,11 +11,13 @@
           <v-text-field
             v-model="localDepartments.name"
             label="Название отдела"
+            :error-messages="errors.name"
             required
           ></v-text-field>
           <v-textarea
             v-model="localDepartments.comment"
             label="Комментарий"
+            :error-messages="errors.comment"
             required
           ></v-textarea>
           <v-select
@@ -26,6 +28,7 @@
             item-value="department_id"
             label="Родительский отдел"
             @update:model-value="updateOrganizationId"
+            :error-messages="errors.parent_id"
             required
           ></v-select>
           <v-select
@@ -35,6 +38,7 @@
             item-value="id"
             label="Организация"
             :disabled="isSubDepartmentMode || TableDepartment.parent_id"
+            :error-messages="errors.organization_id"
             required
           ></v-select>
         </v-form>
@@ -74,20 +78,33 @@ export default {
       type: Boolean,
       required: true,
     },
-    dialogMode: {
-      type: String,
-      required: true,
-    },
   },
   data() {
     return {
       localDepartments: { ...this.TableDepartment },
       organizations: [],
+      errors: {},
     };
   },
   watch: {
     TableDepartment: {
       handler(newDepartment) {
+        if (newDepartment.organization_id) {
+          const organization = this.organizations.find(
+            (org) => org.name === newDepartment.organization_id
+          );
+          if (organization) {
+            newDepartment.organization_id = organization.id;
+          }
+        }
+        if (newDepartment.parent_id) {
+          const parentDepartment = this.departments.find(
+            (dept) => dept.department_name === newDepartment.parent_id
+          );
+          if (parentDepartment) {
+            newDepartment.parent_id = parentDepartment.department_id;
+          }
+        }
         this.localDepartments = { ...newDepartment };
       },
       deep: true,
@@ -125,23 +142,84 @@ export default {
     },
     closeDialog() {
       this.$emit("update:dialog", false);
+      this.errors = [];
     },
     saveDepartment() {
-      const method =
-        this.dialogMode === "add" ? "addDepartment" : "updateDepartment";
-      const departmentData = this.localDepartments;
-
-      DepartmentApi[method](
-        this.dialogMode === "add" ? departmentData : departmentData.id,
-        departmentData
-      )
-        .then(() => {
-          this.$emit("save");
-          this.closeDialog();
+      if (this.isAddMode) {
+        this.addDepartment();
+      } else {
+        this.updateDepartment();
+      }
+    },
+    addDepartment() {
+      if (this.isSubDepartmentMode == false) {
+        delete this.localDepartments.parent_id;
+        DepartmentApi.addDepartment({
+          name: this.localDepartments.name,
+          comment: this.localDepartments.comment,
+          organization_id: this.localDepartments.organization_id,
         })
-        .catch((error) => {
-          console.error("Error saving department:", error);
-        });
+          .then(() => {
+            this.errors = [];
+            this.$emit("update:dialog", false);
+            this.$emit("save");
+          })
+          .catch((err) => {
+            this.errors = err;
+            console.error("Error adding department:", err);
+          });
+      } else {
+        DepartmentApi.addDepartment({
+          name: this.localDepartments.name,
+          comment: this.localDepartments.comment,
+          parent_id: this.localDepartments.parent_id,
+          organization_id: this.localDepartments.organization_id,
+        })
+          .then(() => {
+            this.errors = [];
+            this.$emit("update:dialog", false);
+            this.$emit("save");
+          })
+          .catch((err) => {
+            this.errors = err;
+            console.error("Error adding department:", err);
+          });
+      }
+    },
+    updateDepartment() {
+      if (this.isSubDepartmentMode == false) {
+        delete this.localDepartments.parent_id;
+        DepartmentApi.updateDepartment(this.localDepartments.id, {
+          name: this.localDepartments.name,
+          comment: this.localDepartments.comment,
+          organization_id: this.localDepartments.organization_id,
+        })
+          .then(() => {
+            this.errors = [];
+            this.$emit("update:dialog", false);
+            this.$emit("save");
+          })
+          .catch((err) => {
+            this.errors = err;
+            console.error("Error updating department:", err);
+          });
+      } else {
+        DepartmentApi.updateDepartment(this.localDepartments.id, {
+          name: this.localDepartments.name,
+          comment: this.localDepartments.comment,
+          parent_id: this.localDepartments.parent_id,
+          organization_id: this.localDepartments.organization_id,
+        })
+          .then(() => {
+            this.errors = [];
+            this.$emit("update:dialog", false);
+            this.$emit("save");
+          })
+          .catch((err) => {
+            this.errors = err;
+            console.error("Error updating department:", err);
+          });
+      }
     },
     updateOrganizationId() {
       if (this.localDepartments.parent_id) {
