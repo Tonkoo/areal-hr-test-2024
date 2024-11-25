@@ -128,6 +128,7 @@ export default {
         position_id: item.position_id,
         salary: parseFloat(item.salary.replace(/[$,]/g, "")),
       };
+      console.log(this.TableEmployees);
       this.dialog = true;
     },
     openDetailsDialog(item) {

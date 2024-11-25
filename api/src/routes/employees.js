@@ -6,6 +6,7 @@ const {
   updateEmployee,
   deleteEmployee,
 } = require('../controllers/employee/db_employee')
+const employeeSchema = require('../controllers/employee/dto/validationdEmployees')
 
 router.get('/employees', async (req, res) => {
   try {
@@ -18,45 +19,37 @@ router.get('/employees', async (req, res) => {
 })
 
 router.post('/employees', async (req, res) => {
-  const {
-    last_name,
-    first_name,
-    middle_name,
-    date_of_birth,
-    passport_series,
-    passport_number,
-    region_id,
-    city_id,
-    street,
-    house,
-    building,
-    apartment,
-    department_id,
-    position_id,
-    salary,
-  } = req.body
-
-  if (
-    !last_name ||
-    !first_name ||
-    !middle_name ||
-    !date_of_birth ||
-    !passport_series ||
-    !passport_number ||
-    !region_id ||
-    !city_id ||
-    !street ||
-    !house ||
-    !building ||
-    !apartment ||
-    !department_id ||
-    !position_id ||
-    !salary
-  ) {
-    return res.status(400).json({ error: 'All fields must be filled' })
-  }
-
   try {
+    const { error, value } = employeeSchema.validate(req.body, {
+      abortEarly: false,
+    })
+
+    if (error) {
+      const errorMessages = error.details.reduce((acc, detail) => {
+        acc[detail.path[0]] = detail.message
+        return acc
+      }, {})
+      return res.status(400).json({ errors: errorMessages })
+    }
+
+    const {
+      last_name,
+      first_name,
+      middle_name,
+      date_of_birth,
+      passport_series,
+      passport_number,
+      region_id,
+      city_id,
+      street,
+      house,
+      building,
+      apartment,
+      department_id,
+      position_id,
+      salary,
+    } = value
+
     const employeeId = await addEmployee(
       last_name,
       first_name,
@@ -84,26 +77,37 @@ router.post('/employees', async (req, res) => {
 })
 
 router.put('/employees/:id', async (req, res) => {
-  const { id } = req.params
-  const {
-    last_name,
-    first_name,
-    middle_name,
-    date_of_birth,
-    passport_series,
-    passport_number,
-    region_id,
-    city_id,
-    street,
-    house,
-    building,
-    apartment,
-    department_id,
-    position_id,
-    salary,
-  } = req.body
-
   try {
+    const { error, value } = employeeSchema.validate(req.body, {
+      abortEarly: false,
+    })
+
+    if (error) {
+      const errorMessages = error.details.reduce((acc, detail) => {
+        acc[detail.path[0]] = detail.message
+        return acc
+      }, {})
+      return res.status(400).json({ errors: errorMessages })
+    }
+
+    const { id } = req.params
+    const {
+      last_name,
+      first_name,
+      middle_name,
+      date_of_birth,
+      passport_series,
+      passport_number,
+      region_id,
+      city_id,
+      street,
+      house,
+      building,
+      apartment,
+      department_id,
+      position_id,
+      salary,
+    } = value
     const message = await updateEmployee(
       id,
       last_name,

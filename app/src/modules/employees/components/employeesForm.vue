@@ -13,17 +13,19 @@
           <v-text-field
             v-model="LocalEmployees.last_name"
             label="Фамилия"
+            :error-messages="errors.last_name"
             required
           ></v-text-field>
           <v-text-field
             v-model="LocalEmployees.first_name"
             label="Имя"
+            :error-messages="errors.first_name"
             required
           ></v-text-field>
           <v-text-field
             v-model="LocalEmployees.middle_name"
             label="Отчество"
-            required
+            :error-messages="errors.middle_name"
           ></v-text-field>
           <v-date-picker
             v-model="LocalEmployees.date_of_birth"
@@ -31,15 +33,25 @@
             locale="ru-RU"
             :max="maxDate"
             @update:model-value="formatDate"
-          ></v-date-picker>
+            :error-messages="errors.date_of_birth"
+            required
+          >
+            <template v-slot:title>
+              <span :class="{ 'error-text': isErrorsDate }">
+                {{ isErrorsDate ? errors.date_of_birth : "Дата рождения" }}
+              </span>
+            </template></v-date-picker
+          >
           <v-text-field
             v-model="LocalEmployees.passport_series"
             label="Серия паспорта"
+            :error-messages="errors.passport_series"
             required
           ></v-text-field>
           <v-text-field
             v-model="LocalEmployees.passport_number"
             label="Номер паспорта"
+            :error-messages="errors.passport_number"
             required
           ></v-text-field>
           <v-select
@@ -48,6 +60,7 @@
             item-title="name"
             item-value="id"
             label="Регион"
+            :error-messages="errors.region_id"
             required
             @update:model-value="onRegionChange"
           ></v-select>
@@ -58,29 +71,32 @@
             item-title="name"
             item-value="id"
             label="Город"
+            :error-messages="errors.city_id"
             required
             :disabled="!LocalEmployees.region_id"
           ></v-select>
           <v-text-field
             v-model="LocalEmployees.street"
             label="Улица"
+            :error-messages="errors.street"
             required
           ></v-text-field>
           <v-text-field
             v-model="LocalEmployees.house"
-            label="Дом"
+            label="Номер дома"
+            :error-messages="errors.house"
             required
           ></v-text-field>
           <v-text-field
             v-model="LocalEmployees.building"
-            label="Корпус"
-            required
+            label="Корпус дома"
+            :error-messages="errors.building"
           ></v-text-field>
           <v-text-field
             v-model="LocalEmployees.apartment"
             type="number"
             label="Квартира"
-            required
+            :error-messages="errors.apartment"
           ></v-text-field>
           <v-select
             v-model="LocalEmployees.department_id"
@@ -88,6 +104,7 @@
             item-title="department_name"
             item-value="department_id"
             label="Отдел"
+            :error-messages="errors.department_id"
             required
             @update:model-value="onDepartmentsChange"
           ></v-select>
@@ -98,6 +115,7 @@
             item-title="position_name"
             item-value="id"
             label="Должность"
+            :error-messages="errors.position_id"
             required
             :disabled="!LocalEmployees.department_id"
           ></v-select>
@@ -105,6 +123,7 @@
             v-model="LocalEmployees.salary"
             label="Зарплата"
             type="number"
+            :error-messages="errors.salary"
             required
           ></v-text-field>
         </v-form>
@@ -171,6 +190,8 @@ export default {
       departments: [],
       positions: [],
       date: null,
+      errors: {},
+      isErrorsDate: false,
     };
   },
 
@@ -219,6 +240,8 @@ export default {
       this.LocalEmployees.date_of_birth = new Date(this.date);
     },
     closeDialog() {
+      this.errors = [];
+      this.isErrorsDate = false;
       this.$emit("update:dialog", false);
     },
     saveOrganization() {
@@ -227,22 +250,37 @@ export default {
     },
     addEmployees() {
       const employeeData = { ...this.LocalEmployees };
+      console.log(employeeData);
       EmployeesApi.addEmployee(employeeData)
         .then(() => {
+          this.isErrorsDate = false;
+          this.errors = [];
           this.$emit("save");
           this.closeDialog();
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.errors = err;
+          if (this.errors.date_of_birth) this.isErrorsDate = true;
+          else this.isErrorsDate = false;
+          console.error("Error adding employee:", err);
+        });
     },
     updateEmployees() {
       EmployeesApi.updateEmployee(this.LocalEmployees.id, {
         ...this.LocalEmployees,
       })
         .then(() => {
+          this.isErrorsDate = false;
+          this.errors = [];
           this.$emit("save");
           this.closeDialog();
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.errors = err;
+          if (this.errors.date_of_birth) this.isErrorsDate = true;
+          else this.isErrorsDate = false;
+          console.error("Error updating employee:", err);
+        });
     },
     onRegionChange() {
       this.LocalEmployees.city_id = null;
@@ -253,3 +291,8 @@ export default {
   },
 };
 </script>
+<style scoped>
+.error-text {
+  color: #b00020;
+}
+</style>

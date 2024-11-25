@@ -5,7 +5,9 @@
     max-width="500px"
   >
     <v-card>
-      <v-card-title class="headline">Подробная информация о сотруднике</v-card-title>
+      <v-card-title class="headline"
+        >Подробная информация о сотруднике</v-card-title
+      >
       <v-card-text>
         <v-list>
           <v-list-item>
@@ -22,17 +24,15 @@
           </v-list-item>
           <v-list-item>
             <v-list-item-title>Зарплата</v-list-item-title>
-            <v-list-item-subtitle
-              >{{ TableEmployees.salary }} руб.</v-list-item-subtitle
-            >
+            <v-list-item-subtitle>{{
+              TableEmployees.salary
+            }}</v-list-item-subtitle>
           </v-list-item>
         </v-list>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="closeDialog"
-          >Закрыть</v-btn
-        >
+        <v-btn color="blue darken-1" text @click="closeDialog">Закрыть</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

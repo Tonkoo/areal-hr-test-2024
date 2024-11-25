@@ -33,17 +33,22 @@ export default {
       .post("/employees", employee)
       .then((response) => response.data)
       .catch((err) => {
-        console.error("Error adding employee:", err);
+        if (err.response && err.response.status === 400) {
+          throw err.response.data.errors;
+        }
+        console.error("Error saving employee:", err);
         throw err;
       });
   },
   updateEmployee(id, employee) {
-    console.log(employee);
-
+    delete employee.id;
     return api
       .put(`/employees/${id}`, employee)
       .then(() => id)
       .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          throw err.response.data.errors;
+        }
         console.error("Error updating employee:", err);
         throw err;
       });
