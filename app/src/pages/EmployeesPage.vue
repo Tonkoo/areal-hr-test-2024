@@ -21,14 +21,7 @@
       :dialog="dialog"
       :isEditMode="isEditMode"
       :TableEmployees="TableEmployees"
-      :maxDate="maxDate"
-      :regions="regions"
-      :citiesLoaded="citiesLoaded"
-      :filteredCities="filteredCities"
-      :departments="departments"
-      :filteredPositions="filteredPositions"
-      :positionsLoaded="positionsLoaded"
-      @save="handleSaveOrganization"
+      @save="refreshEmployees"
       @update:dialog="dialog = $event"
     />
 
@@ -42,7 +35,7 @@
       :dismissDialog="dismissDialog"
       :TableEmployees="TableEmployees"
       @update:dismissDialog="dismissDialog = $event"
-      @dismiss="dismissEmployee"
+      @dismiss="refreshEmployees"
     />
 
     <EmployeesFilesDialog
@@ -52,7 +45,7 @@
     />
 
     <EmployeesTable
-      :employees="employees"
+      ref="EmployeesTable"
       @edit="openEditDialog"
       @dismiss="openDismissDialog"
       @DetailsDialog="openDetailsDialog"
@@ -67,9 +60,6 @@ import EmployeesDetailsDialog from "@/modules/employees/components/EmployeesDeta
 import EmployeesDismissDialog from "@/modules/employees/components/EmployeesDismissDialog.vue";
 import EmployeesFilesDialog from "@/modules/employees/components/EmployeesFilesDialog.vue";
 import EmployeesTable from "@/modules/employees/components/EmployeesTable.vue";
-import EmployeesApi from "@/modules/employees/api/EmployeesApi";
-import DepartmentApi from "@/modules/departments/api/DepartmentApi";
-import PositionApi from "@/modules/positions/api/PositionApi";
 
 export default {
   components: {
@@ -107,113 +97,16 @@ export default {
         salary: 0,
       },
       employees: [],
-      regions: [],
-      citys: [],
-      departments: [],
-      positions: [],
-      maxDate: new Date().toISOString().split("T")[0],
-      citiesLoaded: false,
-      positionsLoaded: false,
     };
   },
-  computed: {
-    filteredCities() {
-      if (!this.TableEmployees.region_id) return [];
-      return this.citys.filter(
-        (city) => city.region_id === this.TableEmployees.region_id
-      );
-    },
-    filteredPositions() {
-      if (!this.TableEmployees.department_id) return [];
-      return this.positions.filter(
-        (positions) =>
-          positions.department_id === this.TableEmployees.department_id
-      );
-    },
-  },
-  mounted() {
-    this.fetchEmployees();
-    this.fetchRegions();
-    this.fetchCitys();
-    this.fetchDepartments();
-    this.fetchPositions();
-  },
   methods: {
-    fetchEmployees() {
-      EmployeesApi.getEmployees()
-        .then((data) => {
-          this.employees = data;
-        })
-        .catch((err) => console.error(err));
-    },
-    fetchRegions() {
-      EmployeesApi.getRegions()
-        .then((data) => {
-          this.regions = data;
-        })
-        .catch((err) => console.error(err));
-    },
-    fetchCitys() {
-      EmployeesApi.getCities()
-        .then((data) => {
-          this.citys = data;
-          this.citiesLoaded = true;
-        })
-        .catch((err) => console.error(err));
-    },
-    fetchDepartments() {
-      DepartmentApi.getDepartments()
-        .then((data) => {
-          this.departments = data;
-        })
-        .catch((err) => console.error(err));
-    },
-    fetchPositions() {
-      PositionApi.getPosition()
-        .then((data) => {
-          this.positions = data;
-          this.positionsLoaded = true;
-        })
-        .catch((err) => console.error(err));
+    refreshEmployees() {
+      this.$refs.EmployeesTable.fetchEmployees();
     },
     openAddDialog() {
       this.isEditMode = false;
-      this.TableEmployees = {
-        last_name: "",
-        first_name: "",
-        middle_name: "",
-        date_of_birth: null,
-        passport_series: "",
-        passport_number: "",
-        region_id: null,
-        city_id: null,
-        street: "",
-        house: "",
-        building: "",
-        apartment: null,
-        department_name: "",
-        position_name: "",
-        department_id: null,
-        position_id: null,
-        salary: 0,
-      };
+      this.TableEmployees = [];
       this.dialog = true;
-    },
-    handleSaveOrganization(employee) {
-      if (this.isEditMode) {
-        this.updateEmployees(employee);
-      } else {
-        this.addEmployees(employee);
-      }
-    },
-    addEmployees() {
-      const employeeData = { ...this.TableEmployees };
-      EmployeesApi.addEmployee(employeeData)
-        .then(() => {
-          this.fetchEmployees();
-          this.dialog = false;
-        })
-        .catch((err) => console.error(err));
     },
     openEditDialog(item) {
       this.isEditMode = true;
@@ -225,32 +118,17 @@ export default {
         date_of_birth: new Date(item.date_of_birth),
         passport_series: item.passport_series,
         passport_number: item.passport_number,
-        region_id: this.regions.find((r) => r.name === item.region)?.id,
-        city_id: this.citys.find((c) => c.name === item.city)?.id,
+        region_id: item.region_id,
+        city_id: item.city_id,
         street: item.street,
         house: item.house,
         building: item.building,
         apartment: item.apartment,
-        department_id: this.departments.find(
-          (d) => d.department_name === item.department_name
-        )?.department_id,
-        position_id: this.positions.find(
-          (p) => p.position_name === item.position_name
-        )?.id,
+        department_id: item.department_id,
+        position_id: item.position_id,
         salary: parseFloat(item.salary.replace(/[$,]/g, "")),
       };
-
       this.dialog = true;
-    },
-    updateEmployees() {
-      EmployeesApi.updateEmployee(this.TableEmployees.id, {
-        ...this.TableEmployees,
-      })
-        .then(() => {
-          this.dialog = false;
-          this.fetchEmployees();
-        })
-        .catch((err) => console.error(err));
     },
     openDetailsDialog(item) {
       this.TableEmployees = {
@@ -264,14 +142,6 @@ export default {
       this.TableEmployees = item;
       this.dismissDialog = true;
     },
-    dismissEmployee() {
-      EmployeesApi.dismissEmployee(this.TableEmployees.id)
-        .then(() => {
-          this.dismissDialog = false;
-          this.fetchEmployees();
-        })
-        .catch((err) => console.error(err));
-    },
     openFilesDialog(item) {
       this.TableEmployees = item;
       this.filesDialog = true;
@@ -280,8 +150,4 @@ export default {
 };
 </script>
 
-<style>
-.v-btn {
-  margin: 5px;
-}
-</style>
+<style></style>

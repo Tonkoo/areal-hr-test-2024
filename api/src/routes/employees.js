@@ -131,7 +131,6 @@ router.put('/employees/:id', async (req, res) => {
 
 router.post('/employees/:id', async (req, res) => {
   const { id } = req.params
-
   try {
     const message = await deleteEmployee(id)
     res.json({ message })

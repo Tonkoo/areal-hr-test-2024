@@ -10,11 +10,6 @@ exports.up = (pgm) => {
       onDelete: 'cascade',
     },
   })
-  pgm.sql(`
-      INSERT INTO passport_scan (name, path, employee_id) VALUES
-        ('Иванов И.И. Паспорт', '..\\uploads\\1731938456221.pdf', 1),
-        ('Петров П.П. Паспорт', '..\\uploads\\1731938461207.pdf', 2);
-    `)
 }
 
 exports.down = (pgm) => {

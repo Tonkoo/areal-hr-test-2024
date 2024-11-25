@@ -2,11 +2,16 @@ const express = require('express')
 const router = express.Router()
 const client = require('../db')
 const multer = require('multer')
-const { getFiles, addFile, deleteFile } = require('../controllers/db_file')
+const {
+  getFiles,
+  addFile,
+  deleteFile,
+  getNumberFilesEmployee,
+} = require('../controllers/employeeFiles/db_file')
 const {
   saveFile,
   deleteFileFromSystem,
-} = require('../controllers/service_file')
+} = require('../controllers/employeeFiles/service_file')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -25,9 +30,24 @@ router.get('/files/:employee_id', async (req, res) => {
 router.post('/files/:employee_id', upload.single('file'), async (req, res) => {
   try {
     const { employee_id } = req.params
-    const { name } = req.body
-    const filePath = await saveFile(req.file)
-    const newFile = await addFile(name, filePath, employee_id)
+    const { last_name } = req.body
+    const { first_name } = req.body
+    const { middle_name } = req.body
+    const { numberfile } = await getNumberFilesEmployee(employee_id)
+    const fileName =
+      'паспорт' +
+      '-' +
+      last_name.toLowerCase() +
+      '-' +
+      first_name.toLowerCase() +
+      '-' +
+      middle_name.toLowerCase() +
+      '-' +
+      employee_id +
+      '-№' +
+      numberfile
+    const filePath = await saveFile(req.file, fileName)
+    const newFile = await addFile(fileName, filePath, employee_id)
 
     res
       .status(201)

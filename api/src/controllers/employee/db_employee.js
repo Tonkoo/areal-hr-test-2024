@@ -3,7 +3,7 @@ const client = require('../../db')
 async function getEmployees() {
   try {
     const result = await client.query(
-      "SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number, regions.id as region_id, regions.name AS region, citys.id as city_id, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.id as department_id, departments.name AS department_name, positions.id as position_id, positions.name AS position_name, employee_details.salary FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN employee_details on employees.id = employee_details.id join departments on employee_details.department_id = departments.id join positions on employee_details.position_id = positions.id",
+      "SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number, regions.id as region_id, regions.name AS region, citys.id as city_id, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.id as department_id, departments.name AS department_name, positions.id as position_id, positions.name AS position_name, employee_details.salary, employee_details.is_fired FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN employee_details on employees.id = employee_details.id join departments on employee_details.department_id = departments.id join positions on employee_details.position_id = positions.id",
     )
     return result.rows
   } catch (err) {
@@ -54,8 +54,8 @@ async function addEmployee(
     const employeeId = employeeResult.rows[0].id
 
     await client.query(
-      `INSERT INTO employee_details (id, department_id, position_id, salary) 
-       VALUES ($1, $2, $3, $4)`,
+      `INSERT INTO employee_details (id, department_id, position_id, salary, is_fired) 
+       VALUES ($1, $2, $3, $4, false)`,
       [employeeId, department_id, position_id, salary],
     )
 
@@ -130,29 +130,15 @@ async function updateEmployee(
 }
 async function deleteEmployee(id) {
   try {
-    await client.query('BEGIN')
-
-    const lastOperationData = await client.query(
-      'SELECT * FROM personnel_operations WHERE employee_id = $1 ORDER BY id DESC LIMIT 1',
+    await client.query(
+      `update employee_details
+        set is_fired = true
+        where id = $1`,
       [id],
     )
-    const lastOperation = lastOperationData.rows[0]
 
-    await client.query(
-      `INSERT INTO personnel_operations (employee_id, type_operation_id, department_id, position_id, salary) 
-       VALUES ($1, 2, $2, $3, $4)`,
-      [
-        id,
-        lastOperation.department_id,
-        lastOperation.position_id,
-        lastOperation.salary,
-      ],
-    )
-
-    await client.query('COMMIT')
     return 'Employee terminated successfully'
   } catch (err) {
-    await client.query('ROLLBACK')
     throw new Error('Error when terminating the employee: ' + err.message)
   }
 }

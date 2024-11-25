@@ -1,4 +1,4 @@
-const client = require('../db')
+const client = require('../../db')
 
 async function getFiles(employee_id) {
   try {
@@ -36,9 +36,23 @@ async function deleteFile(fileId) {
     throw err
   }
 }
+async function getNumberFilesEmployee(employee_id) {
+  try {
+    const result = await client.query(
+      'SELECT (COUNT(passport_scan.id)+1) as numberFile FROM passport_scan  JOIN employees ON passport_scan.employee_id = employees.id WHERE employee_id = $1',
+      [employee_id],
+    )
+
+    return result.rows[0]
+  } catch (err) {
+    console.error('Error fetching numberFile:', err)
+    throw err
+  }
+}
 
 module.exports = {
   getFiles,
   addFile,
   deleteFile,
+  getNumberFilesEmployee,
 }

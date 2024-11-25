@@ -25,7 +25,7 @@
         <td>{{ item.last_name }}</td>
         <td>{{ item.first_name }}</td>
         <td>{{ item.middle_name }}</td>
-        <td>{{ item.date_of_birth }}</td>
+        <td style="width: 110px">{{ item.date_of_birth }}</td>
         <td>{{ item.passport_series }}</td>
         <td>{{ item.passport_number }}</td>
         <td>{{ item.region }}</td>
@@ -34,7 +34,7 @@
         <td>{{ item.house }}</td>
         <td>{{ item.building }}</td>
         <td>{{ item.apartment }}</td>
-        <td>{{ item.type_operation_id === 2 ? "Уволен" : "Работает" }}</td>
+        <td>{{ item.is_fired ? "Уволен" : "Работает" }}</td>
         <td>
           <v-btn color="blue" @click="openDetailsDialog(item)" small
             >Подробнее</v-btn
@@ -43,21 +43,21 @@
             color="blue"
             @click="openFilesDialog(item)"
             small
-            :disabled="item.type_operation_id === 2"
+            :disabled="item.is_fired === true"
             >Файлы</v-btn
           >
           <v-btn
             color="blue"
             @click="openEditDialog(item)"
             small
-            :disabled="item.type_operation_id === 2"
+            :disabled="item.is_fired === true"
             >Изменить</v-btn
           >
           <v-btn
             color="red"
             @click="openDismissDialog(item)"
             small
-            :disabled="item.type_operation_id === 2"
+            :disabled="item.is_fired === true"
             >Уволить</v-btn
           >
         </td>
@@ -67,14 +67,24 @@
 </template>
 
 <script>
+import EmployeesApi from "../api/EmployeesApi";
 export default {
-  props: {
-    employees: {
-      type: Array,
-      required: true,
-    },
+  data() {
+    return {
+      employees: [],
+    };
+  },
+  mounted() {
+    this.fetchEmployees();
   },
   methods: {
+    fetchEmployees() {
+      EmployeesApi.getEmployees()
+        .then((data) => {
+          this.employees = data;
+        })
+        .catch((err) => console.error(err));
+    },
     openEditDialog(item) {
       this.$emit("edit", item);
     },
@@ -90,3 +100,9 @@ export default {
   },
 };
 </script>
+<style scoped>
+.v-btn {
+  margin: 5px;
+  width: 130px;
+}
+</style>

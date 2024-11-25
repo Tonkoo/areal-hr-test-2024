@@ -38,6 +38,8 @@ export default {
       });
   },
   updateEmployee(id, employee) {
+    console.log(employee);
+
     return api
       .put(`/employees/${id}`, employee)
       .then(() => id)
@@ -64,13 +66,15 @@ export default {
         throw err;
       });
   },
-  uploadEmployeeFile(employeeId, file) {
+  uploadEmployeeFile(Employee, file) {
+    console.log(Employee);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("name", file.name);
-
+    formData.append("last_name", Employee.last_name);
+    formData.append("first_name", Employee.first_name);
+    formData.append("middle_name", Employee.middle_name);
     return api
-      .post(`/files/${employeeId}`, formData, {
+      .post(`/files/${Employee.id}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

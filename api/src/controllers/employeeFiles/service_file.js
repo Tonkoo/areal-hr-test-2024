@@ -1,13 +1,14 @@
 const fs = require('fs').promises
 const path = require('path')
 
-const storagePath = '../uploads/'
+const storagePath = '../files/'
 
-async function saveFile(file) {
+async function saveFile(file, fileName) {
   const filePath = path.join(
     storagePath,
-    Date.now() + path.extname(file.originalname),
+    fileName + path.extname(file.originalname),
   )
+
   await fs.writeFile(filePath, file.buffer)
   return filePath
 }

@@ -1,16 +1,21 @@
-import { createApp } from 'vue';
-import { createVuetify } from 'vuetify';
-import 'vuetify/styles';
-import * as components from 'vuetify/components';
-import * as directives from 'vuetify/directives';
-import '@mdi/font/css/materialdesignicons.css';
+import { createApp } from "vue";
+import { createVuetify } from "vuetify";
+import { ru } from "vuetify/locale";
+import "vuetify/styles";
+import * as components from "vuetify/components";
+import * as directives from "vuetify/directives";
+import "@mdi/font/css/materialdesignicons.css";
 
-import App from './App.vue';
-import router from './router/router';
+import App from "./App.vue";
+import router from "./router/router";
 
 const vuetify = createVuetify({
   components,
   directives,
+  locale: {
+    locale: "ru",
+    messages: { ru },
+  },
 });
 
 const app = createApp(App);
@@ -18,4 +23,4 @@ const app = createApp(App);
 app.use(vuetify);
 app.use(router);
 
-app.mount('#app');
+app.mount("#app");
