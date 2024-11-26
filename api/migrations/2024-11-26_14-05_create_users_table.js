@@ -15,12 +15,12 @@ exports.up = (pgm) => {
   })
 
   pgm.sql(`
-INSERT INTO users (last_name, first_name, middle_name, login, password, role_id) VALUES
-  ('Иванов', 'Иван', 'Иванович', 'admin', 'admin', 1),
-  ('Петров', 'Петр', 'Петрович', 'manager', 'manager', 2);
+    INSERT INTO users (last_name, first_name, middle_name, login, password, role_id) VALUES
+    ('Иванов', 'Иван', 'Иванович', 'admin', 'admin', 1),
+    ('Петров', 'Петр', 'Петрович', 'manager', 'manager', 2);
   `)
 }
 
 exports.down = (pgm) => {
-  pgm.dropTable('user')
+  pgm.dropTable('users')
 }
