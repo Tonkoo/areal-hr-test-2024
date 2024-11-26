@@ -3,7 +3,7 @@ exports.up = (pgm) => {
     id: { type: 'serial', primaryKey: true },
     datetime_operations: { type: 'timestamp', notNull: true },
     author: { type: 'varchar(255)', notNull: true },
-    id_object_operations: {
+    object_operations_id: {
       type: 'integer',
       notNull: true,
       references: 'object_operations(id)',

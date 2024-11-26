@@ -1,5 +1,5 @@
 <script>
-import Sidebar from "./shared/components/SideBar.vue";
+import Sidebar from "../src/shared/components/Sidebar.vue";
 
 export default {
   components: {

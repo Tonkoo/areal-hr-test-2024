@@ -1,10 +1,10 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import Home from "../pages/HomePage.vue";
 import Organizations from "../pages/OrganizationsPage.vue";
 import Departments from "../pages/DepartmentsPage.vue";
 import Positions from "../pages/PositionsPage.vue";
 import Employees from "../pages/EmployeesPage.vue";
-import Operations from "../pages/OperationsPage.vue";
+import Users from "../pages/UsersPage.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -12,11 +12,11 @@ const routes = [
   { path: "/departments", component: Departments },
   { path: "/positions", component: Positions },
   { path: "/employees", component: Employees },
-  { path: "/operations", component: Operations },
+  { path: "/users", component: Users },
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
 });
 
