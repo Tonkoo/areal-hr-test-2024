@@ -22,7 +22,7 @@
           <v-btn color="blue" @click="openEditDialog(item)" small
             >Изменить</v-btn
           >
-          <v-btn color="red" @click="openDeleteDialog(item.id)" small
+          <v-btn color="red" @click="openDeleteDialog(item)" small
             >Удалить</v-btn
           >
         </td>
@@ -56,8 +56,8 @@ export default {
     openEditDialog(item) {
       this.$emit("edit", item);
     },
-    openDeleteDialog(id) {
-      this.$emit("delete", id);
+    openDeleteDialog(item) {
+      this.$emit("delete", item);
     },
   },
 };

@@ -15,6 +15,7 @@
         >Зарегистрировать пользователя</v-btn
       >
     </v-toolbar>
+
     <UsersForm
       :dialog="dialog"
       :isEditMode="isEditMode"
@@ -22,6 +23,14 @@
       @update:dialog="dialog = $event"
       @save="refreshUsers"
     />
+
+    <UsersDeleteDialog
+      :deleteDialog="deleteDialog"
+      :TableUsers="TableUsers"
+      @update:deleteDialog="deleteDialog = $event"
+      @delete="refreshUsers"
+    />
+
     <UsersTable
       ref="UsersTable"
       @edit="openEditDialog"
@@ -33,15 +42,18 @@
 <script>
 import UsersTable from "@/modules/users/components/UsersTable.vue";
 import UsersForm from "@/modules/users/components/UsersForm.vue";
+import UsersDeleteDialog from "@/modules/users/components/UsersDeleteDialog.vue";
 export default {
   components: {
     UsersTable,
     UsersForm,
+    UsersDeleteDialog,
   },
   data() {
     return {
       dialog: false,
       isEditMode: false,
+      deleteDialog: false,
       TableUsers: {
         id: null,
         last_name: "",
@@ -66,7 +78,10 @@ export default {
       this.TableUsers = { ...item };
       this.dialog = true;
     },
-    openDeleteDialog() {},
+    openDeleteDialog(item) {
+      this.TableUsers = item;
+      this.deleteDialog = true;
+    },
   },
 };
 </script>

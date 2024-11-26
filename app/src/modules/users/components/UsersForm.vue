@@ -90,7 +90,48 @@ export default {
       this.errors = [];
       this.$emit("update:dialog", false);
     },
-    saveUsers() {},
+    saveUsers() {
+      if (this.isEditMode) this.updateUser();
+      else this.addUser();
+    },
+    addUser() {
+      UsersApi.addUser({
+        last_name: this.localUsers.last_name,
+        first_name: this.localUsers.first_name,
+        middle_name: this.localUsers.middle_name,
+        login: this.localUsers.login,
+        password: this.localUsers.password,
+      })
+        .then(() => {
+          this.errors = [];
+          this.$emit("save");
+          this.closeDialog();
+          this.localUsers = [];
+        })
+        .catch((err) => {
+          this.errors = err;
+          console.error("Error adding user:", err);
+        });
+    },
+    updateUser() {
+      UsersApi.updateUser(this.localUsers.id, {
+        last_name: this.localUsers.last_name,
+        first_name: this.localUsers.first_name,
+        middle_name: this.localUsers.middle_name,
+        login: this.localUsers.login,
+        password: this.localUsers.password,
+      })
+        .then(() => {
+          this.errors = [];
+          this.$emit("save");
+          this.closeDialog();
+          this.localUsers = [];
+        })
+        .catch((err) => {
+          this.errors = err;
+          console.error("Error updating user:", err);
+        });
+    },
   },
 };
 </script>

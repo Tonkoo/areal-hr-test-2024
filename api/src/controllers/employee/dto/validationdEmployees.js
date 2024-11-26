@@ -27,13 +27,13 @@ const employeeSchema = Joi.object({
     }),
   middle_name: Joi.string()
     .min(3)
-    .max(255)
+    .max(100)
     .regex(/^[^\d]*$/)
     .allow(null, '')
     .messages({
-      'string.pattern.base': 'Поле "Фамилия" не может содержать цифры',
-      'string.min': 'Название должно быть не короче 3 символов',
-      'string.max': 'Название не может быть длиннее 100 символов',
+      'string.pattern.base': 'Поле "Отчество" не может содержать цифры',
+      'string.min': 'Поле "Отчество" должно быть не короче 3 символов',
+      'string.max': 'Поле "Отчество" не может быть длиннее 100 символов',
     }),
   date_of_birth: Joi.date().required().messages({
     'any.required': 'Поле "Дата рождения" обязательно',
