@@ -1,20 +1,24 @@
-const client = require('../../db')
+const pool = require('../../db')
 
 async function getUsers() {
+  const connection = await pool.connect()
   try {
-    const result = await client.query(
+    const result = await connection.query(
       'SELECT users.id, last_name, first_name, middle_name, login, password, role.name FROM users join role on users.role_id = role.id where role.id = 2',
     )
     return result.rows
   } catch (err) {
     console.error('Error fetching users:', err)
     throw err
+  } finally {
+    connection.release()
   }
 }
 
 async function addUser(last_name, first_name, middle_name, login, password) {
+  const connection = await pool.connect()
   try {
-    const result = await client.query(
+    const result = await connection.query(
       `INSERT INTO users (last_name, first_name, middle_name, login, password, role_id) 
        VALUES ($1, $2, $3, $4, $5, 2) RETURNING *`,
       [last_name, first_name, middle_name, login, password],
@@ -23,6 +27,8 @@ async function addUser(last_name, first_name, middle_name, login, password) {
   } catch (err) {
     console.error('Error saving user:', err)
     throw err
+  } finally {
+    connection.release()
   }
 }
 
@@ -34,8 +40,9 @@ async function updateUser(
   login,
   password,
 ) {
+  const connection = await pool.connect()
   try {
-    const result = await client.query(
+    const result = await connection.query(
       `UPDATE users 
        SET last_name = $1, first_name = $2,
        middle_name = $3, login = $4,
@@ -50,12 +57,15 @@ async function updateUser(
   } catch (err) {
     console.error('Error updating user:', err)
     throw err
+  } finally {
+    connection.release()
   }
 }
 
 async function deleteUser(id) {
+  const connection = await pool.connect()
   try {
-    const result = await client.query(
+    const result = await connection.query(
       'DELETE FROM users WHERE id = $1 RETURNING *',
       [id],
     )
@@ -67,6 +77,8 @@ async function deleteUser(id) {
   } catch (err) {
     console.error('Error deleting user:', err)
     throw err
+  } finally {
+    connection.release()
   }
 }
 

@@ -15,7 +15,6 @@
         <th>Дом</th>
         <th>Корпус</th>
         <th>Квартира</th>
-        <th>Статус</th>
         <th>Действие</th>
       </tr>
     </thead>
@@ -25,7 +24,7 @@
         <td>{{ item.last_name }}</td>
         <td>{{ item.first_name }}</td>
         <td>{{ item.middle_name }}</td>
-        <td style="width: 110px">{{ item.date_of_birth }}</td>
+        <td>{{ item.date_of_birth }}</td>
         <td>{{ item.passport_series }}</td>
         <td>{{ item.passport_number }}</td>
         <td>{{ item.region }}</td>
@@ -34,30 +33,15 @@
         <td>{{ item.house }}</td>
         <td>{{ item.building }}</td>
         <td>{{ item.apartment }}</td>
-        <td>{{ item.is_fired ? "Уволен" : "Работает" }}</td>
         <td>
           <v-btn color="blue" @click="openDetailsDialog(item)" small
             >Подробнее</v-btn
           >
-          <v-btn
-            color="blue"
-            @click="openFilesDialog(item)"
-            small
-            :disabled="item.is_fired === true"
-            >Файлы</v-btn
-          >
-          <v-btn
-            color="blue"
-            @click="openEditDialog(item)"
-            small
-            :disabled="item.is_fired === true"
+          <v-btn color="blue" @click="openFilesDialog(item)" small>Файлы</v-btn>
+          <v-btn color="blue" @click="openEditDialog(item)" small
             >Изменить</v-btn
           >
-          <v-btn
-            color="red"
-            @click="openDismissDialog(item)"
-            small
-            :disabled="item.is_fired === true"
+          <v-btn color="red" @click="openDismissDialog(item)" small
             >Уволить</v-btn
           >
         </td>
