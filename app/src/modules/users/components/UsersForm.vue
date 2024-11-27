@@ -6,9 +6,9 @@
   >
     <v-card>
       <v-card-title class="headline">{{
-        isEditMode
-          ? "Изменить данные пользователя"
-          : "Добавить данные пользователя"
+        isAddMode
+          ? "Добавить данные пользователя"
+          : "Изменить данные пользователя"
       }}</v-card-title>
       <v-form ref="form">
         <v-card-text>
@@ -37,9 +37,23 @@
             required
           ></v-text-field>
           <v-text-field
+            v-if="isAddMode"
+            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+            :type="show1 ? 'text' : 'password'"
             v-model="localUsers.password"
             label="Пароль"
             :error-messages="errors.password"
+            @click:append="show1 = !show1"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-if="isAddMode"
+            :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+            :type="show2 ? 'text' : 'password'"
+            v-model="localUsers.checkPassword"
+            label="Подтверждение пароля"
+            :error-messages="errors.checkPassword"
+            @click:append="show2 = !show2"
             required
           ></v-text-field>
         </v-card-text>
@@ -47,7 +61,7 @@
       <v-card-actions>
         <v-btn color="blue" text @click="closeDialog">Отмена</v-btn>
         <v-btn color="blue" text @click="saveUsers">
-          {{ isEditMode ? "Сохранить" : "Добавить" }}
+          {{ isAddMode ? "Добавить" : "Сохранить" }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -61,7 +75,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    isEditMode: {
+    isAddMode: {
       type: Boolean,
       required: true,
     },
@@ -74,6 +88,8 @@ export default {
     return {
       localUsers: { ...this.TableUsers },
       errors: {},
+      show1: false,
+      show2: false,
     };
   },
   watch: {
@@ -91,8 +107,11 @@ export default {
       this.$emit("update:dialog", false);
     },
     saveUsers() {
-      if (this.isEditMode) this.updateUser();
-      else this.addUser();
+      if (this.isAddMode) {
+        if (this.localUsers.password == this.localUsers.checkPassword)
+          this.addUser();
+        else this.errors.checkPassword = "Пароль не совпадает";
+      } else this.updateUser();
     },
     addUser() {
       UsersApi.addUser({

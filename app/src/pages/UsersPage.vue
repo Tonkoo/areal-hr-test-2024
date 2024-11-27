@@ -18,7 +18,7 @@
 
     <UsersForm
       :dialog="dialog"
-      :isEditMode="isEditMode"
+      :isAddMode="isAddMode"
       :TableUsers="TableUsers"
       @update:dialog="dialog = $event"
       @save="refreshUsers"
@@ -43,6 +43,7 @@
 import UsersTable from "@/modules/users/components/UsersTable.vue";
 import UsersForm from "@/modules/users/components/UsersForm.vue";
 import UsersDeleteDialog from "@/modules/users/components/UsersDeleteDialog.vue";
+
 export default {
   components: {
     UsersTable,
@@ -52,7 +53,7 @@ export default {
   data() {
     return {
       dialog: false,
-      isEditMode: false,
+      isAddMode: false,
       deleteDialog: false,
       TableUsers: {
         id: null,
@@ -69,12 +70,12 @@ export default {
       this.$refs.UsersTable.fetchUser();
     },
     openAddDialog() {
+      this.isAddMode = true;
       this.TableUsers = [];
-      this.isEditMode = false;
       this.dialog = true;
     },
     openEditDialog(item) {
-      this.isEditMode = true;
+      this.isAddMode = false;
       this.TableUsers = { ...item };
       this.dialog = true;
     },
