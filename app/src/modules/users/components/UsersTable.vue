@@ -22,6 +22,12 @@
           <v-btn color="blue" @click="openEditDialog(item)" small
             >Изменить</v-btn
           >
+          <v-btn color="blue" @click="openEditDialog(item)" small
+            >Повысить роль</v-btn
+          >
+          <v-btn color="blue" @click="openResetPasswordDialog(item)" small
+            >Сбросить пароль</v-btn
+          >
           <v-btn color="red" @click="openDeleteDialog(item)" small
             >Удалить</v-btn
           >
@@ -59,6 +65,14 @@ export default {
     openDeleteDialog(item) {
       this.$emit("delete", item);
     },
+    openResetPasswordDialog(item) {
+      this.$emit("reset", item);
+    },
   },
 };
 </script>
+<style scoped>
+.v-btn {
+  margin: 5px;
+}
+</style>

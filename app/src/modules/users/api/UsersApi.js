@@ -25,9 +25,9 @@ export default {
         throw err;
       });
   },
-  updateUser(id, user) {
+  updateUser(id, user, resetPassword) {
     return api
-      .put(`/users/${id}`, user)
+      .put(`/users/${id}?isResetPassword=${resetPassword}`, user)
       .then(() => id)
       .catch((err) => {
         if (err.response && err.response.status === 400) {

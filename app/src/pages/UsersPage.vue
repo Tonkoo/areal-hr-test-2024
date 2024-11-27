@@ -19,7 +19,9 @@
     <UsersForm
       :dialog="dialog"
       :isAddMode="isAddMode"
+      :isEditMode="isEditMode"
       :TableUsers="TableUsers"
+      :resetPassword="resetPassword"
       @update:dialog="dialog = $event"
       @save="refreshUsers"
     />
@@ -35,6 +37,7 @@
       ref="UsersTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
+      @reset="openResetPasswordDialog"
     />
   </v-container>
 </template>
@@ -54,7 +57,9 @@ export default {
     return {
       dialog: false,
       isAddMode: false,
+      isEditMode: false,
       deleteDialog: false,
+      resetPassword: false,
       TableUsers: {
         id: null,
         last_name: "",
@@ -70,18 +75,30 @@ export default {
       this.$refs.UsersTable.fetchUser();
     },
     openAddDialog() {
+      this.resetPassword = false;
+      this.isEditMode = false;
       this.isAddMode = true;
       this.TableUsers = [];
       this.dialog = true;
     },
     openEditDialog(item) {
+      this.resetPassword = false;
       this.isAddMode = false;
+      this.isEditMode = true;
       this.TableUsers = { ...item };
       this.dialog = true;
     },
     openDeleteDialog(item) {
       this.TableUsers = item;
       this.deleteDialog = true;
+    },
+    openResetPasswordDialog(item) {
+      this.TableUsers = item;
+      delete this.TableUsers.password;
+      this.isAddMode = false;
+      this.isEditMode = false;
+      this.resetPassword = true;
+      this.dialog = true;
     },
   },
 };

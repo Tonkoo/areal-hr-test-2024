@@ -5,39 +5,39 @@
     max-width="700px"
   >
     <v-card>
-      <v-card-title class="headline">{{
-        isAddMode
-          ? "Добавить данные пользователя"
-          : "Изменить данные пользователя"
-      }}</v-card-title>
+      <v-card-title class="headline">{{ getDialogTitle }}</v-card-title>
       <v-form ref="form">
         <v-card-text>
           <v-text-field
+            v-if="!resetPassword"
             v-model="localUsers.last_name"
             label="Фамилия"
             :error-messages="errors.last_name"
             required
           ></v-text-field>
           <v-text-field
+            v-if="!resetPassword"
             v-model="localUsers.first_name"
             label="Имя"
             :error-messages="errors.first_name"
             required
           ></v-text-field>
           <v-text-field
+            v-if="!resetPassword"
             v-model="localUsers.middle_name"
             label="Отчество"
             :error-messages="errors.middle_name"
             required
           ></v-text-field>
           <v-text-field
+            v-if="!resetPassword"
             v-model="localUsers.login"
             label="Логин"
             :error-messages="errors.login"
             required
           ></v-text-field>
           <v-text-field
-            v-if="isAddMode"
+            v-if="!isEditMode"
             :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
             :type="show1 ? 'text' : 'password'"
             v-model="localUsers.password"
@@ -47,7 +47,7 @@
             required
           ></v-text-field>
           <v-text-field
-            v-if="isAddMode"
+            v-if="!isEditMode"
             :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
             :type="show2 ? 'text' : 'password'"
             v-model="localUsers.checkPassword"
@@ -79,6 +79,14 @@ export default {
       type: Boolean,
       required: true,
     },
+    isEditMode: {
+      type: Boolean,
+      required: true,
+    },
+    resetPassword: {
+      type: Boolean,
+      required: true,
+    },
     TableUsers: {
       type: Object,
       required: true,
@@ -101,9 +109,20 @@ export default {
     },
   },
   emits: ["update:dialog", "save"],
+  computed: {
+    getDialogTitle() {
+      return this.resetPassword
+        ? "Сброс пароля"
+        : this.isAddMode
+        ? "Добавить данные пользователя"
+        : "Изменить данные пользователя";
+    },
+  },
   methods: {
     closeDialog() {
       this.errors = [];
+      this.show1 = false;
+      this.show2 = false;
       this.$emit("update:dialog", false);
     },
     saveUsers() {
@@ -111,7 +130,11 @@ export default {
         if (this.localUsers.password == this.localUsers.checkPassword)
           this.addUser();
         else this.errors.checkPassword = "Пароль не совпадает";
-      } else this.updateUser();
+      } else {
+        if (this.localUsers.password == this.localUsers.checkPassword)
+          this.updateUser();
+        else this.errors.checkPassword = "Пароль не совпадает";
+      }
     },
     addUser() {
       UsersApi.addUser({
@@ -133,13 +156,25 @@ export default {
         });
     },
     updateUser() {
-      UsersApi.updateUser(this.localUsers.id, {
-        last_name: this.localUsers.last_name,
-        first_name: this.localUsers.first_name,
-        middle_name: this.localUsers.middle_name,
-        login: this.localUsers.login,
-        password: this.localUsers.password,
-      })
+      this.users = {};
+      if (this.resetPassword) {
+        this.users = {
+          last_name: this.localUsers.last_name,
+          first_name: this.localUsers.first_name,
+          middle_name: this.localUsers.middle_name,
+          login: this.localUsers.login,
+          password: this.localUsers.password,
+        };
+      } else {
+        this.users = {
+          last_name: this.localUsers.last_name,
+          first_name: this.localUsers.first_name,
+          middle_name: this.localUsers.middle_name,
+          login: this.localUsers.login,
+        };
+      }
+
+      UsersApi.updateUser(this.localUsers.id, this.users, this.resetPassword)
         .then(() => {
           this.errors = [];
           this.$emit("save");

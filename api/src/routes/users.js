@@ -4,9 +4,12 @@ const {
   getUsers,
   addUser,
   updateUser,
-  deleteUser,
+  deletedUser,
 } = require('../controllers/users/db_users')
-const UsersSchema = require('../controllers/users/dto/validationUsers')
+const {
+  UsersSchema,
+  AlternativeUsersSchema,
+} = require('../controllers/users/dto/validationUsers')
 
 router.get('/users', async (req, res) => {
   try {
@@ -47,10 +50,15 @@ router.post('/users', async (req, res) => {
 
 router.put('/users/:id', async (req, res) => {
   try {
-    const { error, value } = UsersSchema.validate(req.body, {
+    const isResetPassword = req.query.isResetPassword
+    let validationSchema = UsersSchema
+    if (isResetPassword == 'false') {
+      validationSchema = AlternativeUsersSchema
+    }
+
+    const { error, value } = validationSchema.validate(req.body, {
       abortEarly: false,
     })
-
     if (error) {
       const errorMessages = error.details.reduce((acc, detail) => {
         acc[detail.path[0]] = detail.message
@@ -61,6 +69,7 @@ router.put('/users/:id', async (req, res) => {
 
     const { id } = req.params
     const { last_name, first_name, middle_name, login, password } = value
+
     const updatedUser = await updateUser(
       id,
       last_name,
@@ -68,6 +77,7 @@ router.put('/users/:id', async (req, res) => {
       middle_name,
       login,
       password,
+      isResetPassword,
     )
     res.status(201).json(updatedUser)
   } catch (err) {
@@ -80,7 +90,7 @@ router.delete('/users/:id', async (req, res) => {
   const { id } = req.params
 
   try {
-    const deltedUser = await deleteUser(id)
+    const deltedUser = await deletedUser(id)
     res.status(201).json(deltedUser)
   } catch (err) {
     console.error('Error deleting user:', err)
