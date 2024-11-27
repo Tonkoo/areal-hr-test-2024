@@ -22,7 +22,7 @@
           <v-btn color="blue" @click="openEditDialog(item)" small
             >Изменить</v-btn
           >
-          <v-btn color="blue" @click="openEditDialog(item)" small
+          <v-btn color="blue" @click="openUpdateRoleDialog(item)" small
             >Повысить роль</v-btn
           >
           <v-btn color="blue" @click="openResetPasswordDialog(item)" small
@@ -67,6 +67,9 @@ export default {
     },
     openResetPasswordDialog(item) {
       this.$emit("reset", item);
+    },
+    openUpdateRoleDialog(item) {
+      this.$emit("updateRole", item);
     },
   },
 };

@@ -101,9 +101,25 @@ async function deletedUser(id) {
   }
 }
 
+async function updateRole(id) {
+  const connection = await pool.connect()
+  try {
+    const result = await connection.query(
+      'update users set role_id = 1 where id = $1 RETURNING *',
+      [id],
+    )
+    return result.rows[0]
+  } catch (err) {
+    console.error('Error updating user:', err)
+  } finally {
+    connection.release()
+  }
+}
+
 module.exports = {
   getUsers,
   addUser,
   updateUser,
   deletedUser,
+  updateRole,
 }

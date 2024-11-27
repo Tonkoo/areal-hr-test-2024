@@ -131,9 +131,13 @@ export default {
           this.addUser();
         else this.errors.checkPassword = "Пароль не совпадает";
       } else {
-        if (this.localUsers.password == this.localUsers.checkPassword)
+        if (this.resetPassword == true) {
+          if (this.localUsers.password == this.localUsers.checkPassword)
+            this.updateUser();
+          else this.errors.checkPassword = "Пароль не совпадает";
+        } else {
           this.updateUser();
-        else this.errors.checkPassword = "Пароль не совпадает";
+        }
       }
     },
     addUser() {

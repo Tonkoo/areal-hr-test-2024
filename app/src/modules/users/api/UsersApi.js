@@ -33,7 +33,7 @@ export default {
         if (err.response && err.response.status === 400) {
           throw err.response.data.errors;
         }
-        console.error("Error updating position:", err);
+        console.error("Error updating user:", err);
         throw err;
       });
   },
@@ -43,6 +43,15 @@ export default {
       .then(() => id)
       .catch((err) => {
         console.error("Error deleting user:", err);
+        throw err;
+      });
+  },
+  updateRoleUser(id) {
+    return api
+      .put(`/users/role/${id}`)
+      .then(() => id)
+      .catch((err) => {
+        console.error("Error updating user:", err);
         throw err;
       });
   },

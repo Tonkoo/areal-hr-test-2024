@@ -33,9 +33,17 @@
       @delete="refreshUsers"
     />
 
+    <UsersUpdateRoleDialog
+      :updateRoleDialog="updateRoleDialog"
+      :TableUsers="TableUsers"
+      @update:updateRoleDialog="updateRoleDialog = $event"
+      @save="refreshUsers"
+    />
+
     <UsersTable
       ref="UsersTable"
       @edit="openEditDialog"
+      @updateRole="openUpdateRoleDialog"
       @delete="openDeleteDialog"
       @reset="openResetPasswordDialog"
     />
@@ -46,12 +54,14 @@
 import UsersTable from "@/modules/users/components/UsersTable.vue";
 import UsersForm from "@/modules/users/components/UsersForm.vue";
 import UsersDeleteDialog from "@/modules/users/components/UsersDeleteDialog.vue";
+import UsersUpdateRoleDialog from "@/modules/users/components/UsersUpdateRoleDialog.vue";
 
 export default {
   components: {
     UsersTable,
     UsersForm,
     UsersDeleteDialog,
+    UsersUpdateRoleDialog,
   },
   data() {
     return {
@@ -59,6 +69,7 @@ export default {
       isAddMode: false,
       isEditMode: false,
       deleteDialog: false,
+      updateRoleDialog: false,
       resetPassword: false,
       TableUsers: {
         id: null,
@@ -99,6 +110,10 @@ export default {
       this.isEditMode = false;
       this.resetPassword = true;
       this.dialog = true;
+    },
+    openUpdateRoleDialog(item) {
+      this.TableUsers = item;
+      this.updateRoleDialog = true;
     },
   },
 };

@@ -5,6 +5,7 @@ const {
   addUser,
   updateUser,
   deletedUser,
+  updateRole,
 } = require('../controllers/users/db_users')
 const {
   UsersSchema,
@@ -97,4 +98,16 @@ router.delete('/users/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+router.put('/users/role/:id', async (req, res) => {
+  const { id } = req.params
+  try {
+    const updateRoleUser = await updateRole(id)
+    res.status(201).json(updateRoleUser)
+  } catch (err) {
+    console.error('Error update role user:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 module.exports = router
