@@ -1,16 +1,16 @@
 <script>
-import Sidebar from "../src/shared/components/Sidebar.vue";
+import SideBar from "../src/shared/components/SideBar.vue";
 
 export default {
   components: {
-    Sidebar,
+    SideBar,
   },
 };
 </script>
 
 <template>
   <v-app>
-    <Sidebar />
+    <SideBar />
     <v-main>
       <router-view></router-view>
     </v-main>

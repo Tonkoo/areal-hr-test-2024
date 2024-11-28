@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import AuthorizationPage from "../pages/AuthorizationPage.vue";
 import Home from "../pages/HomePage.vue";
 import Organizations from "../pages/OrganizationsPage.vue";
 import Departments from "../pages/DepartmentsPage.vue";
@@ -7,6 +8,7 @@ import Employees from "../pages/EmployeesPage.vue";
 import Users from "../pages/UsersPage.vue";
 
 const routes = [
+  { path: "/", component: AuthorizationPage },
   { path: "/", component: Home },
   { path: "/organizations", component: Organizations },
   { path: "/departments", component: Departments },
