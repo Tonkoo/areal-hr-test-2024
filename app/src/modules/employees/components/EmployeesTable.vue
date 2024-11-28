@@ -89,4 +89,8 @@ export default {
   margin: 5px;
   width: 130px;
 }
+td,
+th {
+  width: 60px;
+}
 </style>

@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getRegions } = require('../controllers/db_regions')
+const { getRegions } = require('../controllers/regions/db_regions')
 
 router.get('/regions', async (req, res) => {
   try {
