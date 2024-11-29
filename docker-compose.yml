@@ -1,8 +1,9 @@
 version: '3.8'
+#Todo переменные нужно подхватывать из env файлов
 
 services:
   db:
-    image: postgres:15  
+    image: postgres:15
     container_name: postgres_container
     environment:
       - POSTGRES_USER=postgres

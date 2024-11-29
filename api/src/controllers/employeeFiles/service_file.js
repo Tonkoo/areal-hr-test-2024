@@ -4,6 +4,7 @@ const path = require('path')
 const storagePath = '../files/'
 
 async function saveFile(file, fileName) {
+  //Todo добавить проверу на существование папки files и создание если ее нет
   const filePath = path.join(
     storagePath,
     fileName + path.extname(file.originalname),
