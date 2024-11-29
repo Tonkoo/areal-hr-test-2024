@@ -9,7 +9,7 @@ import Users from "../pages/UsersPage.vue";
 
 const routes = [
   { path: "/", component: AuthorizationPage },
-  { path: "/", component: Home },
+  { path: "/home", component: Home },
   { path: "/organizations", component: Organizations },
   { path: "/departments", component: Departments },
   { path: "/positions", component: Positions },

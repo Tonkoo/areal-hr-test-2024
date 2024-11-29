@@ -9,29 +9,44 @@
           max-width="448"
           rounded="lg"
         >
-          <div class="text-subtitle-1 text-medium-emphasis">Account</div>
-          <v-text-field
-            density="compact"
-            placeholder="Login"
-            prepend-inner-icon="mdi-account-outline"
-            variant="outlined"
-          />
-          <div
-            class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
-          >
-            Password
-          </div>
+          <v-card-text>
+            <v-form ref="form">
+              <div class="text-subtitle-1 text-medium-emphasis">Account</div>
+              <v-text-field
+                v-model="localUser.login"
+                density="compact"
+                placeholder="Login"
+                prepend-inner-icon="mdi-account-outline"
+                variant="outlined"
+                autocomplete="username"
+              />
+              <div
+                class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
+              >
+                Password
+              </div>
 
-          <v-text-field
-            :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
-            :type="visible ? 'text' : 'password'"
-            density="compact"
-            placeholder="Enter your password"
-            prepend-inner-icon="mdi-lock-outline"
-            variant="outlined"
-            @click:append-inner="visible = !visible"
-          />
-          <v-btn class="mb-8" color="blue" size="large" variant="tonal" block
+              <v-text-field
+                v-model="localUser.password"
+                :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+                :type="visible ? 'text' : 'password'"
+                density="compact"
+                placeholder="Enter your password"
+                prepend-inner-icon="mdi-lock-outline"
+                variant="outlined"
+                autocomplete="current-password"
+                @click:append-inner="visible = !visible"
+              />
+            </v-form>
+          </v-card-text>
+
+          <v-btn
+            class="mb-8"
+            color="blue"
+            size="large"
+            variant="tonal"
+            block
+            @click="logIn"
             >Log In</v-btn
           >
         </v-card>
@@ -42,9 +57,28 @@
 
 <script>
 import logoImage from "../assets/images/LogoAuthorization.svg";
+import authorizationApi from "@/modules/authorization/api/authorization-api";
+
 export default {
   data() {
-    return { visible: false, logoImage };
+    return {
+      visible: false,
+      logoImage,
+      localUser: { login: "", password: "" },
+      error: {},
+    };
+  },
+  methods: {
+    logIn() {
+      authorizationApi
+        .logIn({ ...this.localUser })
+        .then(() => {
+          console.log("Победа");
+        })
+        .catch((err) => {
+          console.log("Error", err);
+        });
+    },
   },
 };
 </script>
