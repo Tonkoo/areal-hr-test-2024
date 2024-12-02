@@ -9,6 +9,7 @@ export default {
       })
       .catch((err) => {
         console.error("Ошибка авторизации:", err);
+        throw err;
       });
   },
 };

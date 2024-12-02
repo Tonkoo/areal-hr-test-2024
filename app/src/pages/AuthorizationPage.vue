@@ -9,6 +9,9 @@
           max-width="448"
           rounded="lg"
         >
+          <v-card-text v-if="error.message" class="error-message red--text">
+            {{ error.message }}
+          </v-card-text>
           <v-card-text>
             <v-form ref="form">
               <div class="text-subtitle-1 text-medium-emphasis">Account</div>
@@ -19,6 +22,7 @@
                 prepend-inner-icon="mdi-account-outline"
                 variant="outlined"
                 autocomplete="username"
+                :error-messages="error.login"
               />
               <div
                 class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between"
@@ -36,6 +40,7 @@
                 variant="outlined"
                 autocomplete="current-password"
                 @click:append-inner="visible = !visible"
+                :error-messages="error.password"
               />
             </v-form>
           </v-card-text>
@@ -70,17 +75,36 @@ export default {
   },
   methods: {
     logIn() {
-      authorizationApi
-        .logIn({ ...this.localUser })
-        .then(() => {
-          console.log("Победа");
-        })
-        .catch((err) => {
-          console.log("Error", err);
-        });
+      this.error = {};
+      if (!this.localUser.login || !this.localUser.password) {
+        if (!this.localUser.login)
+          this.error.login = "Поле 'Логин' обязательно";
+        if (!this.localUser.password)
+          this.error.password = "Поле 'Пароль' обязательно";
+      } else {
+        authorizationApi
+          .logIn({ ...this.localUser })
+          .then(() => {
+            this.error = {};
+          })
+          .catch((err) => {
+            console.log(this.localUser);
+
+            console.log("Error", err);
+            this.error = { message: err.response.data.message };
+          });
+      }
     },
   },
 };
 </script>
 
-<style></style>
+<style>
+.error-message {
+  background-color: rgba(255, 91, 91, 0.3);
+  color: red;
+  border-radius: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+</style>

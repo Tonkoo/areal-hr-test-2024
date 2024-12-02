@@ -12,12 +12,17 @@ passport.use(
     async (login, password, done) => {
       try {
         const user = await getUserByLogin(login)
+
         if (!user)
-          return done(null, false, { message: 'Неверный логин или пароль' })
+          return done(null, false, {
+            message: 'ОШИБКА: Неверный логин или пароль',
+          })
 
         const isValidPassword = await argon2.verify(user.password, password)
         if (!isValidPassword)
-          return done(null, false, { message: 'Неверный логин или пароль' })
+          return done(null, false, {
+            message: 'ОШИБКА: Неверный логин или пароль',
+          })
 
         return done(null, {
           id: user.id,
