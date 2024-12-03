@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAuthStore } from "@/stores/useAuthStore";
 import AuthorizationPage from "../pages/AuthorizationPage.vue";
 import Home from "../pages/HomePage.vue";
 import Organizations from "../pages/OrganizationsPage.vue";
@@ -20,6 +21,18 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+
+  if (!authStore.isAuthenticated && to.path !== "/") {
+    next("/");
+  } else if (authStore.isAuthenticated && to.path === "/") {
+    next("/home");
+  } else {
+    next();
+  }
 });
 
 export default router;

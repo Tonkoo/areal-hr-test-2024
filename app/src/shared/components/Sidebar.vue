@@ -4,7 +4,7 @@ export default {
     return {
       drawer: true,
       menuItems: [
-        { id: 1, name: "Главная", route: "/" },
+        { id: 1, name: "Главная", route: "/home" },
         { id: 2, name: "Организации", route: "/organizations" },
         { id: 3, name: "Отделы", route: "/departments" },
         { id: 4, name: "Должности", route: "/positions" },
