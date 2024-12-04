@@ -5,11 +5,11 @@
     style="height: 100vh; padding: 0"
   >
     <v-toolbar flat>
-      <v-toolbar-title>Организации</v-toolbar-title>
+      <v-toolbar-title>Должности</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
         color="deep-purple accent-4"
-        @click="openAddDialog"
+        @click="openAddDialog()"
         elevation="10"
         class="white--text"
       >
@@ -17,23 +17,23 @@
       </v-btn>
     </v-toolbar>
 
-    <OrganizationForm
+    <PositionForm
       :dialog="dialog"
       :isEditMode="isEditMode"
-      :organization="TableOrganization"
+      :TablePosition="TablePosition"
       @update:dialog="dialog = $event"
-      @save="refreshOrganizations"
+      @save="refreshPosition"
     />
 
-    <OrganizationDeleteDialog
+    <PositionDeleteDialog
       :deleteDialog="deleteDialog"
-      :deleteOrganizationId="deleteOrganizationId"
+      :deletePositionId="deletePositionId"
       @update:deleteDialog="deleteDialog = $event"
-      @delete="refreshOrganizations"
+      @delete="refreshPosition"
     />
 
-    <OrganizationTable
-      ref="organizationTable"
+    <PositionTable
+      ref="PositionTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
     />
@@ -41,53 +41,52 @@
 </template>
 
 <script>
-import OrganizationForm from "@/modules/organizations/components/OrganizationForm.vue";
-import OrganizationDeleteDialog from "@/modules/organizations/components/OrganizationDeleteDialog.vue";
-import OrganizationTable from "@/modules/organizations/components/OrganizationTable.vue";
+import PositionForm from "@/modules/positions/components/position-form.vue";
+import PositionDeleteDialog from "@/modules/positions/components/position-delete-dialog.vue";
+import PositionTable from "@/modules/positions/components/position-table.vue";
 
 export default {
   components: {
-    OrganizationForm,
-    OrganizationDeleteDialog,
-    OrganizationTable,
+    PositionForm,
+    PositionDeleteDialog,
+    PositionTable,
   },
   data() {
     return {
       dialog: false,
       isEditMode: false,
       deleteDialog: false,
-      deleteOrganizationId: 0,
-      TableOrganization: {
+      deletePositionId: 0,
+      TablePosition: {
         id: null,
-        name: "",
-        comment: "",
+        position_name: "",
+        department_id: null,
       },
-      organizations: [],
     };
   },
   methods: {
-    refreshOrganizations() {
-      this.$refs.organizationTable.fetchOrganizations();
+    refreshPosition() {
+      this.$refs.PositionTable.fetchPosition();
     },
     openAddDialog() {
+      this.TablePosition = [];
       this.isEditMode = false;
-      this.TableOrganization = [];
       this.dialog = true;
     },
     openEditDialog(item) {
       this.isEditMode = true;
-      this.TableOrganization = { ...item };
+      this.TablePosition = { ...item };
       this.dialog = true;
     },
     openDeleteDialog(id) {
-      this.deleteOrganizationId = id;
+      this.deletePositionId = id;
       this.deleteDialog = true;
     },
   },
 };
 </script>
 
-<style scoped>
+<style>
 .v-btn {
   margin-right: 8px;
 }

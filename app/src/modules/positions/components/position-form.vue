@@ -38,8 +38,8 @@
 </template>
 
 <script>
-import PositionApi from "../api/PositionApi";
-import DepartmentApi from "@/modules/departments/api/DepartmentApi";
+import PositionApi from "../api/position-api";
+import DepartmentApi from "@/modules/departments/api/department-api";
 export default {
   props: {
     dialog: {
@@ -94,7 +94,6 @@ export default {
       else this.addPosition();
     },
     addPosition() {
-      console.log(this.localPosition);
       PositionApi.addPosition({
         name: this.localPosition.position_name,
         department_id: this.localPosition.department_id,

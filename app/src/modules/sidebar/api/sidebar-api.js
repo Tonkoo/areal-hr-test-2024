@@ -1,5 +1,5 @@
 import api from "../../../shared/api/axios";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { useAuthStore } from "@/stores/use-auth-store";
 import router from "@/router/router";
 
 export default {

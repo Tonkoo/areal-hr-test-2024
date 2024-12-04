@@ -1,6 +1,6 @@
 import api from "@/shared/api/axios";
 import router from "@/router/router";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { useAuthStore } from "@/stores/use-auth-store";
 
 export default {
   logIn(user) {

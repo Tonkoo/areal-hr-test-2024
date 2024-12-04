@@ -6,25 +6,24 @@
   >
     <v-card>
       <v-card-title class="headline">Подтверждение удаления</v-card-title>
-      <v-card-text>Вы точно хотите удалить данный отдел?</v-card-text>
+      <v-card-text>Вы точно хотите удалить данную организацию?</v-card-text>
       <v-card-actions>
         <v-btn color="blue" text @click="closeDialog">Отмена</v-btn>
-        <v-btn color="red" text @click="deleteDepartment">Удалить</v-btn>
+        <v-btn color="red" text @click="deleteOrganization">Удалить</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import DepartmentApi from "../api/DepartmentApi";
-
+import OrganizationsApi from "../api/organizations-api";
 export default {
   props: {
     deleteDialog: {
       type: Boolean,
       required: true,
     },
-    deleteDepartmentId: {
+    deleteOrganizationId: {
       type: Number,
       required: true,
     },
@@ -32,27 +31,27 @@ export default {
   emits: ["update:deleteDialog", "delete"],
   data() {
     return {
-      localDeleteDepartmentId: this.deleteDepartmentId,
+      localdeleteOrganizationId: this.deleteOrganizationId,
     };
   },
   watch: {
-    deleteDepartmentId(newId) {
-      this.localDeleteDepartmentId = newId;
+    deleteOrganizationId(newId) {
+      this.localdeleteOrganizationId = newId;
     },
   },
   methods: {
     closeDialog() {
       this.$emit("update:deleteDialog", false);
     },
-    deleteDepartment() {
-      DepartmentApi.deleteDepartment(this.localDeleteDepartmentId)
+    deleteOrganization() {
+      OrganizationsApi.deleteOrganization(this.localdeleteOrganizationId)
         .then(() => {
           this.$emit("delete");
           this.closeDialog();
-          this.localDeleteDepartmentId = null;
+          this.localdeleteOrganizationId = null;
         })
-        .catch((error) => {
-          console.error("Error deleting department:", error);
+        .catch((err) => {
+          console.error("Error deleting organization:", err);
         });
     },
   },

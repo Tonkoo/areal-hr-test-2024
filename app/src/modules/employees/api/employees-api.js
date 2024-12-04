@@ -72,7 +72,6 @@ export default {
       });
   },
   uploadEmployeeFile(Employee, file) {
-    console.log(Employee);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("last_name", Employee.last_name);

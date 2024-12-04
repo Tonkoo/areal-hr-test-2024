@@ -52,9 +52,9 @@
 </template>
 
 <script>
-import DepartmentForm from "@/modules/departments/components/DepartmentForm.vue";
-import DepartmentDeleteDialog from "@/modules/departments/components/DepartmentDeleteDialog.vue";
-import DepartmentTable from "@/modules/departments/components/DepartmentTable.vue";
+import DepartmentForm from "@/modules/departments/components/department-form.vue";
+import DepartmentDeleteDialog from "@/modules/departments/components/department-delete-dialog.vue";
+import DepartmentTable from "@/modules/departments/components/department-table.vue";
 
 export default {
   components: {

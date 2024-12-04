@@ -2,13 +2,13 @@ const express = require('express')
 const router = express.Router()
 const {
   organizationSchema,
-} = require('../controllers/organizations/dto/validationOrganizations')
+} = require('../controllers/organizations/dto/validation-organizations')
 const {
   getOrganizations,
   addOrganization,
   updateOrganization,
   deleteOrganization,
-} = require('../controllers/organizations/db_organizations')
+} = require('../controllers/organizations/db-organizations')
 
 router.get('/organizations', async (req, res) => {
   try {

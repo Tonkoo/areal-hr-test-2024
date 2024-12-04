@@ -9,6 +9,12 @@ async function saveFile(file, fileName) {
     fileName + path.extname(file.originalname),
   )
 
+  try {
+    await fs.access(storagePath)
+  } catch {
+    await fs.mkdir(storagePath, { recursive: true })
+  }
+
   await fs.writeFile(filePath, file.buffer)
   return filePath
 }

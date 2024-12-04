@@ -1,6 +1,6 @@
 <script>
-import SideBarApi from "../../modules/sidebar/api/SideBarApi";
-import sideBarDialogLogOut from "@/modules/sidebar/components/sideBarDialogLogOut.vue";
+import SideBarApi from "../../modules/sidebar/api/sidebar-api";
+import sideBarDialogLogOut from "@/modules/sidebar/components/sidebar-dialog-log-out.vue";
 
 export default {
   components: {

@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import DepartmentApi from "../api/DepartmentApi";
+import DepartmentApi from "../api/department-api";
 
 export default {
   data() {

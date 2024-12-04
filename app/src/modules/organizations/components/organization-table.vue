@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import OrganizationsApi from "../api/OrganizationsApi";
+import OrganizationsApi from "../api/organizations-api";
 export default {
   data() {
     return {

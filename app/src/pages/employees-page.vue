@@ -55,11 +55,11 @@
 </template>
 
 <script>
-import EmployeesForm from "@/modules/employees/components/employeesForm.vue";
-import EmployeesDetailsDialog from "@/modules/employees/components/EmployeesDetailsDialog.vue";
-import EmployeesDismissDialog from "@/modules/employees/components/EmployeesDismissDialog.vue";
-import EmployeesFilesDialog from "@/modules/employees/components/EmployeesFilesDialog.vue";
-import EmployeesTable from "@/modules/employees/components/EmployeesTable.vue";
+import EmployeesForm from "@/modules/employees/components/employees-form.vue";
+import EmployeesDetailsDialog from "@/modules/employees/components/employees-details-dialog.vue";
+import EmployeesDismissDialog from "@/modules/employees/components/employees-dismiss-dialog.vue";
+import EmployeesFilesDialog from "@/modules/employees/components/employees-files-dialog.vue";
+import EmployeesTable from "@/modules/employees/components/employees-table.vue";
 
 export default {
   components: {
@@ -128,7 +128,6 @@ export default {
         position_id: item.position_id,
         salary: parseFloat(item.salary.replace(/[$,]/g, "")),
       };
-      console.log(this.TableEmployees);
       this.dialog = true;
     },
     openDetailsDialog(item) {

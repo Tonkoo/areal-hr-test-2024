@@ -17,7 +17,6 @@ export default {
       });
   },
   addPosition(position) {
-    console.log(position);
     return api
       .post("/positions", position)
       .then((response) => response.data)

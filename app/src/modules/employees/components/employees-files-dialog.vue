@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import EmployeesApi from "../api/EmployeesApi";
+import EmployeesApi from "../api/employees-api";
 
 export default {
   props: {
@@ -85,9 +85,7 @@ export default {
         .then((data) => {
           this.employeeFiles = data;
         })
-        .catch((error) =>
-          console.error("Error fetching employee files:", error)
-        );
+        .catch((err) => console.error("Error fetching employee files:", err));
     },
     uploadFile() {
       EmployeesApi.uploadEmployeeFile(this.TableEmployees, this.newFile)
@@ -95,14 +93,14 @@ export default {
           this.fetchEmployeeFiles();
           this.newFile = null;
         })
-        .catch((error) => console.error("Error uploading file:", error));
+        .catch((err) => console.error("Error uploading file:", err));
     },
     deleteFile(file) {
       EmployeesApi.deleteEmployeeFile(file.file_id, file.filepath)
         .then(() => {
           this.fetchEmployeeFiles();
         })
-        .catch((error) => console.error("Error deleting file:", error));
+        .catch((err) => console.error("Error deleting file:", err));
     },
   },
 };

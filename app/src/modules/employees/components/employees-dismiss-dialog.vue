@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import EmployeesApi from "../api/EmployeesApi";
+import EmployeesApi from "../api/employees-api";
 export default {
   props: {
     dismissDialog: {

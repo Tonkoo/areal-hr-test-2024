@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import SideBarApi from "../api/SideBarApi";
+import SideBarApi from "../api/sidebar-api";
 
 export default {
   props: {

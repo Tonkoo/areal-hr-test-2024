@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAuthStore } from "@/stores/useAuthStore";
-import AuthorizationPage from "../pages/AuthorizationPage.vue";
-import Home from "../pages/HomePage.vue";
-import Organizations from "../pages/OrganizationsPage.vue";
-import Departments from "../pages/DepartmentsPage.vue";
-import Positions from "../pages/PositionsPage.vue";
-import Employees from "../pages/EmployeesPage.vue";
-import Users from "../pages/UsersPage.vue";
+import { useAuthStore } from "@/stores/use-auth-store";
+import AuthorizationPage from "../pages/authorization-page.vue";
+import Home from "../pages/home-page.vue";
+import Organizations from "../pages/organizations-page.vue";
+import Departments from "../pages/departments-page.vue";
+import Positions from "../pages/positions-page.vue";
+import Employees from "../pages/employees-page.vue";
+import Users from "../pages/users-page.vue";
 
 const routes = [
   { path: "/", component: AuthorizationPage },

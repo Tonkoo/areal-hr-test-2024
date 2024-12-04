@@ -51,10 +51,10 @@
 </template>
 
 <script>
-import UsersTable from "@/modules/users/components/UsersTable.vue";
-import UsersForm from "@/modules/users/components/UsersForm.vue";
-import UsersDeleteDialog from "@/modules/users/components/UsersDeleteDialog.vue";
-import UsersUpdateRoleDialog from "@/modules/users/components/UsersUpdateRoleDialog.vue";
+import UsersTable from "@/modules/users/components/users-table.vue";
+import UsersForm from "@/modules/users/components/users-form.vue";
+import UsersDeleteDialog from "@/modules/users/components/users-delete-dialog.vue";
+import UsersUpdateRoleDialog from "@/modules/users/components/users-update-role-dialog.vue";
 
 export default {
   components: {

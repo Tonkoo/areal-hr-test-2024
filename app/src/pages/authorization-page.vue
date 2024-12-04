@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import logoImage from "../assets/images/LogoAuthorization.svg";
+import logoImage from "../assets/images/logo-authorization.svg";
 import authorizationApi from "@/modules/authorization/api/authorization-api";
 
 export default {

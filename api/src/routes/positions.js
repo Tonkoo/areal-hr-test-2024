@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const positionSchema = require('../controllers/positions/dto/validationPositions')
+const positionSchema = require('../controllers/positions/dto/validation-positions')
 const {
   getPositions,
   addPosition,
   updatePosition,
   deletePosition,
-} = require('../controllers/positions/db_positions')
+} = require('../controllers/positions/db-positions')
 
 router.get('/positions', async (req, res) => {
   try {

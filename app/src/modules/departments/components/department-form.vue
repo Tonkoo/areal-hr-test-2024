@@ -54,8 +54,8 @@
 </template>
 
 <script>
-import DepartmentApi from "../api/DepartmentApi";
-import OrganizationsApi from "@/modules/organizations/api/OrganizationsApi";
+import DepartmentApi from "../api/department-api";
+import OrganizationsApi from "@/modules/organizations/api/organizations-api";
 export default {
   props: {
     dialog: {

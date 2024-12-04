@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import OrganizationsApi from "@/modules/organizations/api/OrganizationsApi";
+import OrganizationsApi from "@/modules/organizations/api/organizations-api";
 
 export default {
   props: {
@@ -80,8 +80,6 @@ export default {
       }
     },
     addOrganization() {
-      console.log(this.localOrganization);
-
       OrganizationsApi.addOrganization({
         name: this.localOrganization.name,
         comment: this.localOrganization.comment,

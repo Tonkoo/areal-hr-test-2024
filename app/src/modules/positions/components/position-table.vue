@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import PositionApi from "../api/PositionApi";
+import PositionApi from "../api/position-api";
 export default {
   data() {
     return {

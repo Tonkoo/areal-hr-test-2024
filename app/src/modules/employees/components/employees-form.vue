@@ -139,9 +139,9 @@
 </template>
 
 <script>
-import EmployeesApi from "../api/EmployeesApi";
-import DepartmentApi from "@/modules/departments/api/DepartmentApi";
-import PositionApi from "@/modules/positions/api/PositionApi";
+import EmployeesApi from "../api/employees-api";
+import DepartmentApi from "@/modules/departments/api/department-api";
+import PositionApi from "@/modules/positions/api/position-api";
 import { format } from "date-fns";
 export default {
   props: {
@@ -250,7 +250,6 @@ export default {
     },
     addEmployees() {
       const employeeData = { ...this.LocalEmployees };
-      console.log(employeeData);
       EmployeesApi.addEmployee(employeeData)
         .then(() => {
           this.isErrorsDate = false;

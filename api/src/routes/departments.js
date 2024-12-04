@@ -5,8 +5,8 @@ const {
   addDepartment,
   updateDepartment,
   deleteDepartment,
-} = require('../controllers/departments/db_departments')
-const departmentSchema = require('../controllers/departments/dto/validationdDepartments')
+} = require('../controllers/departments/db-departments')
+const departmentSchema = require('../controllers/departments/dto/validationd-departments')
 
 router.get('/departments', async (req, res) => {
   try {

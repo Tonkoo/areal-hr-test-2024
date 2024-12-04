@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getCity } = require('../controllers/citys/db_city')
+const { getCity } = require('../controllers/citys/db-city')
 
 router.get('/citys', async (req, res) => {
   try {

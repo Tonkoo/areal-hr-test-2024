@@ -1,31 +1,29 @@
 <template>
   <v-dialog
-    :model-value="updateRoleDialog"
-    @update:model-value="$emit('update:updateRoleDialog', $event)"
+    :model-value="deleteDialog"
+    @update:model-value="$emit('update:deleteDialog', $event)"
     max-width="500px"
   >
     <v-card>
-      <v-card-title class="headline">Уволить сотрудника</v-card-title>
+      <v-card-title class="headline">Удалить сотрудника</v-card-title>
       <v-card-text>
-        Вы уверены, что хотите выдать права пользователю
+        Вы уверены, что хотите удалить аккаунт пользователя
         {{ LocalUser.last_name }} {{ LocalUser.first_name }}?
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" text @click="closeDialog">Отмена</v-btn>
-        <v-btn color="blue darken-1" text @click="updateRole"
-          >Выдать права</v-btn
-        >
+        <v-btn color="red darken-1" text @click="deleteUser">Удалить</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
-import UsersApi from "../api/UsersApi";
+import UsersApi from "../api/users-api";
 export default {
   props: {
-    updateRoleDialog: {
+    deleteDialog: {
       type: Boolean,
       required: true,
     },
@@ -47,16 +45,16 @@ export default {
       deep: true,
     },
   },
-  emits: ["update:updateRoleDialog", "save"],
+  emits: ["update:deleteDialog", "delete"],
   methods: {
     closeDialog() {
-      this.$emit("update:updateRoleDialog", false);
+      this.$emit("update:deleteDialog", false);
     },
-    updateRole() {
-      UsersApi.updateRoleUser(this.LocalUser.id)
+    deleteUser() {
+      UsersApi.deleteUser(this.LocalUser.id)
         .then(() => {
           this.closeDialog();
-          this.$emit("save");
+          this.$emit("delete");
         })
         .catch((err) => console.error(err));
     },

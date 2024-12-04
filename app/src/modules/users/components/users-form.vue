@@ -35,6 +35,7 @@
             label="Логин"
             :error-messages="errors.login"
             required
+            autocomplete="username"
           ></v-text-field>
           <v-text-field
             v-if="!isEditMode"
@@ -45,6 +46,7 @@
             :error-messages="errors.password"
             @click:append="show1 = !show1"
             required
+            autocomplete="new-password"
           ></v-text-field>
           <v-text-field
             v-if="!isEditMode"
@@ -55,6 +57,7 @@
             :error-messages="errors.checkPassword"
             @click:append="show2 = !show2"
             required
+            autocomplete="new-password"
           ></v-text-field>
         </v-card-text>
       </v-form>
@@ -68,7 +71,7 @@
   </v-dialog>
 </template>
 <script>
-import UsersApi from "../api/UsersApi";
+import UsersApi from "../api/users-api";
 export default {
   props: {
     dialog: {

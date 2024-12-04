@@ -15,6 +15,7 @@
         <th>Дом</th>
         <th>Корпус</th>
         <th>Квартира</th>
+        <th>Статус</th>
         <th>Действие</th>
       </tr>
     </thead>
@@ -33,15 +34,30 @@
         <td>{{ item.house }}</td>
         <td>{{ item.building }}</td>
         <td>{{ item.apartment }}</td>
+        <td>{{ item.fired ? "Уволен" : "Работает" }}</td>
         <td>
           <v-btn color="blue" @click="openDetailsDialog(item)" small
             >Подробнее</v-btn
           >
-          <v-btn color="blue" @click="openFilesDialog(item)" small>Файлы</v-btn>
-          <v-btn color="blue" @click="openEditDialog(item)" small
+          <v-btn
+            color="blue"
+            @click="openFilesDialog(item)"
+            small
+            :disabled="item.fired === true"
+            >Файлы</v-btn
+          >
+          <v-btn
+            color="blue"
+            @click="openEditDialog(item)"
+            small
+            :disabled="item.fired === true"
             >Изменить</v-btn
           >
-          <v-btn color="red" @click="openDismissDialog(item)" small
+          <v-btn
+            color="red"
+            @click="openDismissDialog(item)"
+            small
+            :disabled="item.fired === true"
             >Уволить</v-btn
           >
         </td>
@@ -51,7 +67,7 @@
 </template>
 
 <script>
-import EmployeesApi from "../api/EmployeesApi";
+import EmployeesApi from "../api/employees-api";
 export default {
   data() {
     return {

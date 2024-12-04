@@ -6,11 +6,11 @@ const {
   updateUser,
   deletedUser,
   updateRole,
-} = require('../controllers/users/db_users')
+} = require('../controllers/users/db-users')
 const {
   UsersSchema,
   AlternativeUsersSchema,
-} = require('../controllers/users/dto/validationUsers')
+} = require('../controllers/users/dto/validation-users')
 
 router.get('/users', async (req, res) => {
   try {
