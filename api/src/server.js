@@ -16,13 +16,22 @@ const cors = require('cors')
 const app = express()
 const port = process.env.PORT
 
-app.use(cors())
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  }),
+)
 app.use(express.json())
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'Lax',
+    },
   }),
 )
 app.use(passport.initialize())

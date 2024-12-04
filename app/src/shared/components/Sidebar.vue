@@ -1,4 +1,5 @@
 <script>
+import SideBarApi from "../api/sideBar/SideBarApi";
 export default {
   data() {
     return {
@@ -9,9 +10,29 @@ export default {
         { id: 3, name: "Отделы", route: "/departments" },
         { id: 4, name: "Должности", route: "/positions" },
         { id: 5, name: "Сотрудники", route: "/employees" },
-        { id: 6, name: "Пользователи", route: "/users" },
+        {
+          id: 6,
+          name: "Пользователи",
+          route: "/users",
+          roles: ["Администратор"],
+        },
       ],
     };
+  },
+  async mounted() {
+    this.checkUserRole();
+  },
+  methods: {
+    async checkUserRole() {
+      try {
+        const userRole = await SideBarApi.getUserRole();
+        this.menuItems = this.menuItems.filter(
+          (item) => !item.roles || item.roles.includes(userRole)
+        );
+      } catch (error) {
+        console.error("Ошибка при получении роли пользователя:", error);
+      }
+    },
   },
 };
 </script>

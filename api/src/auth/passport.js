@@ -23,7 +23,6 @@ passport.use(
           return done(null, false, {
             message: 'ОШИБКА: Неверный логин или пароль',
           })
-
         return done(null, {
           id: user.id,
           lastName: user.last_name,
@@ -46,7 +45,7 @@ passport.deserializeUser(async (userData, done) => {
   try {
     const user = await getUserById(userData.id)
 
-    if (!user) return done(new Error('Пользователь не найденx'))
+    if (!user) return done(new Error('Пользователь не найден'))
 
     done(null, {
       id: user.id,

@@ -13,4 +13,11 @@ router.post('/login', (req, res, next) => {
   })(req, res, next)
 })
 
+router.get('/user-role', (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.json({ roleName: req.user.roleName })
+  }
+  res.status(401).json({ message: 'Неавторизованный доступ' })
+})
+
 module.exports = router
