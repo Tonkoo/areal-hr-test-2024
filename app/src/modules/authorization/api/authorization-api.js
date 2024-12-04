@@ -6,16 +6,14 @@ export default {
   logIn(user) {
     const authStore = useAuthStore();
     return api
-      .post("/login", user, { withCredentials: true })
+      .post("/login", user)
       .then((response) => {
         console.log("Успешный вход:", response.data);
-        console.log(response.data.user.roleName);
-
         authStore.toggleAuthStatus();
         router.push("/home");
       })
       .catch((err) => {
-        console.error("Ошибка авторизации:", err);
+        console.error("Authorization error:", err);
         throw err;
       });
   },

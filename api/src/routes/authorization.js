@@ -20,4 +20,13 @@ router.get('/user-role', (req, res) => {
   res.status(401).json({ message: 'Неавторизованный доступ' })
 })
 
+router.post('/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Ошибка при выходе' })
+    }
+    res.status(200).json({ message: 'Выход выполнен успешно' })
+  })
+})
+
 module.exports = router

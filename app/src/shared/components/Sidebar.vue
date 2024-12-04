@@ -1,6 +1,11 @@
 <script>
-import SideBarApi from "../api/sideBar/SideBarApi";
+import SideBarApi from "../../modules/sidebar/api/SideBarApi";
+import sideBarDialogLogOut from "@/modules/sidebar/components/sideBarDialogLogOut.vue";
+
 export default {
+  components: {
+    sideBarDialogLogOut,
+  },
   data() {
     return {
       drawer: true,
@@ -17,6 +22,7 @@ export default {
           roles: ["Администратор"],
         },
       ],
+      logOutDialog: false,
     };
   },
   async mounted() {
@@ -24,14 +30,13 @@ export default {
   },
   methods: {
     async checkUserRole() {
-      try {
-        const userRole = await SideBarApi.getUserRole();
-        this.menuItems = this.menuItems.filter(
-          (item) => !item.roles || item.roles.includes(userRole)
-        );
-      } catch (error) {
-        console.error("Ошибка при получении роли пользователя:", error);
-      }
+      const userRole = await SideBarApi.getUserRole();
+      this.menuItems = this.menuItems.filter(
+        (item) => !item.roles || item.roles.includes(userRole)
+      );
+    },
+    logOut() {
+      this.logOutDialog = true;
     },
   },
 };
@@ -51,8 +56,16 @@ export default {
       >
         <v-list-item-title>{{ item.name }}</v-list-item-title>
       </v-list-item>
+      <v-list-item @click="logOut">
+        <v-list-item-title>Выйти из аккаунта</v-list-item-title>
+      </v-list-item>
     </v-list>
   </v-navigation-drawer>
+
+  <sideBarDialogLogOut
+    :logOutDialog="logOutDialog"
+    @update:logOutDialog="logOutDialog = $event"
+  />
 </template>
 
 <style scoped>
@@ -60,8 +73,6 @@ export default {
   background-color: #1976d2;
   color: white;
   padding: 16px;
-  display: flex;
-  align-items: center;
 }
 
 .sidebar-title {
