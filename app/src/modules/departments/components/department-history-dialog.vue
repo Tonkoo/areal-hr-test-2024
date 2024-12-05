@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in historyOrganization" :key="item.id">
+          <tr v-for="item in historyDepartment" :key="item.id">
             <td>{{ item.id }}</td>
             <td>{{ item.datetime_operations }}</td>
             <td>{{ item.full_name }}</td>
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import OrganizationsApi from "@/modules/organizations/api/organizations-api";
+import departmentApi from "../api/department-api";
 
 export default {
   props: {
@@ -43,7 +43,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    organization: {
+    department: {
       type: Object,
       required: true,
     },
@@ -51,19 +51,19 @@ export default {
   emits: ["update:historyDialog", "save"],
   data() {
     return {
-      localOrganization: { ...this.organization },
-      historyOrganization: {},
+      localDepartment: { ...this.department },
+      historyDepartment: {},
     };
   },
   watch: {
     historyDialog(newValue) {
       if (newValue) {
-        this.fetchHistoryOrganizations();
+        this.fetchHistoryDepartments();
       }
     },
-    organization: {
-      handler(newOrganization) {
-        this.localOrganization = { ...newOrganization };
+    department: {
+      handler(newDepartment) {
+        this.localDepartment = { ...newDepartment };
       },
       deep: true,
     },
@@ -72,14 +72,17 @@ export default {
     closeDialog() {
       this.$emit("update:historyDialog", false);
     },
-    fetchHistoryOrganizations() {
-      OrganizationsApi.getHistoryOrganizations(this.localOrganization.id)
+    fetchHistoryDepartments() {
+      console.log(this.localDepartment);
+
+      departmentApi
+        .getHistoryDepartments(this.localDepartment.department_id)
         .then((data) => {
-          this.historyOrganization = data;
+          this.historyDepartment = data;
         })
         .catch((err) => {
-          console.error("Error fetching history organizations:", err);
-          this.historyOrganization = [];
+          console.error("Error fetching history departments:", err);
+          this.historyDepartment = [];
         });
     },
     formatHistory(value) {

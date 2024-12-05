@@ -16,6 +16,21 @@ export default {
         throw err;
       });
   },
+  getHistoryDepartments(id) {
+    return api
+      .get(`/departments/history/${id}`)
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          return response.data;
+        } else {
+          throw new Error("Expected an array but got: " + response.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching history departments:", err);
+        throw err;
+      });
+  },
   addDepartment(department) {
     return api
       .post("/departments", department)

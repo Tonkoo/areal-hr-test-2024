@@ -42,11 +42,18 @@
       @delete="refreshDepartment"
     />
 
+    <DepartmentHistoryDialog
+      :historyDialog="historyDialog"
+      :department="TableDepartment"
+      @update:historyDialog="historyDialog = $event"
+    />
+
     <DepartmentTable
       ref="departmentTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
       @updateDepartments="handleUpdateDepartments"
+      @history="openHistoryDialog"
     />
   </v-container>
 </template>
@@ -55,17 +62,20 @@
 import DepartmentForm from "@/modules/departments/components/department-form.vue";
 import DepartmentDeleteDialog from "@/modules/departments/components/department-delete-dialog.vue";
 import DepartmentTable from "@/modules/departments/components/department-table.vue";
+import DepartmentHistoryDialog from "@/modules/departments/components/department-history-dialog.vue";
 
 export default {
   components: {
     DepartmentForm,
     DepartmentDeleteDialog,
     DepartmentTable,
+    DepartmentHistoryDialog,
   },
   data() {
     return {
       dialog: false,
       deleteDialog: false,
+      historyDialog: false,
       isSubDepartmentMode: false,
       TableDepartment: {
         id: null,
@@ -112,6 +122,12 @@ export default {
     openDeleteDialog(id) {
       this.deleteDepartmentId = id;
       this.deleteDialog = true;
+    },
+    openHistoryDialog(item) {
+      this.TableDepartment = item;
+      console.log(this.TableDepartment);
+
+      this.historyDialog = true;
     },
   },
 };
