@@ -36,7 +36,7 @@ router.post('/organizations', async (req, res) => {
 
     const { name, comment } = value
 
-    const newOrganization = await addOrganization(name, comment)
+    const newOrganization = await addOrganization(req, name, comment)
 
     res.status(201).json(newOrganization)
   } catch (err) {
@@ -62,7 +62,12 @@ router.put('/organizations/:id', async (req, res) => {
     const { id } = req.params
     const { name, comment } = value
 
-    const updatedOrganizations = await updateOrganization(id, name, comment)
+    const updatedOrganizations = await updateOrganization(
+      req,
+      id,
+      name,
+      comment,
+    )
     res.status(201).json(updatedOrganizations)
   } catch (err) {
     console.error('Error updating organization:', err)
