@@ -16,6 +16,21 @@ export default {
         throw err;
       });
   },
+  getHistoryOrganizations(id) {
+    return api
+      .get(`/organizations/history/${id}`)
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          return response.data;
+        } else {
+          throw new Error("Expected an array but got: " + response.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching history organizations:", err);
+        throw err;
+      });
+  },
   addOrganization(organization) {
     return api
       .post("/organizations", organization)

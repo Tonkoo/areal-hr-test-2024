@@ -1,9 +1,36 @@
 <template>
   <v-dialog
-    :model-value="dialog"
-    @update:model-value="$emit('update:dialog', $event)"
+    :model-value="historyDialog"
+    @update:model-value="$emit('update:historyDialog', $event)"
     max-width="1000px"
   >
+    <v-card>
+      <v-card-title class="headline">История записиы</v-card-title>
+      <v-table>
+        <thead>
+          <tr>
+            <th>Код</th>
+            <th>Дата операции</th>
+            <th>Автор</th>
+            <th>Старое значение</th>
+            <th>Новое значение</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in historyOrganization" :key="item.id">
+            <td>{{ item.id }}</td>
+            <td>{{ item.datetime_operations }}</td>
+            <td>{{ item.full_name }}</td>
+            <td v-html="formatHistory(item.old_value)"></td>
+            <td v-html="formatHistory(item.new_value)"></td>
+          </tr>
+        </tbody>
+      </v-table>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue darken-1" text @click="closeDialog">Закрыть</v-btn>
+      </v-card-actions>
+    </v-card>
   </v-dialog>
 </template>
 
@@ -12,11 +39,7 @@ import OrganizationsApi from "@/modules/organizations/api/organizations-api";
 
 export default {
   props: {
-    dialog: {
-      type: Boolean,
-      required: true,
-    },
-    isEditMode: {
+    historyDialog: {
       type: Boolean,
       required: true,
     },
@@ -25,14 +48,20 @@ export default {
       required: true,
     },
   },
-  emits: ["update:dialog", "save"],
+  emits: ["update:historyDialog", "save"],
   data() {
     return {
       localOrganization: { ...this.organization },
+      historyOrganization: {},
       errors: {},
     };
   },
   watch: {
+    historyDialog(newValue) {
+      if (newValue) {
+        this.fetchHistoryOrganizations();
+      }
+    },
     organization: {
       handler(newOrganization) {
         this.localOrganization = { ...newOrganization };
@@ -43,44 +72,22 @@ export default {
   methods: {
     closeDialog() {
       this.errors = [];
-      this.$emit("update:dialog", false);
+      this.$emit("update:historyDialog", false);
     },
-    saveOrganization() {
-      if (this.isEditMode) {
-        this.updateOrganization();
-      } else {
-        this.addOrganization();
-      }
-    },
-    addOrganization() {
-      OrganizationsApi.addOrganization({
-        name: this.localOrganization.name,
-        comment: this.localOrganization.comment,
-      })
-        .then(() => {
-          this.errors = [];
-          this.$emit("update:dialog", false);
-          this.$emit("save");
+    fetchHistoryOrganizations() {
+      OrganizationsApi.getHistoryOrganizations(this.localOrganization.id)
+        .then((data) => {
+          this.historyOrganization = data;
+          console.log(this.historyOrganization);
         })
         .catch((err) => {
-          this.errors = err;
-          console.error("Error adding organization:", err);
+          console.error("Error fetching history organizations:", err);
+          this.historyOrganization = [];
         });
     },
-    updateOrganization() {
-      OrganizationsApi.updateOrganization(this.localOrganization.id, {
-        name: this.localOrganization.name,
-        comment: this.localOrganization.comment,
-      })
-        .then(() => {
-          this.errors = [];
-          this.$emit("update:dialog", false);
-          this.$emit("save");
-        })
-        .catch((err) => {
-          this.errors = err;
-          console.error("Error updating organization:", err);
-        });
+    formatHistory(value) {
+      if (!value) return "";
+      return value.replace(/\n/g, "<br>");
     },
   },
 };

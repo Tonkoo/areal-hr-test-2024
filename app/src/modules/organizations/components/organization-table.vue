@@ -20,6 +20,9 @@
           <v-btn color="red" @click="openDeleteDialog(item.id)" small
             >Удалить</v-btn
           >
+          <v-btn color="blue" @click="openHistoryDialog(item)" small
+            >История</v-btn
+          >
         </td>
       </tr>
     </tbody>
@@ -53,6 +56,9 @@ export default {
           console.error("Error fetching organizations:", err);
           this.organizations = [];
         });
+    },
+    openHistoryDialog(item) {
+      this.$emit("history", item);
     },
   },
 };
