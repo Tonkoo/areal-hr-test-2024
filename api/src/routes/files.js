@@ -7,11 +7,11 @@ const {
   addFile,
   deleteFile,
   getNumberFilesEmployee,
-} = require('../controllers/employeeFiles/db_file')
+} = require('../controllers/employeeFiles/db-file')
 const {
   saveFile,
   deleteFileFromSystem,
-} = require('../controllers/employeeFiles/service_file')
+} = require('../controllers/employeeFiles/service-file')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })

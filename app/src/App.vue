@@ -1,16 +1,23 @@
 <script>
-import Sidebar from "../src/shared/components/Sidebar.vue";
+import SideBar from "./shared/components/sidebar.vue";
+import { useAuthStore } from "@/stores/use-auth-store";
 
 export default {
   components: {
-    Sidebar,
+    SideBar,
+  },
+  computed: {
+    isAuthenticated() {
+      const authStore = useAuthStore();
+      return authStore.isAuthenticated;
+    },
   },
 };
 </script>
 
 <template>
   <v-app>
-    <Sidebar />
+    <SideBar v-if="isAuthenticated" />
     <v-main>
       <router-view></router-view>
     </v-main>

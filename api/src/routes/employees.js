@@ -5,8 +5,8 @@ const {
   addEmployee,
   updateEmployee,
   deleteEmployee,
-} = require('../controllers/employee/db_employee')
-const employeeSchema = require('../controllers/employee/dto/validationdEmployees')
+} = require('../controllers/employee/db-employee')
+const employeeSchema = require('../controllers/employee/dto/validationd-employees')
 
 router.get('/employees', async (req, res) => {
   try {
