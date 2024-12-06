@@ -15,30 +15,80 @@ async function getFiles(employee_id) {
     connection.release()
   }
 }
-async function addFile(name, filePath, employee_id) {
+async function addFile(req, name, filePath, employee_id) {
   const connection = await pool.connect()
   try {
+    await connection.query('BEGIN')
     const result = await connection.query(
       'INSERT INTO passport_scan (name, path, employee_id) VALUES ($1, $2, $3) RETURNING id',
       [name, filePath, employee_id],
     )
+
+    const userId = req.user.id
+    const newValue = `Добавлен файл ${name}`
+
+    const currentDate = new Date()
+    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+
+    await connection.query(
+      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, new_value) 
+       VALUES ($1, $2, 4, $3, $4)`,
+      [formattedDateTime, userId, employee_id, newValue],
+    )
+
+    await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
+    await connection.query('ROLLBACK')
     console.error('Error adding file:', err)
     throw err
   } finally {
     connection.release()
   }
 }
-async function deleteFile(fileId) {
+async function deleteFile(req, fileId) {
   const connection = await pool.connect()
   try {
+    await connection.query('BEGIN')
+    const oldDataResult = await connection.query(
+      'select name, employee_id from passport_scan where id = $1',
+      [fileId],
+    )
     const result = await connection.query(
       'DELETE FROM passport_scan WHERE id = $1',
       [fileId],
     )
+
+    const userId = req.user.id
+    const newValue = `Удален файл ${oldDataResult.rows[0].name}`
+
+    const currentDate = new Date()
+    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+
+    await connection.query(
+      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, new_value) 
+       VALUES ($1, $2, 4, $3, $4)`,
+      [formattedDateTime, userId, oldDataResult.rows[0].employee_id, newValue],
+    )
+
+    await connection.query('COMMIT')
     return result.rowCount
   } catch (err) {
+    await connection.query('ROLLBACK')
     console.error('Error deleting file:', err)
     throw err
   } finally {

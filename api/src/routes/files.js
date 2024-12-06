@@ -47,7 +47,7 @@ router.post('/files/:employee_id', upload.single('file'), async (req, res) => {
       '-№' +
       numberfile
     const filePath = await saveFile(req.file, fileName)
-    const newFile = await addFile(fileName, filePath, employee_id)
+    const newFile = await addFile(req, fileName, filePath, employee_id)
 
     res
       .status(201)
@@ -69,7 +69,7 @@ router.delete('/files/:fileId', async (req, res) => {
 
     await client.query('BEGIN')
 
-    const deletedFiles = await deleteFile(fileId)
+    const deletedFiles = await deleteFile(req, fileId)
     if (!deletedFiles) {
       await client.query('ROLLBACK')
       return res.status(404).json({ error: 'File not found' })
