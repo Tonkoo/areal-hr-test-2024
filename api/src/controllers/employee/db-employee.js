@@ -30,6 +30,27 @@ async function getHistoryEmployees(id) {
     connection.release()
   }
 }
+async function addHistory(record_id, oldValue, newValue, connection, req) {
+  try {
+    const currentDate = new Date()
+    const datetime_operations = currentDate.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    const author = req.user.id
+    await connection.query(
+      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
+       VALUES ($1, $2, 4, $3, $4, $5)`,
+      [datetime_operations, author, record_id, oldValue, newValue],
+    )
+  } catch (err) {
+    console.error('Error saving history:', err)
+  }
+}
 
 async function addEmployee(
   req,
@@ -80,7 +101,6 @@ async function addEmployee(
       [employeeId, department_id, position_id, salary],
     )
 
-    const userId = req.user.id
     const region = await connection.query(
       'select name from regions where id=$1',
       [region_id],
@@ -99,21 +119,7 @@ async function addEmployee(
     const formatteddate_of_birth = date_of_birth.toISOString().split('T')[0]
     const newValue = `Фамилия: ${last_name}\nИмя: ${first_name}\nОтчество: ${middle_name}\nДата рождения: ${formatteddate_of_birth}\nСерия: ${passport_series}\nНомер паспорта: ${passport_number}\nРегион: ${region.rows[0].name}\nГород: ${city.rows[0].name}\nУлица: ${street}\nДом: ${house}\nКорпус: ${building}\nКвартира: ${apartment}\nОтдел: ${department.rows[0].name}\nДолжность: ${position.rows[0].name}\nЗарплата: $${salary}.00\nСтатус: Работает`
 
-    const currentDate = new Date()
-    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, new_value) 
-       VALUES ($1, $2, 4, $3, $4)`,
-      [formattedDateTime, userId, employeeId, newValue],
-    )
+    await addHistory(employeeId, '', newValue, connection, req)
 
     await connection.query('COMMIT')
     return employeeId
@@ -186,7 +192,6 @@ async function updateEmployee(
       [department_id, position_id, salary, id],
     )
 
-    const userId = req.user.id
     const region = await connection.query(
       'select name from regions where id=$1',
       [region_id],
@@ -207,24 +212,9 @@ async function updateEmployee(
     const fired = oldDataResult.rows[0].fired ? 'Уволен' : 'Работает'
 
     const oldValue = `Фамилия: ${oldDataResult.rows[0].last_name}\nИмя: ${oldDataResult.rows[0].first_name}\nОтчество: ${oldDataResult.rows[0].middle_name}\nДата рождения: ${oldDataResult.rows[0].date_of_birth}\nСерия: ${oldDataResult.rows[0].passport_series}\nНомер паспорта: ${oldDataResult.rows[0].passport_number}\nРегион: ${oldDataResult.rows[0].region}\nГород: ${oldDataResult.rows[0].city}\nУлица: ${oldDataResult.rows[0].street}\nДом: ${oldDataResult.rows[0].house}\nКорпус: ${oldDataResult.rows[0].building}\nКвартира: ${oldDataResult.rows[0].apartment}\nОтдел: ${oldDataResult.rows[0].department_name}\nДолжность: ${oldDataResult.rows[0].position_name}\nЗарплата: ${oldDataResult.rows[0].salary}\nСтатус: ${fired}`
-
     const newValue = `Фамилия: ${last_name}\nИмя: ${first_name}\nОтчество: ${middle_name}\nДата рождения: ${formatteddate_of_birth}\nСерия: ${passport_series}\nНомер паспорта: ${passport_number}\nРегион: ${region.rows[0].name}\nГород: ${city.rows[0].name}\nУлица: ${street}\nДом: ${house}\nКорпус: ${building}\nКвартира: ${apartment}\nОтдел: ${department.rows[0].name}\nДолжность: ${position.rows[0].name}\nЗарплата: $${salary}.00\nСтатус: Работает`
 
-    const currentDate = new Date()
-    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value ,new_value) 
-       VALUES ($1, $2, 4, $3, $4, $5)`,
-      [formattedDateTime, userId, id, oldValue, newValue],
-    )
+    await addHistory(id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return 'Employee data successfully updated'
@@ -252,29 +242,11 @@ async function deleteEmployee(req, id) {
       [id],
     )
 
-    const userId = req.user.id
-
     const fired = oldDataResult.rows[0].fired ? 'Уволен' : 'Работает'
-
     const oldValue = `Статус: ${fired}`
-
     const newValue = `Статус: Уволен`
 
-    const currentDate = new Date()
-    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value ,new_value) 
-       VALUES ($1, $2, 4, $3, $4, $5)`,
-      [formattedDateTime, userId, id, oldValue, newValue],
-    )
+    await addHistory(id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return 'Employee terminated successfully'

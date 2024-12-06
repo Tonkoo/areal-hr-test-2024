@@ -31,6 +31,28 @@ async function getHistoryDepartments(id) {
   }
 }
 
+async function addHistory(record_id, oldValue, newValue, connection, req) {
+  try {
+    const currentDate = new Date()
+    const datetime_operations = currentDate.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    const author = req.user.id
+    await connection.query(
+      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
+       VALUES ($1, $2, 2, $3, $4, $5)`,
+      [datetime_operations, author, record_id, oldValue, newValue],
+    )
+  } catch (err) {
+    console.error('Error saving history:', err)
+  }
+}
+
 async function addDepartment(req, name, comment, parent_id, organization_id) {
   const connection = await pool.connect()
   try {
@@ -39,7 +61,10 @@ async function addDepartment(req, name, comment, parent_id, organization_id) {
     let values
     let newValue
     let parent
-    let organization
+    const organization = await connection.query(
+      'select name from organizations where id = $1',
+      [organization_id],
+    )
 
     if (parent_id) {
       query = `INSERT INTO departments (name, comment, parent_id, organization_id) 
@@ -49,42 +74,20 @@ async function addDepartment(req, name, comment, parent_id, organization_id) {
         'select name from departments where id = $1',
         [parent_id],
       )
-      organization = await connection.query(
-        'select name from organizations where id = $1',
-        [organization_id],
-      )
       newValue = `Название: ${name}\nКомментарий: ${comment}\nРодитель: ${parent.rows[0].name}\nОрганизация: ${organization.rows[0].name}`
     } else {
       query = `INSERT INTO departments (name, comment, organization_id) 
                VALUES ($1, $2, $3) RETURNING *`
       values = [name, comment, organization_id]
-      organization = await connection.query(
-        'select name from organizations where id = $1',
-        [organization_id],
-      )
       newValue = `Название: ${name}\nКомментарий: ${comment}\nОрганизация: ${organization.rows[0].name}`
     }
 
     const result = await connection.query(query, values)
 
     const departmentId = result.rows[0].id
-    const userId = req.user.id
 
-    const currentDate = new Date()
-    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
+    await addHistory(departmentId, '', newValue, connection, req)
 
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, new_value) 
-       VALUES ($1, $2, 2, $3, $4)`,
-      [formattedDateTime, userId, departmentId, newValue],
-    )
     await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
@@ -110,12 +113,15 @@ async function updateDepartment(
     let query
     let values
     let parent
-    let organization
     let newValue
     let oldValue
     const oldDataResult = await connection.query(
       'SELECT d.name AS department_name, pd.name AS parent_department_name,d.comment AS department_comment, o.name AS organization_name FROM departments AS d LEFT JOIN departments AS pd ON d.parent_id = pd.id LEFT JOIN organizations AS o ON d.organization_id = o.id where d.id = $1',
       [id],
+    )
+    const organization = await connection.query(
+      'select name from organizations where id = $1',
+      [organization_id],
     )
 
     if (parent_id) {
@@ -127,10 +133,6 @@ async function updateDepartment(
         'select name from departments where id = $1',
         [parent_id],
       )
-      organization = await connection.query(
-        'select name from organizations where id = $1',
-        [organization_id],
-      )
       oldValue = `Название: ${oldDataResult.rows[0].department_name}\nКомментарий: ${oldDataResult.rows[0].department_comment}\nРодитель: ${oldDataResult.rows[0].parent_department_name}\nОрганизация: ${oldDataResult.rows[0].organization_name}`
       newValue = `Название: ${name}\nКомментарий: ${comment}\nРодитель: ${parent.rows[0].name}\nОрганизация: ${organization.rows[0].name}`
     } else {
@@ -138,10 +140,6 @@ async function updateDepartment(
                SET name = $1, comment = $2, parent_id = NULL, organization_id = $3
                WHERE id = $4 RETURNING *`
       values = [name, comment, organization_id, id]
-      organization = await connection.query(
-        'select name from organizations where id = $1',
-        [organization_id],
-      )
       oldValue = `Название: ${oldDataResult.rows[0].department_name}\nКомментарий: ${oldDataResult.rows[0].department_comment}\nОрганизация: ${oldDataResult.rows[0].organization_name}`
       newValue = `Название: ${name}\nКомментарий: ${comment}\nОрганизация: ${organization.rows[0].name}`
     }
@@ -155,23 +153,7 @@ async function updateDepartment(
       [organization_id, id],
     )
 
-    const userId = req.user.id
-
-    const currentDate = new Date()
-    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
-       VALUES ($1, $2, 2, $3, $4, $5)`,
-      [formattedDateTime, userId, id, oldValue, newValue],
-    )
+    await addHistory(id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]

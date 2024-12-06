@@ -29,6 +29,28 @@ async function getHistoryOrganizations(id) {
   }
 }
 
+async function addHistory(record_id, oldValue, newValue, connection, req) {
+  try {
+    const currentDate = new Date()
+    const datetime_operations = currentDate.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    const author = req.user.id
+    await connection.query(
+      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
+       VALUES ($1, $2, 1, $3, $4, $5)`,
+      [datetime_operations, author, record_id, oldValue, newValue],
+    )
+  } catch (err) {
+    console.error('Error saving history:', err)
+  }
+}
+
 async function addOrganization(req, name, comment) {
   const connection = await pool.connect()
   try {
@@ -39,24 +61,10 @@ async function addOrganization(req, name, comment) {
     )
 
     const organizationId = result.rows[0].id
-    const userId = req.user.id
+
     const newValue = `Название: ${name}\nКомментарий: ${comment}`
 
-    const currentDate = new Date()
-    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, new_value) 
-       VALUES ($1, $2, 1, $3, $4)`,
-      [formattedDateTime, userId, organizationId, newValue],
-    )
+    await addHistory(organizationId, '', newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
@@ -83,25 +91,10 @@ async function updateOrganization(req, id, name, comment) {
       [name, comment, id],
     )
 
-    const currentDate = new Date()
-    const formattedDateTime = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-
-    const userId = req.user.id
     const oldValue = `Название: ${oldDataResult.rows[0].name}\nКомментарий: ${oldDataResult.rows[0].comment}`
     const newValue = `Название: ${name}\nКомментарий: ${comment}`
 
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
-       VALUES ($1, $2, 1, $3, $4, $5)`,
-      [formattedDateTime, userId, id, oldValue, newValue],
-    )
+    await addHistory(id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
