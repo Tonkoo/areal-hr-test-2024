@@ -11,22 +11,58 @@
       <v-card-text>
         <v-list>
           <v-list-item>
-            <v-list-item-title>Отдел</v-list-item-title>
+            <v-list-item-title>Дата рождения</v-list-item-title>
             <v-list-item-subtitle>{{
-              TableEmployees.department_name
+              TableEmployees.date_of_birth
             }}</v-list-item-subtitle>
           </v-list-item>
           <v-list-item>
-            <v-list-item-title>Должность</v-list-item-title>
+            <v-list-item-title>Серия паспорта</v-list-item-title>
             <v-list-item-subtitle>{{
-              TableEmployees.position_name
+              TableEmployees.passport_series
             }}</v-list-item-subtitle>
           </v-list-item>
           <v-list-item>
-            <v-list-item-title>Зарплата</v-list-item-title>
+            <v-list-item-title>Номер паспорта</v-list-item-title>
             <v-list-item-subtitle>{{
-              TableEmployees.salary
+              TableEmployees.passport_number
             }}</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title>Регион</v-list-item-title>
+            <v-list-item-subtitle>{{
+              TableEmployees.region
+            }}</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title>Город</v-list-item-title>
+            <v-list-item-subtitle>{{
+              TableEmployees.city
+            }}</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title>Улица</v-list-item-title>
+            <v-list-item-subtitle>{{
+              TableEmployees.street
+            }}</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title>Дом</v-list-item-title>
+            <v-list-item-subtitle
+              >№{{ TableEmployees.house }}</v-list-item-subtitle
+            >
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title>Корпус</v-list-item-title>
+            <v-list-item-subtitle>{{
+              TableEmployees.building
+            }}</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title>Квартира</v-list-item-title>
+            <v-list-item-subtitle
+              >№{{ TableEmployees.apartment }}</v-list-item-subtitle
+            >
           </v-list-item>
         </v-list>
       </v-card-text>

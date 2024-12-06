@@ -68,6 +68,8 @@ async function addUser(
     const hashedPassword = await argon2.hash(password, {
       type: argon2.argon2id,
     })
+    console.log('Password ', hashedPassword)
+
     const result = await connection.query(
       `INSERT INTO users (last_name, first_name, middle_name, login, password, role_id) 
        VALUES ($1, $2, $3, $4, $5, 2) RETURNING *`,

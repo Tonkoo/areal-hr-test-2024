@@ -6,15 +6,9 @@
         <th>Фамилия</th>
         <th>Имя</th>
         <th>Отчество</th>
-        <th>Дата рождения</th>
-        <th>Серия паспорта</th>
-        <th>Номер паспорта</th>
-        <th>Регион</th>
-        <th>Город</th>
-        <th>Улица</th>
-        <th>Дом</th>
-        <th>Корпус</th>
-        <th>Квартира</th>
+        <th>Отдел</th>
+        <th>Должность</th>
+        <th>Зарплата</th>
         <th>Статус</th>
         <th>Действие</th>
       </tr>
@@ -25,15 +19,9 @@
         <td>{{ item.last_name }}</td>
         <td>{{ item.first_name }}</td>
         <td>{{ item.middle_name }}</td>
-        <td>{{ item.date_of_birth }}</td>
-        <td>{{ item.passport_series }}</td>
-        <td>{{ item.passport_number }}</td>
-        <td>{{ item.region }}</td>
-        <td>{{ item.city }}</td>
-        <td>{{ item.street }}</td>
-        <td>{{ item.house }}</td>
-        <td>{{ item.building }}</td>
-        <td>{{ item.apartment }}</td>
+        <td>{{ item.department_name }}</td>
+        <td>{{ item.position_name }}</td>
+        <td>{{ item.salary }}</td>
         <td>{{ item.fired ? "Уволен" : "Работает" }}</td>
         <td>
           <v-btn color="blue" @click="openDetailsDialog(item)" small

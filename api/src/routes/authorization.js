@@ -15,6 +15,8 @@ router.post('/login', (req, res, next) => {
 
 router.get('/user-role', (req, res) => {
   if (req.isAuthenticated()) {
+    console.log(process.env.PASSWORD_ADMIN)
+
     return res.json({ roleName: req.user.roleName })
   }
   res.status(401).json({ message: 'Неавторизованный доступ' })

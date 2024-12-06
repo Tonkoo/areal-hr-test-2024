@@ -141,11 +141,7 @@ export default {
       this.dialog = true;
     },
     openDetailsDialog(item) {
-      this.TableEmployees = {
-        department_name: item.department_name,
-        position_name: item.position_name,
-        salary: item.salary,
-      };
+      this.TableEmployees = { ...item };
       this.detailsDialog = true;
     },
     openDismissDialog(item) {
