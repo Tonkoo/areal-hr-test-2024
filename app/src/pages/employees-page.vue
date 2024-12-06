@@ -44,12 +44,19 @@
       @update:filesDialog="filesDialog = $event"
     />
 
+    <EmployeesHistoryDialog
+      :historyDialog="historyDialog"
+      :employee="TableEmployees"
+      @update:historyDialog="historyDialog = $event"
+    />
+
     <EmployeesTable
       ref="EmployeesTable"
       @edit="openEditDialog"
       @dismiss="openDismissDialog"
       @DetailsDialog="openDetailsDialog"
       @FilesDialog="openFilesDialog"
+      @history="openHistoryDialog"
     />
   </v-container>
 </template>
@@ -60,6 +67,7 @@ import EmployeesDetailsDialog from "@/modules/employees/components/employees-det
 import EmployeesDismissDialog from "@/modules/employees/components/employees-dismiss-dialog.vue";
 import EmployeesFilesDialog from "@/modules/employees/components/employees-files-dialog.vue";
 import EmployeesTable from "@/modules/employees/components/employees-table.vue";
+import EmployeesHistoryDialog from "@/modules/employees/components/employees-history-dialog.vue";
 
 export default {
   components: {
@@ -68,6 +76,7 @@ export default {
     EmployeesDismissDialog,
     EmployeesFilesDialog,
     EmployeesTable,
+    EmployeesHistoryDialog,
   },
   data() {
     return {
@@ -76,6 +85,7 @@ export default {
       detailsDialog: false,
       dismissDialog: false,
       filesDialog: false,
+      historyDialog: false,
       TableEmployees: {
         id: null,
         last_name: "",
@@ -145,6 +155,10 @@ export default {
     openFilesDialog(item) {
       this.TableEmployees = item;
       this.filesDialog = true;
+    },
+    openHistoryDialog(item) {
+      this.TableEmployees = item;
+      this.historyDialog = true;
     },
   },
 };

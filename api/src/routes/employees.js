@@ -5,6 +5,7 @@ const {
   addEmployee,
   updateEmployee,
   deleteEmployee,
+  getHistoryEmployees,
 } = require('../controllers/employee/db-employee')
 const employeeSchema = require('../controllers/employee/dto/validationd-employees')
 
@@ -14,6 +15,17 @@ router.get('/employees', async (req, res) => {
     res.json(employees)
   } catch (err) {
     console.error('Error fetching employees:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.get('/employees/history/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const historyOrganizations = await getHistoryEmployees(id)
+    res.json(historyOrganizations)
+  } catch (err) {
+    console.error('Error fetching history employees:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -51,6 +63,7 @@ router.post('/employees', async (req, res) => {
     } = value
 
     const employeeId = await addEmployee(
+      req,
       last_name,
       first_name,
       middle_name,
@@ -109,6 +122,7 @@ router.put('/employees/:id', async (req, res) => {
       salary,
     } = value
     const message = await updateEmployee(
+      req,
       id,
       last_name,
       first_name,
@@ -136,7 +150,7 @@ router.put('/employees/:id', async (req, res) => {
 router.post('/employees/:id', async (req, res) => {
   const { id } = req.params
   try {
-    const message = await deleteEmployee(id)
+    const message = await deleteEmployee(req, id)
     res.json({ message })
   } catch (err) {
     console.error('Error when terminating the employee:', err)

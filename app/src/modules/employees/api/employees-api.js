@@ -10,6 +10,21 @@ export default {
         throw err;
       });
   },
+  getHistoryEmployees(id) {
+    return api
+      .get(`/employees/history/${id}`)
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          return response.data;
+        } else {
+          throw new Error("Expected an array but got: " + response.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching history employees:", err);
+        throw err;
+      });
+  },
   getRegions() {
     return api
       .get("/regions")

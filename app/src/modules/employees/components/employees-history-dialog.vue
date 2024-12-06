@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in historyPosition" :key="item.id">
+          <tr v-for="item in historyEmployee" :key="item.id">
             <td>{{ item.id }}</td>
             <td>{{ item.datetime_operations }}</td>
             <td>{{ item.full_name }}</td>
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import positionApi from "../api/position-api";
+import employeesApi from "../api/employees-api";
 
 export default {
   props: {
@@ -43,7 +43,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    position: {
+    employee: {
       type: Object,
       required: true,
     },
@@ -51,19 +51,19 @@ export default {
   emits: ["update:historyDialog", "save"],
   data() {
     return {
-      localPosition: { ...this.position },
-      historyPosition: {},
+      localEmployee: { ...this.employee },
+      historyEmployee: {},
     };
   },
   watch: {
     historyDialog(newValue) {
       if (newValue) {
-        this.fetchHistoryPositions();
+        this.fetchHistoryEmployees();
       }
     },
-    position: {
-      handler(newPosition) {
-        this.localPosition = { ...newPosition };
+    employee: {
+      handler(newEmployee) {
+        this.localEmployee = { ...newEmployee };
       },
       deep: true,
     },
@@ -72,15 +72,17 @@ export default {
     closeDialog() {
       this.$emit("update:historyDialog", false);
     },
-    fetchHistoryPositions() {
-      positionApi
-        .getHistoryPositions(this.localPosition.id)
+    fetchHistoryEmployees() {
+      console.log(this.localEmployee.id);
+
+      employeesApi
+        .getHistoryEmployees(this.localEmployee.id)
         .then((data) => {
-          this.historyPosition = data;
+          this.historyEmployee = data;
         })
         .catch((err) => {
-          console.error("Error fetching history positions:", err);
-          this.historyPosition = [];
+          console.error("Error fetching history employees:", err);
+          this.historyEmployee = [];
         });
     },
     formatHistory(value) {
