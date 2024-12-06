@@ -125,8 +125,6 @@ export default {
     },
     openHistoryDialog(item) {
       this.TableDepartment = item;
-      console.log(this.TableDepartment);
-
       this.historyDialog = true;
     },
   },

@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in historyDepartment" :key="item.id">
+          <tr v-for="item in historyPosition" :key="item.id">
             <td>{{ item.id }}</td>
             <td>{{ item.datetime_operations }}</td>
             <td>{{ item.full_name }}</td>
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import departmentApi from "../api/department-api";
+import positionApi from "../api/position-api";
 
 export default {
   props: {
@@ -43,7 +43,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    department: {
+    position: {
       type: Object,
       required: true,
     },
@@ -51,8 +51,8 @@ export default {
   emits: ["update:historyDialog", "save"],
   data() {
     return {
-      localDepartment: { ...this.department },
-      historyDepartment: {},
+      localPosition: { ...this.position },
+      historyPosition: {},
     };
   },
   watch: {
@@ -61,9 +61,9 @@ export default {
         this.fetchHistoryDepartments();
       }
     },
-    department: {
-      handler(newDepartment) {
-        this.localDepartment = { ...newDepartment };
+    position: {
+      handler(newPosition) {
+        this.localPosition = { ...newPosition };
       },
       deep: true,
     },
@@ -73,14 +73,14 @@ export default {
       this.$emit("update:historyDialog", false);
     },
     fetchHistoryDepartments() {
-      departmentApi
-        .getHistoryDepartments(this.localDepartment.department_id)
+      positionApi
+        .getHistoryPositions(this.localPosition.id)
         .then((data) => {
-          this.historyDepartment = data;
+          this.historyPosition = data;
         })
         .catch((err) => {
-          console.error("Error fetching history departments:", err);
-          this.historyDepartment = [];
+          console.error("Error fetching history positions:", err);
+          this.historyPosition = [];
         });
     },
     formatHistory(value) {

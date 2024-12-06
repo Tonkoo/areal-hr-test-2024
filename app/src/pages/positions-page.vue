@@ -31,11 +31,17 @@
       @update:deleteDialog="deleteDialog = $event"
       @delete="refreshPosition"
     />
+    <PositionHistoryDialog
+      :historyDialog="historyDialog"
+      :position="TablePosition"
+      @update:historyDialog="historyDialog = $event"
+    />
 
     <PositionTable
       ref="PositionTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
+      @history="openHistoryDialog"
     />
   </v-container>
 </template>
@@ -44,18 +50,21 @@
 import PositionForm from "@/modules/positions/components/position-form.vue";
 import PositionDeleteDialog from "@/modules/positions/components/position-delete-dialog.vue";
 import PositionTable from "@/modules/positions/components/position-table.vue";
+import PositionHistoryDialog from "@/modules/positions/components/position-history-dialog.vue";
 
 export default {
   components: {
     PositionForm,
     PositionDeleteDialog,
     PositionTable,
+    PositionHistoryDialog,
   },
   data() {
     return {
       dialog: false,
       isEditMode: false,
       deleteDialog: false,
+      historyDialog: false,
       deletePositionId: 0,
       TablePosition: {
         id: null,
@@ -81,6 +90,10 @@ export default {
     openDeleteDialog(id) {
       this.deletePositionId = id;
       this.deleteDialog = true;
+    },
+    openHistoryDialog(item) {
+      this.TablePosition = item;
+      this.historyDialog = true;
     },
   },
 };

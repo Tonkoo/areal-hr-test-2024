@@ -6,6 +6,7 @@ const {
   addPosition,
   updatePosition,
   deletePosition,
+  getHistoryPositions,
 } = require('../controllers/positions/db-positions')
 
 router.get('/positions', async (req, res) => {
@@ -14,6 +15,17 @@ router.get('/positions', async (req, res) => {
     res.json(positions)
   } catch (err) {
     console.error('Error fetching positions:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.get('/positions/history/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const historyOrganizations = await getHistoryPositions(id)
+    res.json(historyOrganizations)
+  } catch (err) {
+    console.error('Error fetching history positions:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -31,7 +43,7 @@ router.post('/positions', async (req, res) => {
       return res.status(400).json({ errors: errorMessages })
     }
     const { name, department_id } = value
-    const newPosition = await addPosition(name, department_id)
+    const newPosition = await addPosition(req, name, department_id)
     res.status(201).json(newPosition)
   } catch (err) {
     console.error('Error adding position:', err)
@@ -55,7 +67,7 @@ router.put('/positions/:id', async (req, res) => {
 
     const { id } = req.params
     const { name, department_id } = value
-    const updatedPosition = await updatePosition(id, name, department_id)
+    const updatedPosition = await updatePosition(req, id, name, department_id)
     res.status(201).json(updatedPosition)
   } catch (err) {
     console.error('Error updating position:', err)
