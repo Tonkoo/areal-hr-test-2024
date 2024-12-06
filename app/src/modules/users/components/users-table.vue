@@ -31,6 +31,9 @@
           <v-btn color="red" @click="openDeleteDialog(item)" small
             >Удалить</v-btn
           >
+          <v-btn color="blue" @click="openHistoryDialog(item)" small
+            >История</v-btn
+          >
         </td>
       </tr>
     </tbody>
@@ -70,6 +73,9 @@ export default {
     },
     openUpdateRoleDialog(item) {
       this.$emit("updateRole", item);
+    },
+    openHistoryDialog(item) {
+      this.$emit("history", item);
     },
   },
 };

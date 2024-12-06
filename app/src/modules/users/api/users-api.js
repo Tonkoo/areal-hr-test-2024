@@ -13,6 +13,21 @@ export default {
         throw err;
       });
   },
+  getHistoryUsers(id) {
+    return api
+      .get(`/users/history/${id}`)
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          return response.data;
+        } else {
+          throw new Error("Expected an array but got: " + response.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching history users:", err);
+        throw err;
+      });
+  },
   addUser(user) {
     return api
       .post("/users", user)

@@ -6,6 +6,7 @@ const {
   updateUser,
   deletedUser,
   updateRole,
+  getHistoryUsers,
 } = require('../controllers/users/db-users')
 const {
   UsersSchema,
@@ -18,6 +19,17 @@ router.get('/users', async (req, res) => {
     res.json(users)
   } catch (err) {
     console.error('Error fetching users:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.get('/users/history/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const historyUsers = await getHistoryUsers(id)
+    res.json(historyUsers)
+  } catch (err) {
+    console.error('Error fetching history users:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -36,6 +48,7 @@ router.post('/users', async (req, res) => {
     }
     const { last_name, first_name, middle_name, login, password } = value
     const newUser = await addUser(
+      req,
       last_name,
       first_name,
       middle_name,
@@ -72,6 +85,7 @@ router.put('/users/:id', async (req, res) => {
     const { last_name, first_name, middle_name, login, password } = value
 
     const updatedUser = await updateUser(
+      req,
       id,
       last_name,
       first_name,
@@ -102,7 +116,7 @@ router.delete('/users/:id', async (req, res) => {
 router.put('/users/role/:id', async (req, res) => {
   const { id } = req.params
   try {
-    const updateRoleUser = await updateRole(id)
+    const updateRoleUser = await updateRole(req, id)
     res.status(201).json(updateRoleUser)
   } catch (err) {
     console.error('Error update role user:', err)

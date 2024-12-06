@@ -22,8 +22,8 @@ router.get('/positions', async (req, res) => {
 router.get('/positions/history/:id', async (req, res) => {
   try {
     const { id } = req.params
-    const historyOrganizations = await getHistoryPositions(id)
-    res.json(historyOrganizations)
+    const historyPositions = await getHistoryPositions(id)
+    res.json(historyPositions)
   } catch (err) {
     console.error('Error fetching history positions:', err)
     res.status(500).json({ error: 'Internal server error' })
