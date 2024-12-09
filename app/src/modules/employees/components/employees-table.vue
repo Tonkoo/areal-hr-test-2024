@@ -10,7 +10,7 @@
         <th>Должность</th>
         <th>Зарплата</th>
         <th>Статус</th>
-        <th>Действие</th>
+        <th colspan="2" style="width: 316px">Действие</th>
       </tr>
     </thead>
     <tbody>
@@ -24,33 +24,38 @@
         <td>{{ item.salary }}</td>
         <td>{{ item.fired ? "Уволен" : "Работает" }}</td>
         <td>
-          <v-btn color="blue" @click="openDetailsDialog(item)" small
-            >Подробнее</v-btn
-          >
-          <v-btn
-            color="blue"
-            @click="openFilesDialog(item)"
-            small
-            :disabled="item.fired === true"
-            >Файлы</v-btn
-          >
-          <v-btn
-            color="blue"
-            @click="openEditDialog(item)"
-            small
-            :disabled="item.fired === true"
-            >Изменить</v-btn
-          >
-          <v-btn
-            color="red"
-            @click="openDismissDialog(item)"
-            small
-            :disabled="item.fired === true"
-            >Уволить</v-btn
-          >
-          <v-btn color="blue" @click="openHistoryDialog(item)" small
-            >История</v-btn
-          >
+          <div class="action-buttons">
+            <v-btn color="blue" @click="openDetailsDialog(item)" small
+              >Подробнее</v-btn
+            >
+            <v-btn
+              color="blue"
+              @click="openFilesDialog(item)"
+              small
+              :disabled="item.fired === true"
+            >
+              Файлы
+            </v-btn>
+            <v-btn
+              color="blue"
+              @click="openEditDialog(item)"
+              small
+              :disabled="item.fired === true"
+            >
+              Изменить
+            </v-btn>
+            <v-btn
+              color="red"
+              @click="openDismissDialog(item)"
+              small
+              :disabled="item.fired === true"
+            >
+              Уволить
+            </v-btn>
+            <v-btn color="blue" @click="openHistoryDialog(item)" small
+              >История</v-btn
+            >
+          </div>
         </td>
       </tr>
     </tbody>
@@ -102,5 +107,10 @@ export default {
 td,
 th {
   width: 60px;
+}
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
 }
 </style>

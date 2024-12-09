@@ -131,8 +131,4 @@ export default {
 };
 </script>
 
-<style>
-.v-btn {
-  margin-right: 8px;
-}
-</style>
+<style></style>

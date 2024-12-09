@@ -43,9 +43,35 @@ export default {
         throw err;
       });
   },
-  addEmployee(employee) {
+  addEmployee(employee, files) {
+    console.log(files);
+
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append(`files`, file);
+    });
+    formData.append("last_name", employee.last_name);
+    formData.append("first_name", employee.first_name);
+    formData.append("middle_name", employee.middle_name);
+    formData.append("date_of_birth", employee.date_of_birth);
+    formData.append("passport_series", employee.passport_series);
+    formData.append("passport_number", employee.passport_number);
+    formData.append("region_id", employee.region_id);
+    formData.append("city_id", employee.city_id);
+    formData.append("street", employee.street);
+    formData.append("house", employee.house);
+    formData.append("building", employee.building);
+    formData.append("apartment", employee.apartment);
+    formData.append("department_id", employee.department_id);
+    formData.append("position_id", employee.position_id);
+    formData.append("salary", employee.salary);
+
     return api
-      .post("/employees", employee)
+      .post("/employees", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 400) {
@@ -92,6 +118,8 @@ export default {
     formData.append("last_name", Employee.last_name);
     formData.append("first_name", Employee.first_name);
     formData.append("middle_name", Employee.middle_name);
+    console.log(formData);
+
     return api
       .post(`/files/${Employee.id}`, formData, {
         headers: {
@@ -114,5 +142,12 @@ export default {
         console.error("Error deleting employee file:", err);
         throw err;
       });
+  },
+  downloadFile(fileId) {
+    console.log(fileId);
+
+    return api.get(`/files/download/${fileId}`, {
+      responseType: "blob",
+    });
   },
 };

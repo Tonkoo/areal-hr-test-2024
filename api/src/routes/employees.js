@@ -1,5 +1,7 @@
 const express = require('express')
 const router = express.Router()
+const pool = require('../db')
+const multer = require('multer')
 const {
   getEmployees,
   addEmployee,
@@ -7,7 +9,11 @@ const {
   deleteEmployee,
   getHistoryEmployees,
 } = require('../controllers/employee/db-employee')
+const { addFile } = require('../controllers/employeeFiles/db-file')
 const employeeSchema = require('../controllers/employee/dto/validationd-employees')
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
 router.get('/employees', async (req, res) => {
   try {
@@ -30,7 +36,8 @@ router.get('/employees/history/:id', async (req, res) => {
   }
 })
 
-router.post('/employees', async (req, res) => {
+router.post('/employees', upload.array('files', 10), async (req, res) => {
+  const connection = await pool.connect()
   try {
     const { error, value } = employeeSchema.validate(req.body, {
       abortEarly: false,
@@ -61,7 +68,7 @@ router.post('/employees', async (req, res) => {
       position_id,
       salary,
     } = value
-
+    await connection.query('BEGIN')
     const employeeId = await addEmployee(
       req,
       last_name,
@@ -80,12 +87,19 @@ router.post('/employees', async (req, res) => {
       position_id,
       salary,
     )
+    for (let file of req.files) {
+      await addFile(req, employeeId, file, connection)
+    }
+    await connection.query('COMMIT')
     res
       .status(201)
       .json({ id: employeeId, message: 'Employee added successfully' })
   } catch (err) {
+    await connection.query('ROLLBACK')
     console.error('Error adding employee:', err)
     res.status(500).json({ error: 'Internal server error' })
+  } finally {
+    connection.release()
   }
 })
 

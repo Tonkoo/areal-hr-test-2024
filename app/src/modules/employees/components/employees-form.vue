@@ -126,6 +126,47 @@
             :error-messages="errors.salary"
             required
           ></v-text-field>
+          <div v-if="!isEditMode">
+            <v-file-input
+              v-model="newFile"
+              show-size
+              truncate-length="25"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              label="Выберите файл сотрудника для загрузки"
+              prepend-icon="mdi-paperclip"
+              @change="addFiles"
+              class="mt-2"
+              :error-messages="errors.file"
+            >
+            </v-file-input>
+            <v-card-text class="pt-4">
+              <div v-if="employeeFiles.length > 0">
+                <v-list>
+                  <v-list-item
+                    v-for="(file, index) in employeeFiles"
+                    :key="index"
+                  >
+                    <div class="d-flex align-center justify-space-between">
+                      <v-list-item-title class="text-subtitle-1">
+                        {{ file.name }}
+                      </v-list-item-title>
+                      <v-btn
+                        icon
+                        small
+                        color="error"
+                        @click="removeFile(index)"
+                      >
+                        <v-icon>mdi-delete</v-icon>
+                      </v-btn>
+                    </div>
+                  </v-list-item>
+                </v-list>
+              </div>
+              <v-alert v-else type="info" text class="mb-4">
+                Пока нет загруженных файлов
+              </v-alert>
+            </v-card-text>
+          </div>
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -189,6 +230,8 @@ export default {
       citys: [],
       departments: [],
       positions: [],
+      employeeFiles: [],
+      newFile: null,
       date: null,
       errors: {},
       isErrorsDate: false,
@@ -249,20 +292,22 @@ export default {
       else this.addEmployees();
     },
     addEmployees() {
-      const employeeData = { ...this.LocalEmployees };
-      EmployeesApi.addEmployee(employeeData)
-        .then(() => {
-          this.isErrorsDate = false;
-          this.errors = [];
-          this.$emit("save");
-          this.closeDialog();
-        })
-        .catch((err) => {
-          this.errors = err;
-          if (this.errors.date_of_birth) this.isErrorsDate = true;
-          else this.isErrorsDate = false;
-          console.error("Error adding employee:", err);
-        });
+      if (this.employeeFiles.length > 0) {
+        const employeeData = { ...this.LocalEmployees };
+        EmployeesApi.addEmployee(employeeData, this.employeeFiles)
+          .then(() => {
+            this.isErrorsDate = false;
+            this.errors = [];
+            this.$emit("save");
+            this.closeDialog();
+          })
+          .catch((err) => {
+            this.errors = err;
+            if (this.errors.date_of_birth) this.isErrorsDate = true;
+            else this.isErrorsDate = false;
+            console.error("Error adding employee:", err);
+          });
+      } else this.errors.file = "Не загружен ни один файл";
     },
     updateEmployees() {
       EmployeesApi.updateEmployee(this.LocalEmployees.id, {
@@ -286,6 +331,15 @@ export default {
     },
     onDepartmentsChange() {
       this.LocalEmployees.position_id = null;
+    },
+    addFiles() {
+      if (this.newFile) {
+        this.employeeFiles.push(this.newFile);
+        this.newFile = null;
+      }
+    },
+    removeFile(index) {
+      this.employeeFiles.splice(index, 1);
     },
   },
 };
