@@ -90,9 +90,16 @@ async function updateOrganization(req, id, name, comment) {
       'UPDATE organizations SET name = $1, comment = $2 WHERE id = $3',
       [name, comment, id],
     )
-
-    const oldValue = `Название: ${oldDataResult.rows[0].name}\nКомментарий: ${oldDataResult.rows[0].comment}`
-    const newValue = `Название: ${name}\nКомментарий: ${comment}`
+    let oldValue = ''
+    let newValue = ''
+    if (oldDataResult.rows[0].name != name) {
+      oldValue += `Название: ${oldDataResult.rows[0].name}\n`
+      newValue += `Название: ${name}\n`
+    }
+    if (oldDataResult.rows[0].comment != comment) {
+      oldValue += `Комментарий: ${oldDataResult.rows[0].comment}\n`
+      newValue += `Комментарий: ${comment}\n`
+    }
 
     await addHistory(id, oldValue, newValue, connection, req)
 

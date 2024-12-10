@@ -1,4 +1,5 @@
 import api from "@/shared/api/axios";
+import { useAuthStore } from "@/stores/use-auth-store";
 
 export default {
   getUsers() {
@@ -9,6 +10,11 @@ export default {
         else throw new Error("Expected an array but got: " + response.data);
       })
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching users:", err);
         throw err;
       });
@@ -24,6 +30,11 @@ export default {
         }
       })
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching history users:", err);
         throw err;
       });
@@ -33,6 +44,11 @@ export default {
       .post("/users", user)
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         if (err.response && err.response.status === 400) {
           throw err.response.data.errors;
         }
@@ -45,6 +61,11 @@ export default {
       .put(`/users/${id}?isResetPassword=${resetPassword}`, user)
       .then(() => id)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         if (err.response && err.response.status === 400) {
           throw err.response.data.errors;
         }
@@ -57,6 +78,11 @@ export default {
       .delete(`/users/${id}`)
       .then(() => id)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error deleting user:", err);
         throw err;
       });
@@ -66,6 +92,11 @@ export default {
       .put(`/users/role/${id}`)
       .then(() => id)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error updating user:", err);
         throw err;
       });

@@ -1,4 +1,5 @@
 import api from "@/shared/api/axios";
+import { useAuthStore } from "@/stores/use-auth-store";
 
 export default {
   getEmployees() {
@@ -6,6 +7,11 @@ export default {
       .get("/employees")
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching employees:", err);
         throw err;
       });
@@ -21,6 +27,11 @@ export default {
         }
       })
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching history employees:", err);
         throw err;
       });
@@ -30,6 +41,11 @@ export default {
       .get("/regions")
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching regions:", err);
         throw err;
       });
@@ -39,13 +55,16 @@ export default {
       .get("/citys")
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching cities:", err);
         throw err;
       });
   },
   addEmployee(employee, files) {
-    console.log(files);
-
     const formData = new FormData();
     files.forEach((file) => {
       formData.append(`files`, file);
@@ -74,6 +93,11 @@ export default {
       })
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         if (err.response && err.response.status === 400) {
           throw err.response.data.errors;
         }
@@ -87,6 +111,11 @@ export default {
       .put(`/employees/${id}`, employee)
       .then(() => id)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         if (err.response && err.response.status === 400) {
           throw err.response.data.errors;
         }
@@ -99,6 +128,11 @@ export default {
       .post(`/employees/${id}`)
       .then(() => id)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error dismissing employee:", err);
         throw err;
       });
@@ -108,6 +142,11 @@ export default {
       .get(`/files/${employeeId}`)
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching employee files:", err);
         throw err;
       });
@@ -128,6 +167,11 @@ export default {
       })
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error uploading employee file:", err);
         throw err;
       });
@@ -139,6 +183,11 @@ export default {
       })
       .then(() => fileId)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error deleting employee file:", err);
         throw err;
       });

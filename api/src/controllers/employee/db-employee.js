@@ -4,7 +4,7 @@ async function getEmployees() {
   const connection = await pool.connect()
   try {
     const result = await connection.query(
-      "SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number, regions.id as region_id, regions.name AS region, citys.id as city_id, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.id as department_id, departments.name AS department_name, positions.id as position_id, positions.name AS position_name, employee_details.salary, employee_details.is_fired as fired FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN employee_details on employees.id = employee_details.id join departments on employee_details.department_id = departments.id join positions on employee_details.position_id = positions.id",
+      "SELECT employees.id, employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number, regions.id as region_id, regions.name AS region, citys.id as city_id, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.id as department_id, departments.name AS department_name, positions.id as position_id, positions.name AS position_name, employee_details.salary, employee_details.is_fired as fired FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN employee_details on employees.id = employee_details.id join departments on employee_details.department_id = departments.id join positions on employee_details.position_id = positions.id ORDER BY employees.id",
     )
     return result.rows
   } catch (err) {
@@ -155,7 +155,7 @@ async function updateEmployee(
     await connection.query('BEGIN')
 
     const oldDataResult = await connection.query(
-      "SELECT employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number,  regions.name AS region, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.name AS department_name, positions.name AS position_name, employee_details.salary, employee_details.is_fired as fired FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN employee_details on employees.id = employee_details.id join departments on employee_details.department_id = departments.id join positions on employee_details.position_id = positions.id where employees.id = $1",
+      "SELECT employees.last_name, employees.first_name, employees.middle_name, TO_CHAR(employees.date_of_birth, 'yyyy-MM-dd') AS date_of_birth, employees.passport_series, employees.passport_number,  regions.name AS region, citys.name AS city, employees.street, employees.house, employees.building, employees.apartment, departments.name AS department_name, positions.name AS position_name, CAST(salary AS NUMERIC)::INTEGER as salary, employee_details.is_fired as fired FROM employees JOIN regions ON employees.region_id = regions.id JOIN citys ON employees.city_id = citys.id JOIN employee_details on employees.id = employee_details.id join departments on employee_details.department_id = departments.id join positions on employee_details.position_id = positions.id where employees.id = $1",
       [id],
     )
 
@@ -209,10 +209,69 @@ async function updateEmployee(
     )
     const formatteddate_of_birth = date_of_birth.toISOString().split('T')[0]
 
-    const fired = oldDataResult.rows[0].fired ? 'Уволен' : 'Работает'
+    let oldValue = ''
+    let newValue = ''
 
-    const oldValue = `Фамилия: ${oldDataResult.rows[0].last_name}\nИмя: ${oldDataResult.rows[0].first_name}\nОтчество: ${oldDataResult.rows[0].middle_name}\nДата рождения: ${oldDataResult.rows[0].date_of_birth}\nСерия: ${oldDataResult.rows[0].passport_series}\nНомер паспорта: ${oldDataResult.rows[0].passport_number}\nРегион: ${oldDataResult.rows[0].region}\nГород: ${oldDataResult.rows[0].city}\nУлица: ${oldDataResult.rows[0].street}\nДом: ${oldDataResult.rows[0].house}\nКорпус: ${oldDataResult.rows[0].building}\nКвартира: ${oldDataResult.rows[0].apartment}\nОтдел: ${oldDataResult.rows[0].department_name}\nДолжность: ${oldDataResult.rows[0].position_name}\nЗарплата: ${oldDataResult.rows[0].salary}\nСтатус: ${fired}`
-    const newValue = `Фамилия: ${last_name}\nИмя: ${first_name}\nОтчество: ${middle_name}\nДата рождения: ${formatteddate_of_birth}\nСерия: ${passport_series}\nНомер паспорта: ${passport_number}\nРегион: ${region.rows[0].name}\nГород: ${city.rows[0].name}\nУлица: ${street}\nДом: ${house}\nКорпус: ${building}\nКвартира: ${apartment}\nОтдел: ${department.rows[0].name}\nДолжность: ${position.rows[0].name}\nЗарплата: $${salary}.00\nСтатус: Работает`
+    if (oldDataResult.rows[0].last_name != last_name) {
+      oldValue += `Фамилия: ${oldDataResult.rows[0].last_name}\n`
+      newValue += `Фамилия: ${last_name}\n`
+    }
+    if (oldDataResult.rows[0].first_name != first_name) {
+      oldValue += `Имя: ${oldDataResult.rows[0].first_name}\n`
+      newValue += `Имя: ${first_name}\n`
+    }
+    if (oldDataResult.rows[0].middle_name != middle_name) {
+      oldValue += `Отчество: ${oldDataResult.rows[0].middle_name}\n`
+      newValue += `Отчество: ${middle_name}\n`
+    }
+    if (oldDataResult.rows[0].date_of_birth != formatteddate_of_birth) {
+      oldValue += `Дата рождения: ${oldDataResult.rows[0].date_of_birth}\n`
+      newValue += `Дата рождения: ${formatteddate_of_birth}\n`
+    }
+    if (oldDataResult.rows[0].passport_series != passport_series) {
+      oldValue += `Серия: ${oldDataResult.rows[0].passport_series}\n`
+      newValue += `Серия: ${passport_series}\n`
+    }
+    if (oldDataResult.rows[0].passport_number != passport_number) {
+      oldValue += `Номер паспорта: ${oldDataResult.rows[0].passport_number}\n`
+      newValue += `Номер паспорта: ${passport_number}\n`
+    }
+    if (oldDataResult.rows[0].region != region.rows[0].name) {
+      oldValue += `Регион: ${oldDataResult.rows[0].region}\n`
+      newValue += `Регион: ${region.rows[0].name}\n`
+    }
+    if (oldDataResult.rows[0].city != city.rows[0].name) {
+      oldValue += `Город: ${oldDataResult.rows[0].city}\n`
+      newValue += `Город: ${city.rows[0].name}\n`
+    }
+    if (oldDataResult.rows[0].street != street) {
+      oldValue += `Улица: ${oldDataResult.rows[0].street}\n`
+      newValue += `Улица: ${street}\n`
+    }
+    if (oldDataResult.rows[0].house != house) {
+      oldValue += `Дом: ${oldDataResult.rows[0].house}\n`
+      newValue += `Дом: ${house}\n`
+    }
+    if (oldDataResult.rows[0].building != building) {
+      oldValue += `Корпус: ${oldDataResult.rows[0].building}\n`
+      newValue += `Корпус: ${building}\n`
+    }
+    if (oldDataResult.rows[0].apartment != apartment) {
+      oldValue += `Квартира: ${oldDataResult.rows[0].apartment}\n`
+      newValue += `Квартира: ${apartment}\n`
+    }
+    if (oldDataResult.rows[0].department_name != department.rows[0].name) {
+      oldValue += `Отдел: ${oldDataResult.rows[0].department_name}\n`
+      newValue += `Отдел: ${department.rows[0].name}\n`
+    }
+    if (oldDataResult.rows[0].position_name != position.rows[0].name) {
+      oldValue += `Должность: ${oldDataResult.rows[0].position_name}\n`
+      newValue += `Должность: ${position.rows[0].name}\n`
+    }
+    if (oldDataResult.rows[0].salary != salary) {
+      oldValue += `Зарплата: ${oldDataResult.rows[0].salary}\n`
+      newValue += `Зарплата: $${salary}.00\n`
+    }
 
     await addHistory(id, oldValue, newValue, connection, req)
 

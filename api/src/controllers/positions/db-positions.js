@@ -106,8 +106,18 @@ async function updatePosition(req, id, name, department_id) {
       'select name from departments where id=$1',
       [department_id],
     )
-    const oldValue = `Название: ${oldDataResult.rows[0].positions_name}\nОтдел: ${oldDataResult.rows[0].departments_name}`
-    const newValue = `Название: ${name}\nОтдел: ${department.rows[0].name}`
+    let oldValue = ''
+    let newValue = ''
+    if (oldDataResult.rows[0].positions_name != name) {
+      oldValue += `Название: ${oldDataResult.rows[0].positions_name}\n`
+      newValue += `Название: ${name}\n`
+    }
+    if (oldDataResult.rows[0].departments_name != department.rows[0].name) {
+      oldValue += `Отдел: ${oldDataResult.rows[0].departments_name}\n`
+      newValue += `Отдел: ${department.rows[0].name}\n`
+    }
+    // const oldValue = `Название: ${oldDataResult.rows[0].positions_name}\nОтдел: ${oldDataResult.rows[0].departments_name}`
+    // const newValue = `Название: ${name}\nОтдел: ${department.rows[0].name}`
 
     await addHistory(id, oldValue, newValue, connection, req)
 

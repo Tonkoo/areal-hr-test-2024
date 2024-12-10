@@ -113,8 +113,8 @@ async function updateDepartment(
     let query
     let values
     let parent
-    let newValue
-    let oldValue
+    let newValue = ''
+    let oldValue = ''
     const oldDataResult = await connection.query(
       'SELECT d.name AS department_name, pd.name AS parent_department_name,d.comment AS department_comment, o.name AS organization_name FROM departments AS d LEFT JOIN departments AS pd ON d.parent_id = pd.id LEFT JOIN organizations AS o ON d.organization_id = o.id where d.id = $1',
       [id],
@@ -123,6 +123,15 @@ async function updateDepartment(
       'select name from organizations where id = $1',
       [organization_id],
     )
+
+    if (oldDataResult.rows[0].department_name != name) {
+      oldValue += `Название: ${oldDataResult.rows[0].department_name}\n`
+      newValue += `Название: ${name}\n`
+    }
+    if (oldDataResult.rows[0].department_comment != comment) {
+      oldValue += `Комментарий: ${oldDataResult.rows[0].department_comment}\n`
+      newValue += `Комментарий: ${comment}\n`
+    }
 
     if (parent_id) {
       query = `UPDATE departments 
@@ -133,15 +142,19 @@ async function updateDepartment(
         'select name from departments where id = $1',
         [parent_id],
       )
-      oldValue = `Название: ${oldDataResult.rows[0].department_name}\nКомментарий: ${oldDataResult.rows[0].department_comment}\nРодитель: ${oldDataResult.rows[0].parent_department_name}\nОрганизация: ${oldDataResult.rows[0].organization_name}`
-      newValue = `Название: ${name}\nКомментарий: ${comment}\nРодитель: ${parent.rows[0].name}\nОрганизация: ${organization.rows[0].name}`
+      if (oldDataResult.rows[0].parent_department_name != parent.rows[0].name) {
+        oldValue += `Родитель: ${oldDataResult.rows[0].parent_department_name}\n`
+        newValue += `Родитель: ${parent.rows[0].name}\n`
+      }
     } else {
       query = `UPDATE departments 
                SET name = $1, comment = $2, parent_id = NULL, organization_id = $3
                WHERE id = $4 RETURNING *`
       values = [name, comment, organization_id, id]
-      oldValue = `Название: ${oldDataResult.rows[0].department_name}\nКомментарий: ${oldDataResult.rows[0].department_comment}\nОрганизация: ${oldDataResult.rows[0].organization_name}`
-      newValue = `Название: ${name}\nКомментарий: ${comment}\nОрганизация: ${organization.rows[0].name}`
+    }
+    if (oldDataResult.rows[0].organization_name != organization.rows[0].name) {
+      oldValue += `Организация: ${oldDataResult.rows[0].organization_name}\n`
+      newValue += `Организация: ${organization.rows[0].name}\n`
     }
     const result = await connection.query(query, values)
 

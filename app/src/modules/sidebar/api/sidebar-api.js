@@ -16,10 +16,8 @@ export default {
         }
       })
       .catch((err) => {
-        const authStore = useAuthStore();
-        authStore.toggleAuthStatus();
-        router.push("/");
         console.error("Error fetching user role:", err);
+        this.logOut();
       });
   },
   logOut() {
@@ -28,7 +26,7 @@ export default {
       .then((response) => {
         console.log(response.data.message);
         const authStore = useAuthStore();
-        authStore.toggleAuthStatus();
+        authStore.disableAuthentication();
         router.push("/");
       })
       .catch((err) => {

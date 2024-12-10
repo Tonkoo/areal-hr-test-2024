@@ -10,7 +10,7 @@
         <th>Должность</th>
         <th>Зарплата</th>
         <th>Статус</th>
-        <th colspan="2" style="width: 316px">Действие</th>
+        <th>Действие</th>
       </tr>
     </thead>
     <tbody>
@@ -106,7 +106,7 @@ export default {
 }
 td,
 th {
-  width: 60px;
+  width: 150px;
 }
 .action-buttons {
   display: grid;

@@ -107,8 +107,8 @@ async function updateUser(
     let hashedPassword
     let query
     let values
-    let newValue
-    let oldValue
+    let newValue = ''
+    let oldValue = ''
     await connection.query('BEGIN')
     const oldDataResult = await connection.query(
       'SELECT last_name, first_name, middle_name, login, role.name FROM users join role on users.role_id = role.id where users.id = $1',
@@ -132,8 +132,24 @@ async function updateUser(
       middle_name = $3, login = $4
       WHERE id = $5 RETURNING *`
       values = [last_name, first_name, middle_name, login, id]
-      oldValue = `Фамилия: ${oldDataResult.rows[0].last_name}\nИмя: ${oldDataResult.rows[0].first_name}\nОтчество: ${oldDataResult.rows[0].middle_name}\nЛогин: ${oldDataResult.rows[0].login}`
-      newValue = `Фамилия: ${last_name}\nИмя: ${first_name}\nОтчество: ${middle_name}\nЛогин: ${login}`
+      if (oldDataResult.rows[0].last_name != last_name) {
+        oldValue += `Фамилия: ${oldDataResult.rows[0].last_name}\n`
+        newValue += `Фамилия: ${last_name}\n`
+      }
+      if (oldDataResult.rows[0].first_name != first_name) {
+        oldValue += `Имя: ${oldDataResult.rows[0].first_name}\n`
+        newValue += `Имя: ${first_name}\n`
+      }
+      if (oldDataResult.rows[0].middle_name != middle_name) {
+        oldValue += `Отчество: ${oldDataResult.rows[0].middle_name}\n`
+        newValue += `Отчество: ${middle_name}\n`
+      }
+      if (oldDataResult.rows[0].login != login) {
+        oldValue += `Логин: ${oldDataResult.rows[0].login}\n`
+        newValue += `Логин: ${login}\n`
+      }
+      // oldValue = `Фамилия: ${oldDataResult.rows[0].last_name}\nИмя: ${oldDataResult.rows[0].first_name}\nОтчество: ${oldDataResult.rows[0].middle_name}\nЛогин: ${oldDataResult.rows[0].login}`
+      // newValue = `Фамилия: ${last_name}\nИмя: ${first_name}\nОтчество: ${middle_name}\nЛогин: ${login}`
     }
 
     const result = await connection.query(query, values)

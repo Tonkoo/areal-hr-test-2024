@@ -51,6 +51,7 @@
           <v-text-field
             v-model="LocalEmployees.passport_number"
             label="Номер паспорта"
+            val
             :error-messages="errors.passport_number"
             required
           ></v-text-field>

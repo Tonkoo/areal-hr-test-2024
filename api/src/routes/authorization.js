@@ -17,7 +17,7 @@ router.get('/user-role', (req, res) => {
   if (req.isAuthenticated()) {
     return res.json({ roleName: req.user.roleName })
   }
-  res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(401).json({ message: 'Неавторизованный доступ' })
 })
 
 router.post('/logout', (req, res) => {
@@ -25,7 +25,7 @@ router.post('/logout', (req, res) => {
     if (err) {
       return res.status(500).json({ message: 'Ошибка при выходе' })
     }
-    res.status(200).json({ message: 'Выход выполнен успешно' })
+    return res.status(200).json({ message: 'Выход выполнен успешно' })
   })
 })
 

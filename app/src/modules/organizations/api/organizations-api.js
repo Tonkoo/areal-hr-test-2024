@@ -1,4 +1,5 @@
 import api from "@/shared/api/axios";
+import { useAuthStore } from "@/stores/use-auth-store";
 
 export default {
   getOrganizations() {
@@ -12,6 +13,11 @@ export default {
         }
       })
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching organizations:", err);
         throw err;
       });
@@ -27,6 +33,11 @@ export default {
         }
       })
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error fetching history organizations:", err);
         throw err;
       });
@@ -36,6 +47,11 @@ export default {
       .post("/organizations", organization)
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         if (err.response && err.response.status === 400) {
           throw err.response.data.errors;
         }
@@ -48,6 +64,11 @@ export default {
       .put(`/organizations/${id}`, organization)
       .then((response) => response.data)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         if (err.response && err.response.status === 400) {
           throw err.response.data.errors;
         }
@@ -60,6 +81,11 @@ export default {
       .delete(`/organizations/${id}`)
       .then(() => id)
       .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          const authStore = useAuthStore();
+          authStore.disableAuthentication();
+          window.location.reload();
+        }
         console.error("Error deleting organization:", err);
         throw err;
       });

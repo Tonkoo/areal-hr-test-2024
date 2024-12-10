@@ -9,7 +9,7 @@ export default {
       .post("/login", user)
       .then((response) => {
         console.log("Успешный вход:", response.data);
-        authStore.toggleAuthStatus();
+        authStore.authenticateUser();
         router.push("/home");
       })
       .catch((err) => {
