@@ -1,4 +1,6 @@
 const pool = require('../../db')
+const path = require('path')
+const { saveFile } = require('../employeeFiles/service-file')
 
 async function getFiles(employee_id) {
   const connection = await pool.connect()
@@ -15,34 +17,95 @@ async function getFiles(employee_id) {
     connection.release()
   }
 }
-async function addFile(name, filePath, employee_id) {
-  const connection = await pool.connect()
+
+async function addHistory(record_id, oldValue, newValue, connection, req) {
   try {
-    const result = await connection.query(
-      'INSERT INTO passport_scan (name, path, employee_id) VALUES ($1, $2, $3) RETURNING id',
-      [name, filePath, employee_id],
+    const currentDate = new Date()
+    const datetime_operations = currentDate.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    const author = req.user.id
+    await connection.query(
+      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
+       VALUES ($1, $2, 4, $3, $4, $5)`,
+      [datetime_operations, author, record_id, oldValue, newValue],
     )
-    return result.rows[0]
   } catch (err) {
-    console.error('Error adding file:', err)
-    throw err
-  } finally {
-    connection.release()
+    console.error('Error saving history:', err)
   }
 }
-async function deleteFile(fileId) {
-  const connection = await pool.connect()
+
+async function addFile(req, employee_id, file, connection) {
+  const { last_name } = req.body
+  const { first_name } = req.body
+  const { middle_name } = req.body
+  const { numberfile } = await getNumberFilesEmployee(employee_id)
+  const fileName =
+    'паспорт' +
+    '-' +
+    last_name.toLowerCase() +
+    '-' +
+    first_name.toLowerCase() +
+    '-' +
+    middle_name.toLowerCase() +
+    '-' +
+    employee_id +
+    '-№' +
+    numberfile +
+    path.extname(file.originalname)
+  const filePath = await saveFile(file, fileName)
   try {
+    await connection.query('BEGIN')
+    const result = await connection.query(
+      'INSERT INTO passport_scan (name, path, employee_id) VALUES ($1, $2, $3) RETURNING id',
+      [fileName, filePath, employee_id],
+    )
+
+    const newValue = `Добавлен файл ${fileName}`
+
+    await addHistory(employee_id, '', newValue, connection, req)
+
+    await connection.query('COMMIT')
+    return result.rows[0]
+  } catch (err) {
+    await connection.query('ROLLBACK')
+    console.error('Error adding file:', err)
+    throw err
+  }
+}
+async function deleteFile(req, fileId, connection) {
+  try {
+    await connection.query('BEGIN')
+    const oldDataResult = await connection.query(
+      'select name, employee_id from passport_scan where id = $1',
+      [fileId],
+    )
     const result = await connection.query(
       'DELETE FROM passport_scan WHERE id = $1',
       [fileId],
     )
+
+    const newValue = `Удален файл ${oldDataResult.rows[0].name}`
+
+    await addHistory(
+      oldDataResult.rows[0].employee_id,
+      '',
+      newValue,
+      connection,
+      req,
+    )
+
+    await connection.query('COMMIT')
     return result.rowCount
   } catch (err) {
+    await connection.query('ROLLBACK')
     console.error('Error deleting file:', err)
     throw err
-  } finally {
-    connection.release()
   }
 }
 async function getNumberFilesEmployee(employee_id) {
@@ -61,10 +124,27 @@ async function getNumberFilesEmployee(employee_id) {
     connection.release()
   }
 }
+async function getFileById(fileId) {
+  const connection = await pool.connect()
+  try {
+    const result = await connection.query(
+      'SELECT * FROM passport_scan WHERE id = $1',
+      [fileId],
+    )
+
+    return result.rows[0]
+  } catch (err) {
+    console.error('Error fetching numberFile:', err)
+    throw err
+  } finally {
+    connection.release()
+  }
+}
 
 module.exports = {
   getFiles,
   addFile,
   deleteFile,
   getNumberFilesEmployee,
+  getFileById,
 }

@@ -32,10 +32,17 @@
       @delete="refreshOrganizations"
     />
 
+    <OrganizationHistoryDialog
+      :historyDialog="historyDialog"
+      :organization="TableOrganization"
+      @update:historyDialog="historyDialog = $event"
+    />
+
     <OrganizationTable
       ref="organizationTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
+      @history="openHistoryDialog"
     />
   </v-container>
 </template>
@@ -44,18 +51,21 @@
 import OrganizationForm from "@/modules/organizations/components/organization-form.vue";
 import OrganizationDeleteDialog from "@/modules/organizations/components/organization-delete-dialog.vue";
 import OrganizationTable from "@/modules/organizations/components/organization-table.vue";
+import OrganizationHistoryDialog from "@/modules/organizations/components/organization-history-dialog.vue";
 
 export default {
   components: {
     OrganizationForm,
     OrganizationDeleteDialog,
     OrganizationTable,
+    OrganizationHistoryDialog,
   },
   data() {
     return {
       dialog: false,
       isEditMode: false,
       deleteDialog: false,
+      historyDialog: false,
       deleteOrganizationId: 0,
       TableOrganization: {
         id: null,
@@ -83,12 +93,12 @@ export default {
       this.deleteOrganizationId = id;
       this.deleteDialog = true;
     },
+    openHistoryDialog(item) {
+      this.TableOrganization = item;
+      this.historyDialog = true;
+    },
   },
 };
 </script>
 
-<style scoped>
-.v-btn {
-  margin-right: 8px;
-}
-</style>
+<style></style>

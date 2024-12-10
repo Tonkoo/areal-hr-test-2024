@@ -6,17 +6,11 @@
         <th>Фамилия</th>
         <th>Имя</th>
         <th>Отчество</th>
-        <th>Дата рождения</th>
-        <th>Серия паспорта</th>
-        <th>Номер паспорта</th>
-        <th>Регион</th>
-        <th>Город</th>
-        <th>Улица</th>
-        <th>Дом</th>
-        <th>Корпус</th>
-        <th>Квартира</th>
+        <th>Отдел</th>
+        <th>Должность</th>
+        <th>Зарплата</th>
         <th>Статус</th>
-        <th>Действие</th>
+        <th colspan="2" style="width: 316px">Действие</th>
       </tr>
     </thead>
     <tbody>
@@ -25,41 +19,43 @@
         <td>{{ item.last_name }}</td>
         <td>{{ item.first_name }}</td>
         <td>{{ item.middle_name }}</td>
-        <td>{{ item.date_of_birth }}</td>
-        <td>{{ item.passport_series }}</td>
-        <td>{{ item.passport_number }}</td>
-        <td>{{ item.region }}</td>
-        <td>{{ item.city }}</td>
-        <td>{{ item.street }}</td>
-        <td>{{ item.house }}</td>
-        <td>{{ item.building }}</td>
-        <td>{{ item.apartment }}</td>
+        <td>{{ item.department_name }}</td>
+        <td>{{ item.position_name }}</td>
+        <td>{{ item.salary }}</td>
         <td>{{ item.fired ? "Уволен" : "Работает" }}</td>
         <td>
-          <v-btn color="blue" @click="openDetailsDialog(item)" small
-            >Подробнее</v-btn
-          >
-          <v-btn
-            color="blue"
-            @click="openFilesDialog(item)"
-            small
-            :disabled="item.fired === true"
-            >Файлы</v-btn
-          >
-          <v-btn
-            color="blue"
-            @click="openEditDialog(item)"
-            small
-            :disabled="item.fired === true"
-            >Изменить</v-btn
-          >
-          <v-btn
-            color="red"
-            @click="openDismissDialog(item)"
-            small
-            :disabled="item.fired === true"
-            >Уволить</v-btn
-          >
+          <div class="action-buttons">
+            <v-btn color="blue" @click="openDetailsDialog(item)" small
+              >Подробнее</v-btn
+            >
+            <v-btn
+              color="blue"
+              @click="openFilesDialog(item)"
+              small
+              :disabled="item.fired === true"
+            >
+              Файлы
+            </v-btn>
+            <v-btn
+              color="blue"
+              @click="openEditDialog(item)"
+              small
+              :disabled="item.fired === true"
+            >
+              Изменить
+            </v-btn>
+            <v-btn
+              color="red"
+              @click="openDismissDialog(item)"
+              small
+              :disabled="item.fired === true"
+            >
+              Уволить
+            </v-btn>
+            <v-btn color="blue" @click="openHistoryDialog(item)" small
+              >История</v-btn
+            >
+          </div>
         </td>
       </tr>
     </tbody>
@@ -97,6 +93,9 @@ export default {
     openDismissDialog(item) {
       this.$emit("dismiss", item);
     },
+    openHistoryDialog(item) {
+      this.$emit("history", item);
+    },
   },
 };
 </script>
@@ -108,5 +107,10 @@ export default {
 td,
 th {
   width: 60px;
+}
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
 }
 </style>

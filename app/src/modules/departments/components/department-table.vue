@@ -24,6 +24,9 @@
           <v-btn color="red" @click="openDeleteDialog(item.department_id)" small
             >Удалить</v-btn
           >
+          <v-btn color="blue" @click="openHistoryDialog(item)" small
+            >История</v-btn
+          >
         </td>
       </tr>
     </tbody>
@@ -59,6 +62,14 @@ export default {
     openDeleteDialog(id) {
       this.$emit("delete", id);
     },
+    openHistoryDialog(item) {
+      this.$emit("history", item);
+    },
   },
 };
 </script>
+<style scoped>
+.v-btn {
+  margin-right: 8px;
+}
+</style>

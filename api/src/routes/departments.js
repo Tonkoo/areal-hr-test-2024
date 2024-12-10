@@ -5,6 +5,7 @@ const {
   addDepartment,
   updateDepartment,
   deleteDepartment,
+  getHistoryDepartments,
 } = require('../controllers/departments/db-departments')
 const departmentSchema = require('../controllers/departments/dto/validationd-departments')
 
@@ -14,6 +15,17 @@ router.get('/departments', async (req, res) => {
     res.json(departments)
   } catch (err) {
     console.error('Error fetching departments:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.get('/departments/history/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const historyDepartments = await getHistoryDepartments(id)
+    res.json(historyDepartments)
+  } catch (err) {
+    console.error('Error fetching history departments:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -34,6 +46,7 @@ router.post('/departments', async (req, res) => {
 
     const { name, comment, parent_id, organization_id } = value
     const newDepartment = await addDepartment(
+      req,
       name,
       comment,
       parent_id,
@@ -63,6 +76,7 @@ router.put('/departments/:id', async (req, res) => {
     const { name, comment, parent_id, organization_id } = value
 
     const updatedDepartment = await updateDepartment(
+      req,
       id,
       name,
       comment,

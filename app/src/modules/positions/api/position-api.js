@@ -16,6 +16,21 @@ export default {
         throw err;
       });
   },
+  getHistoryPositions(id) {
+    return api
+      .get(`/positions/history/${id}`)
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          return response.data;
+        } else {
+          throw new Error("Expected an array but got: " + response.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching history positions:", err);
+        throw err;
+      });
+  },
   addPosition(position) {
     return api
       .post("/positions", position)

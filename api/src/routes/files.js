@@ -1,15 +1,14 @@
 const express = require('express')
 const router = express.Router()
-const client = require('../db')
+const pool = require('../db')
 const multer = require('multer')
 const {
   getFiles,
   addFile,
   deleteFile,
-  getNumberFilesEmployee,
+  getFileById,
 } = require('../controllers/employeeFiles/db-file')
 const {
-  saveFile,
   deleteFileFromSystem,
 } = require('../controllers/employeeFiles/service-file')
 
@@ -28,37 +27,24 @@ router.get('/files/:employee_id', async (req, res) => {
 })
 
 router.post('/files/:employee_id', upload.single('file'), async (req, res) => {
+  const connection = await pool.connect()
   try {
     const { employee_id } = req.params
-    const { last_name } = req.body
-    const { first_name } = req.body
-    const { middle_name } = req.body
-    const { numberfile } = await getNumberFilesEmployee(employee_id)
-    const fileName =
-      'паспорт' +
-      '-' +
-      last_name.toLowerCase() +
-      '-' +
-      first_name.toLowerCase() +
-      '-' +
-      middle_name.toLowerCase() +
-      '-' +
-      employee_id +
-      '-№' +
-      numberfile
-    const filePath = await saveFile(req.file, fileName)
-    const newFile = await addFile(fileName, filePath, employee_id)
-
+    const file = req.file
+    const newFile = await addFile(req, employee_id, file, connection)
     res
       .status(201)
       .json({ message: 'File added successfully', fileId: newFile.id })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'An error occurred while adding the file' })
+  } finally {
+    connection.release()
   }
 })
 
 router.delete('/files/:fileId', async (req, res) => {
+  const connection = await pool.connect()
   try {
     const { fileId } = req.params
     const { filepath } = req.query
@@ -67,22 +53,40 @@ router.delete('/files/:fileId', async (req, res) => {
       return res.status(400).json({ error: 'The file path is not specified' })
     }
 
-    await client.query('BEGIN')
+    await connection.query('BEGIN')
 
-    const deletedFiles = await deleteFile(fileId)
+    const deletedFiles = await deleteFile(req, fileId, connection)
     if (!deletedFiles) {
-      await client.query('ROLLBACK')
+      await connection.query('ROLLBACK')
       return res.status(404).json({ error: 'File not found' })
     }
     await deleteFileFromSystem(filepath)
 
-    await client.query('COMMIT')
+    await connection.query('COMMIT')
 
     res.status(200).json({ message: 'File successfully deleted' })
   } catch (err) {
     console.error(err)
-    await client.query('ROLLBACK')
+    await connection.query('ROLLBACK')
     res.status(500).json({ error: 'An error occurred while deleting the file' })
+  } finally {
+    connection.release()
+  }
+})
+
+router.get('/files/download/:fileId', async (req, res) => {
+  const { fileId } = req.params
+
+  try {
+    const file = await getFileById(fileId)
+    if (!file) {
+      return res.status(404).json({ error: 'File not found' })
+    }
+
+    res.download(file.path, file.name)
+  } catch (err) {
+    console.error('Error downloading file:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
 })
 

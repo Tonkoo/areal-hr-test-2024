@@ -8,6 +8,7 @@ const {
   addOrganization,
   updateOrganization,
   deleteOrganization,
+  getHistoryOrganizations,
 } = require('../controllers/organizations/db-organizations')
 
 router.get('/organizations', async (req, res) => {
@@ -16,6 +17,17 @@ router.get('/organizations', async (req, res) => {
     res.json(organizations)
   } catch (err) {
     console.error('Error fetching organizations:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.get('/organizations/history/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const historyOrganizations = await getHistoryOrganizations(id)
+    res.json(historyOrganizations)
+  } catch (err) {
+    console.error('Error fetching history organizations:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -36,7 +48,7 @@ router.post('/organizations', async (req, res) => {
 
     const { name, comment } = value
 
-    const newOrganization = await addOrganization(name, comment)
+    const newOrganization = await addOrganization(req, name, comment)
 
     res.status(201).json(newOrganization)
   } catch (err) {
@@ -62,7 +74,12 @@ router.put('/organizations/:id', async (req, res) => {
     const { id } = req.params
     const { name, comment } = value
 
-    const updatedOrganizations = await updateOrganization(id, name, comment)
+    const updatedOrganizations = await updateOrganization(
+      req,
+      id,
+      name,
+      comment,
+    )
     res.status(201).json(updatedOrganizations)
   } catch (err) {
     console.error('Error updating organization:', err)

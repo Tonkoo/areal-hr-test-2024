@@ -17,9 +17,20 @@
                 <v-list-item-title class="text-subtitle-1">
                   {{ file.file_name }}
                 </v-list-item-title>
-                <v-btn icon small color="error" @click="deleteFile(file)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
+                <div class="d-flex align-center">
+                  <v-btn
+                    icon
+                    small
+                    color="error"
+                    @click="deleteFile(file)"
+                    class="mr-2"
+                  >
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                  <v-btn icon small @click="downloadFile(file)">
+                    <v-icon>mdi-download</v-icon>
+                  </v-btn>
+                </div>
               </div>
             </v-list-item>
           </v-list>
@@ -88,6 +99,8 @@ export default {
         .catch((err) => console.error("Error fetching employee files:", err));
     },
     uploadFile() {
+      console.log(this.newFile);
+
       EmployeesApi.uploadEmployeeFile(this.TableEmployees, this.newFile)
         .then(() => {
           this.fetchEmployeeFiles();
@@ -101,6 +114,24 @@ export default {
           this.fetchEmployeeFiles();
         })
         .catch((err) => console.error("Error deleting file:", err));
+    },
+    downloadFile(file) {
+      EmployeesApi.downloadFile(file.file_id)
+        .then((response) => {
+          const blob = new Blob([response.data]);
+          console.log(response);
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", file.file_name);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+        })
+        .catch((err) => {
+          console.error("Error downloading file:", err);
+        });
     },
   },
 };

@@ -1,5 +1,5 @@
 <script>
-import SideBar from "./shared/components/sidebar.vue";
+import SideBar from "./shared/components/side-bar.vue";
 import { useAuthStore } from "@/stores/use-auth-store";
 
 export default {
