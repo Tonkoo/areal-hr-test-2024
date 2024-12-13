@@ -44,7 +44,6 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (userData, done) => {
   try {
     const user = await getUserById(userData.id)
-
     if (!user) return done(new Error('Пользователь не найден'))
 
     done(null, {

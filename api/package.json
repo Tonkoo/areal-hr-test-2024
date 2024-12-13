@@ -7,7 +7,8 @@
     "migrate:down": "node-pg-migrate down --envPath=../.env",
     "migrate:create": "node-pg-migrate create --envPath=../.env",
     "start": "node src/server.js",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "lint": "npx eslint"
   },
   "author": "Tonkoo12",
   "license": "ISC",
