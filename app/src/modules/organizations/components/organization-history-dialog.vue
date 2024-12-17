@@ -56,16 +56,18 @@ export default {
     };
   },
   watch: {
-    historyDialog(newValue) {
-      if (newValue) {
-        this.fetchHistoryOrganizations();
-      }
-    },
     organization: {
       handler(newOrganization) {
         this.localOrganization = { ...newOrganization };
       },
       deep: true,
+    },
+    historyDialog(newValue) {
+      if (newValue) {
+        this.$nextTick(() => {
+          this.fetchHistoryOrganizations();
+        });
+      }
     },
   },
   methods: {

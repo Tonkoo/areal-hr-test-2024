@@ -58,7 +58,9 @@ export default {
   watch: {
     historyDialog(newValue) {
       if (newValue) {
-        this.fetchHistoryEmployees();
+        this.$nextTick(() => {
+          this.fetchHistoryEmployees();
+        });
       }
     },
     employee: {

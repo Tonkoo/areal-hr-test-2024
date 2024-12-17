@@ -1,12 +1,12 @@
 import {
   useMediaQuery
-} from "./chunk-YJ6QP2VR.js";
+} from "./chunk-A7UTJUSY.js";
 import {
   computed,
   ref,
   shallowRef,
   watch
-} from "./chunk-LW4I4DCF.js";
+} from "./chunk-VJWGEPT5.js";
 
 // node_modules/vitepress/dist/client/theme-default/index.js
 import "C:/Users/andre/OneDrive/Документы/хуета/Areal/web/docs/node_modules/vitepress/dist/client/theme-default/styles/fonts.css";

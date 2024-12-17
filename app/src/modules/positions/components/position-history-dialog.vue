@@ -58,7 +58,9 @@ export default {
   watch: {
     historyDialog(newValue) {
       if (newValue) {
-        this.fetchHistoryPositions();
+        this.$nextTick(() => {
+          this.fetchHistoryPositions();
+        });
       }
     },
     position: {

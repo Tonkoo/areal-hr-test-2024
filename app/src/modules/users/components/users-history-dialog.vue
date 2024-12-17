@@ -58,7 +58,9 @@ export default {
   watch: {
     historyDialog(newValue) {
       if (newValue) {
-        this.fetchHistoryUser();
+        this.$nextTick(() => {
+          this.fetchHistoryUser();
+        });
       }
     },
     user: {
@@ -73,8 +75,6 @@ export default {
       this.$emit("update:historyDialog", false);
     },
     fetchHistoryUser() {
-      console.log(this.localUser.id);
-
       usersApi
         .getHistoryUsers(this.localUser.id)
         .then((data) => {
