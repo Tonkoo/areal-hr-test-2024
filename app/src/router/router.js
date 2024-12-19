@@ -25,9 +25,10 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const checkrole = await authorizationApi.getUserRole();
-  if (checkrole.session) {
+  if (checkrole && checkrole.session) {
     authStore.authenticateUser();
   }
+
   if (!authStore.isAuthenticated && to.path !== "/") {
     next("/");
   } else if (authStore.isAuthenticated && to.path === "/") {

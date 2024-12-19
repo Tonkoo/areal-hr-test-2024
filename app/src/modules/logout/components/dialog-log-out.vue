@@ -27,7 +27,7 @@ export default {
       required: true,
     },
   },
-  emits: ["update:logOutDialog"],
+  emits: ["update:logOutDialog", "openSnackBar"],
   methods: {
     closeDialog() {
       this.$emit("update:logOutDialog", false);
@@ -39,7 +39,11 @@ export default {
           this.closeDialog();
         })
         .catch((err) => {
-          console.error("Error logout:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.message,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
         });
     },
   },

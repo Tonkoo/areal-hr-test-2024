@@ -100,7 +100,7 @@ export default {
           } else {
             this.settingsSnackBar = {
               error: true,
-              text: err.status + ": " + err.response.statusText,
+              text: err.message,
             };
             this.$emit("openSnackBar", this.settingsSnackBar);
           }
@@ -127,7 +127,7 @@ export default {
           } else {
             this.settingsSnackBar = {
               error: true,
-              text: err.status + ": " + err.response.statusText,
+              text: err.message,
             };
             this.$emit("openSnackBar", this.settingsSnackBar);
           }

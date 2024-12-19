@@ -1,4 +1,4 @@
-const client = require('../../db')
+const client = require('./../../services/db')
 const logger = require('./../../logger/logger')
 const { fetching } = require('./../../errors/text-errors')
 

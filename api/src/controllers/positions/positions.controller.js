@@ -1,4 +1,4 @@
-const pool = require('../../db')
+const pool = require('./../../services/db')
 const { addHistory } = require('./../history/history.controller')
 const logger = require('./../../logger/logger')
 const {
@@ -17,24 +17,6 @@ async function getPositions() {
     return result.rows
   } catch (err) {
     logger.error(`${fetching} positions: ${err.message}`, {
-      stack: err.stack,
-    })
-    throw err
-  } finally {
-    connection.release()
-  }
-}
-
-async function getHistoryPositions(id) {
-  const connection = await pool.connect()
-  try {
-    const result = await connection.query(
-      `SELECT history_change.id, to_char(datetime_operations, 'YYYY-MM-DD HH24:MI:SS') as datetime_operations, (users.last_name || ' ' || LEFT(users.first_name, 1) || '. ' || left(users.middle_name, 1) || '.') as full_name, old_value, new_value FROM history_change join users on history_change.author = users.id where object_operations_id =3 and record_id = $1`,
-      [id],
-    )
-    return result.rows
-  } catch (err) {
-    logger.error(`${fetching} history positions: ${err.message}`, {
       stack: err.stack,
     })
     throw err
@@ -90,10 +72,6 @@ async function updatePosition(req, id, name, department_id) {
        WHERE id = $3 RETURNING *`,
       [name, department_id, id],
     )
-    if (result.rows.length === 0) {
-      return { error: 'Position not found' }
-    }
-
     const department = await connection.query(
       'select name from departments where id=$1',
       [department_id],
@@ -132,10 +110,6 @@ async function deletePosition(id) {
       [id],
     )
 
-    if (result.rows.length === 0) {
-      return { error: 'Position not found' }
-    }
-
     await connection.query(
       `DELETE FROM history_change WHERE record_id = $1 and object_operations_id = 3`,
       [id],
@@ -159,5 +133,4 @@ module.exports = {
   addPosition,
   updatePosition,
   deletePosition,
-  getHistoryPositions,
 }

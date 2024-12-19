@@ -1,4 +1,4 @@
-const pool = require('../../db')
+const pool = require('./../../services/db')
 const logger = require('./../../logger/logger')
 const { fetching } = require('./../../errors/text-errors')
 

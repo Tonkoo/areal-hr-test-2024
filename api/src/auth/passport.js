@@ -1,6 +1,8 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const argon2 = require('argon2')
+const logger = require('./../logger/logger')
+const { authentication, deserialize } = require('./../errors/text-errors')
 const {
   getUserByLogin,
   getUserById,
@@ -34,6 +36,7 @@ passport.use(
           roleName: user.role_name,
         })
       } catch (err) {
+        logger.error(`${authentication} ${err.message}`, err)
         return done(err)
       }
     },
@@ -47,7 +50,11 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (userData, done) => {
   try {
     const user = await getUserById(userData.id)
-    if (!user) return done(new Error('Пользователь не найден'))
+
+    if (!user) {
+      logger.error(`${deserialize} ${userData.id}`)
+      return done(new Error(`${deserialize} ${userData.id}`))
+    }
 
     done(null, {
       id: user.id,
@@ -57,6 +64,7 @@ passport.deserializeUser(async (userData, done) => {
       roleName: user.role_name,
     })
   } catch (err) {
+    logger.error(`${deserialize} ${userData.id}`)
     done(err)
   }
 })

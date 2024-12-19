@@ -27,7 +27,7 @@ export default {
         window.location.reload();
       })
       .catch((err) => {
-        console.error("Error:", err);
+        throw err;
       });
   },
   getUserRole() {
@@ -36,9 +36,7 @@ export default {
       .then((response) => {
         return response.data;
       })
-      .catch(() => {
-        window.location.reload();
-      });
+      .catch(() => {});
   },
   getUserFullName() {
     return api

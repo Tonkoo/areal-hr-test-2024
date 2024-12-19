@@ -8,7 +8,6 @@ const {
   updateUser,
   deletedUser,
   updateRole,
-  getHistoryUsers,
 } = require('../controllers/users/users.controller')
 const {
   fetching,
@@ -22,6 +21,9 @@ const {
   UsersSchema,
   AlternativeUsersSchema,
 } = require('../controllers/users/dto/validation-users')
+const {
+  getHistorRecord,
+} = require('./../controllers/history/history.controller')
 
 router.get('/users', async (req, res) => {
   if (req.isAuthenticated()) {
@@ -44,13 +46,12 @@ router.get('/users/history/:id', async (req, res) => {
   if (req.isAuthenticated()) {
     try {
       const { id } = req.params
-      const historyUsers = await getHistoryUsers(id)
+      const historyUsers = await getHistorRecord(5, id)
       return res.json(historyUsers)
     } catch (err) {
       logger.error(`${fetching} history users: ${err.message}`, {
         stack: err.stack,
       })
-      // console.error('Error fetching history users:', err)
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: Internal })

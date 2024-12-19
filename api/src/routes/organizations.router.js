@@ -18,8 +18,10 @@ const {
   addOrganization,
   updateOrganization,
   deleteOrganization,
-  getHistoryOrganizations,
 } = require('../controllers/organizations/organizations.controller')
+const {
+  getHistorRecord,
+} = require('./../controllers/history/history.controller')
 
 router.get('/organizations', async (req, res) => {
   if (req.isAuthenticated()) {
@@ -42,7 +44,7 @@ router.get('/organizations/history/:id', async (req, res) => {
   if (req.isAuthenticated()) {
     try {
       const { id } = req.params
-      const historyOrganizations = await getHistoryOrganizations(id)
+      const historyOrganizations = await getHistorRecord(1, id)
       return res.json(historyOrganizations)
     } catch (err) {
       logger.error(`${fetching} history organizations: ${err.message}`, {

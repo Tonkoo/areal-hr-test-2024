@@ -7,7 +7,6 @@ const {
   addDepartment,
   updateDepartment,
   deleteDepartment,
-  getHistoryDepartments,
 } = require('../controllers/departments/departments.controller')
 const {
   fetching,
@@ -18,6 +17,9 @@ const {
   access,
 } = require('./../errors/text-errors')
 const departmentSchema = require('../controllers/departments/dto/validationd-departments')
+const {
+  getHistorRecord,
+} = require('./../controllers/history/history.controller')
 
 router.get('/departments', async (req, res) => {
   if (req.isAuthenticated()) {
@@ -40,7 +42,7 @@ router.get('/departments/history/:id', async (req, res) => {
   if (req.isAuthenticated()) {
     try {
       const { id } = req.params
-      const historyDepartments = await getHistoryDepartments(id)
+      const historyDepartments = await getHistorRecord(2, id)
       return res.json(historyDepartments)
     } catch (err) {
       logger.error(`${fetching} history departments: ${err.message}`, {

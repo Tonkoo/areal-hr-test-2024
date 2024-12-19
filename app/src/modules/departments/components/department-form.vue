@@ -107,7 +107,7 @@ export default {
     },
     filteredDepartments() {
       return this.departments.filter(
-        (dept) => dept.department_id !== this.TableDepartment.id
+        (dept) => dept.department_id !== this.localDepartments.department_id
       );
     },
   },
@@ -123,7 +123,7 @@ export default {
         .catch((err) => {
           this.settingsSnackBar = {
             error: true,
-            text: err.status + ": " + err.response.statusText,
+            text: err.message,
           };
           this.$emit("openSnackBar", this.settingsSnackBar);
         });
@@ -163,7 +163,7 @@ export default {
             } else {
               this.settingsSnackBar = {
                 error: true,
-                text: err.status + ": " + err.response.statusText,
+                text: err.message,
               };
               this.$emit("openSnackBar", this.settingsSnackBar);
             }
@@ -191,7 +191,7 @@ export default {
             } else {
               this.settingsSnackBar = {
                 error: true,
-                text: err.status + ": " + err.response.statusText,
+                text: err.message,
               };
               this.$emit("openSnackBar", this.settingsSnackBar);
             }
@@ -222,7 +222,7 @@ export default {
             } else {
               this.settingsSnackBar = {
                 error: true,
-                text: err.status + ": " + err.response.statusText,
+                text: err.message,
               };
               this.$emit("openSnackBar", this.settingsSnackBar);
             }
@@ -250,7 +250,7 @@ export default {
             } else {
               this.settingsSnackBar = {
                 error: true,
-                text: err.status + ": " + err.response.statusText,
+                text: err.message,
               };
               this.$emit("openSnackBar", this.settingsSnackBar);
             }

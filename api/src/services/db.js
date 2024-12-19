@@ -1,5 +1,7 @@
 require('dotenv').config({ path: '../.env' })
 const { Pool } = require('pg')
+const logger = require('./../logger/logger')
+const { connect } = require('../errors/text-errors')
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -11,7 +13,9 @@ async function testDatabaseConnection() {
     console.log('Connected to PostgreSQL')
     client.release()
   } catch (err) {
-    console.error('Connection error:', err)
+    logger.error(`${connect} db: ${err.message}`, {
+      stack: err.stack,
+    })
     process.exit(1)
   }
 }

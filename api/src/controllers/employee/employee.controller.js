@@ -1,4 +1,4 @@
-const pool = require('../../db')
+const pool = require('./../../services/db')
 const logger = require('./../../logger/logger')
 const {
   fetching,
@@ -17,24 +17,6 @@ async function getEmployees() {
     return result.rows
   } catch (err) {
     logger.error(`${fetching} employees: ${err.message}`, {
-      stack: err.stack,
-    })
-    throw err
-  } finally {
-    connection.release()
-  }
-}
-
-async function getHistoryEmployees(id) {
-  const connection = await pool.connect()
-  try {
-    const result = await connection.query(
-      `SELECT history_change.id, to_char(datetime_operations, 'YYYY-MM-DD HH24:MI:SS') as datetime_operations, (users.last_name || ' ' || LEFT(users.first_name, 1) || '. ' || left(users.middle_name, 1) || '.') as full_name, old_value, new_value FROM history_change join users on history_change.author = users.id where object_operations_id =4 and record_id = $1`,
-      [id],
-    )
-    return result.rows
-  } catch (err) {
-    logger.error(`${fetching} history employees: ${err.message}`, {
       stack: err.stack,
     })
     throw err
@@ -262,7 +244,7 @@ async function updateEmployee(
       newValue += `Должность: ${position.rows[0].name}\n`
     }
     if (oldDataResult.rows[0].salary != salary) {
-      oldValue += `Зарплата: ${oldDataResult.rows[0].salary}\n`
+      oldValue += `Зарплата: $${oldDataResult.rows[0].salary}.00\n`
       newValue += `Зарплата: $${salary}.00\n`
     }
 
@@ -321,5 +303,4 @@ module.exports = {
   addEmployee,
   updateEmployee,
   dismissEmployee,
-  getHistoryEmployees,
 }

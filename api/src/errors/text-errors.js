@@ -8,4 +8,9 @@ module.exports = {
   access: 'Unauthorized access',
   download: 'Error downloading file:',
   found: 'not found',
+  connect: 'Connection error',
+  authentication: 'User verification error:',
+  deserialize: 'Error when deserializing user:',
+  session: 'Error while setting up session:',
+  exit: 'Error when exiting:',
 }

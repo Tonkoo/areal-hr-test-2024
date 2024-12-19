@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const pool = require('../db')
+const pool = require('./../services/db')
 const { StatusCodes } = require('http-status-codes')
 const logger = require('../logger/logger')
 const multer = require('multer')
@@ -17,10 +17,12 @@ const {
   addEmployee,
   updateEmployee,
   dismissEmployee,
-  getHistoryEmployees,
 } = require('../controllers/employee/employee.controller')
 const { addFile } = require('../controllers/employeeFiles/file.controller')
 const employeeSchema = require('../controllers/employee/dto/validationd-employees')
+const {
+  getHistorRecord,
+} = require('./../controllers/history/history.controller')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -46,7 +48,7 @@ router.get('/employees/history/:id', async (req, res) => {
   if (req.isAuthenticated()) {
     try {
       const { id } = req.params
-      const historyEmployees = await getHistoryEmployees(id)
+      const historyEmployees = await getHistorRecord(4, id)
       return res.json(historyEmployees)
     } catch (err) {
       logger.error(`${fetching} history employees: ${err.message}`, {
@@ -190,7 +192,7 @@ router.put('/employees/:id', async (req, res) => {
         position_id,
         salary,
       )
-      return res.json({ message })
+      return res.status(StatusCodes.CREATED).json({ message })
     } catch (err) {
       logger.error(`${update} employee: ${err.message}`, {
         stack: err.stack,
@@ -208,7 +210,7 @@ router.post('/employees/:id', async (req, res) => {
     const { id } = req.params
     try {
       const message = await dismissEmployee(req, id)
-      return res.json({ message })
+      return res.status(StatusCodes.CREATED).json({ message })
     } catch (err) {
       logger.error(`${dismiss} organization: ${err.message}`, {
         stack: err.stack,

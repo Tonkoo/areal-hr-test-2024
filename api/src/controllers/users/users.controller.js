@@ -1,4 +1,4 @@
-const pool = require('../../db')
+const pool = require('./../../services/db')
 const argon2 = require('argon2')
 const logger = require('./../../logger/logger')
 const { addHistory } = require('./../history/history.controller')
@@ -18,24 +18,6 @@ async function getUsers() {
     return result.rows
   } catch (err) {
     logger.error(`${fetching} users: ${err.message}`, {
-      stack: err.stack,
-    })
-    throw err
-  } finally {
-    connection.release()
-  }
-}
-
-async function getHistoryUsers(id) {
-  const connection = await pool.connect()
-  try {
-    const result = await connection.query(
-      `SELECT history_change.id, to_char(datetime_operations, 'YYYY-MM-DD HH24:MI:SS') as datetime_operations, (users.last_name || ' ' || LEFT(users.first_name, 1) || '. ' || left(users.middle_name, 1) || '.') as full_name, old_value, new_value FROM history_change join users on history_change.author = users.id where object_operations_id =5 and record_id = $1`,
-      [id],
-    )
-    return result.rows
-  } catch (err) {
-    logger.error(`${fetching} history users: ${err.message}`, {
       stack: err.stack,
     })
     throw err
@@ -142,9 +124,6 @@ async function updateUser(
     }
 
     const result = await connection.query(query, values)
-    if (result.rows.length === 0) {
-      return { error: 'User not found' }
-    }
 
     await addHistory(5, id, oldValue, newValue, connection, req)
 
@@ -169,10 +148,6 @@ async function deletedUser(id) {
       'DELETE FROM users WHERE id = $1 RETURNING *',
       [id],
     )
-
-    if (result.rows.length === 0) {
-      return { error: 'User not found' }
-    }
 
     await connection.query(
       `DELETE FROM history_change WHERE record_id = $1 and object_operations_id = 5`,
@@ -228,5 +203,4 @@ module.exports = {
   updateUser,
   deletedUser,
   updateRole,
-  getHistoryUsers,
 }

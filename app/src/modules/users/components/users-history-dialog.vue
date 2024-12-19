@@ -83,7 +83,7 @@ export default {
         .catch((err) => {
           this.settingsSnackBar = {
             error: true,
-            text: err.status + ": " + err.response.statusText,
+            text: err.message,
           };
           this.$emit("openSnackBar", this.settingsSnackBar);
           this.historyUser = [];

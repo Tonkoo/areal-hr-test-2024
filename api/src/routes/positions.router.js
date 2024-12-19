@@ -16,8 +16,10 @@ const {
   addPosition,
   updatePosition,
   deletePosition,
-  getHistoryPositions,
 } = require('../controllers/positions/positions.controller')
+const {
+  getHistorRecord,
+} = require('./../controllers/history/history.controller')
 
 router.get('/positions', async (req, res) => {
   if (req.isAuthenticated()) {
@@ -40,7 +42,7 @@ router.get('/positions/history/:id', async (req, res) => {
   if (req.isAuthenticated()) {
     try {
       const { id } = req.params
-      const historyPositions = await getHistoryPositions(id)
+      const historyPositions = await getHistorRecord(3, id)
       return res.json(historyPositions)
     } catch (err) {
       logger.error(`${fetching} history positions: ${err.message}`, {

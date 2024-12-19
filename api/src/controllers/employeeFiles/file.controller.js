@@ -1,4 +1,4 @@
-const pool = require('../../db')
+const pool = require('./../../services/db')
 const path = require('path')
 const { saveFile } = require('./file.services')
 const { addHistory } = require('./../history/history.controller')
@@ -45,7 +45,7 @@ async function addFile(req, employee_id, file, connection) {
   try {
     await connection.query('BEGIN')
     const result = await connection.query(
-      'INSERT1 INTO passport_scan (name, path, employee_id) VALUES ($1, $2, $3) RETURNING id',
+      'INSERT INTO passport_scan (name, path, employee_id) VALUES ($1, $2, $3) RETURNING id',
       [fileName, filePath, employee_id],
     )
 
@@ -71,7 +71,7 @@ async function deleteFile(req, fileId, connection) {
       [fileId],
     )
     const result = await connection.query(
-      'DELETE1 FROM passport_scan WHERE id = $1',
+      'DELETE FROM passport_scan WHERE id = $1',
       [fileId],
     )
 
