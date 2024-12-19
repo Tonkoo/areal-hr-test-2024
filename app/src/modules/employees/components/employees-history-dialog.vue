@@ -48,7 +48,7 @@ export default {
       required: true,
     },
   },
-  emits: ["update:historyDialog", "save"],
+  emits: ["update:historyDialog", "save", "openSnackBar"],
   data() {
     return {
       localEmployee: { ...this.employee },
@@ -75,15 +75,17 @@ export default {
       this.$emit("update:historyDialog", false);
     },
     fetchHistoryEmployees() {
-      console.log(this.localEmployee.id);
-
       employeesApi
         .getHistoryEmployees(this.localEmployee.id)
         .then((data) => {
           this.historyEmployee = data;
         })
         .catch((err) => {
-          console.error("Error fetching history employees:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.historyEmployee = [];
         });
     },

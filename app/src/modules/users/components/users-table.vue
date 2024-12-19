@@ -58,7 +58,11 @@ export default {
           this.users = data;
         })
         .catch((err) => {
-          console.error("Error fetching users:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.users = [];
         });
     },

@@ -1,5 +1,4 @@
 import api from "@/shared/api/axios";
-import { useAuthStore } from "@/stores/use-auth-store";
 
 export default {
   getEmployees() {
@@ -8,11 +7,8 @@ export default {
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error fetching employees:", err);
         throw err;
       });
   },
@@ -28,11 +24,8 @@ export default {
       })
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error fetching history employees:", err);
         throw err;
       });
   },
@@ -42,11 +35,8 @@ export default {
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error fetching regions:", err);
         throw err;
       });
   },
@@ -56,11 +46,8 @@ export default {
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error fetching cities:", err);
         throw err;
       });
   },
@@ -69,21 +56,27 @@ export default {
     files.forEach((file) => {
       formData.append(`files`, file);
     });
-    formData.append("last_name", employee.last_name);
-    formData.append("first_name", employee.first_name);
-    formData.append("middle_name", employee.middle_name);
-    formData.append("date_of_birth", employee.date_of_birth);
-    formData.append("passport_series", employee.passport_series);
-    formData.append("passport_number", employee.passport_number);
-    formData.append("region_id", employee.region_id);
-    formData.append("city_id", employee.city_id);
-    formData.append("street", employee.street);
-    formData.append("house", employee.house);
-    formData.append("building", employee.building);
-    formData.append("apartment", employee.apartment);
-    formData.append("department_id", employee.department_id);
-    formData.append("position_id", employee.position_id);
-    formData.append("salary", employee.salary);
+    if (employee.last_name) formData.append("last_name", employee.last_name);
+    if (employee.first_name) formData.append("first_name", employee.first_name);
+    if (employee.middle_name)
+      formData.append("middle_name", employee.middle_name);
+    if (employee.date_of_birth)
+      formData.append("date_of_birth", employee.date_of_birth);
+    if (employee.passport_series)
+      formData.append("passport_series", employee.passport_series);
+    if (employee.passport_number)
+      formData.append("passport_number", employee.passport_number);
+    if (employee.region_id) formData.append("region_id", employee.region_id);
+    if (employee.city_id) formData.append("city_id", employee.city_id);
+    if (employee.street) formData.append("street", employee.street);
+    if (employee.house) formData.append("house", employee.house);
+    if (employee.building) formData.append("building", employee.building);
+    if (employee.apartment) formData.append("apartment", employee.apartment);
+    if (employee.department_id)
+      formData.append("department_id", employee.department_id);
+    if (employee.position_id)
+      formData.append("position_id", employee.position_id);
+    if (employee.salary) formData.append("salary", employee.salary);
 
     return api
       .post("/employees", formData, {
@@ -94,14 +87,11 @@ export default {
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
         if (err.response && err.response.status === 400) {
-          throw err.response.data.errors;
+          throw err.response;
         }
-        console.error("Error saving employee:", err);
         throw err;
       });
   },
@@ -112,14 +102,11 @@ export default {
       .then(() => id)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
         if (err.response && err.response.status === 400) {
-          throw err.response.data.errors;
+          throw err.response;
         }
-        console.error("Error updating employee:", err);
         throw err;
       });
   },
@@ -129,11 +116,8 @@ export default {
       .then(() => id)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error dismissing employee:", err);
         throw err;
       });
   },
@@ -143,11 +127,8 @@ export default {
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error fetching employee files:", err);
         throw err;
       });
   },
@@ -168,11 +149,8 @@ export default {
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error uploading employee file:", err);
         throw err;
       });
   },
@@ -184,17 +162,12 @@ export default {
       .then(() => fileId)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error deleting employee file:", err);
         throw err;
       });
   },
   downloadFile(fileId) {
-    console.log(fileId);
-
     return api.get(`/files/download/${fileId}`, {
       responseType: "blob",
     });

@@ -1,7 +1,9 @@
 import { defineStore } from "pinia";
 
 export const useAuthStore = defineStore("authStore", {
-  state: () => ({ isAuthenticated: false }),
+  state: () => ({
+    isAuthenticated: false,
+  }),
   actions: {
     authenticateUser() {
       this.isAuthenticated = true;
@@ -10,5 +12,4 @@ export const useAuthStore = defineStore("authStore", {
       this.isAuthenticated = false;
     },
   },
-  persist: true,
 });

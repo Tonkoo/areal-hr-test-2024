@@ -1,5 +1,6 @@
 const fs = require('fs').promises
 const path = require('path')
+const logger = require('./../../logger/logger')
 
 const storagePath = '../files/'
 
@@ -24,8 +25,10 @@ async function deleteFileFromSystem(filepath) {
     await fs.unlink(filepath)
     return true
   } catch (err) {
-    console.error('Error deleting file from filesystem:', err)
-    throw new Error('Could not delete file from filesystem')
+    logger.error(`Error deleting file from filesystem: ${err.message}`, {
+      stack: err.stack,
+    })
+    throw err
   }
 }
 

@@ -47,7 +47,11 @@ export default {
           this.positions = data;
         })
         .catch((err) => {
-          console.error("Error fetching positions:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.positions = [];
         });
     },

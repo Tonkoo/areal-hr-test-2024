@@ -1,15 +1,25 @@
 const express = require('express')
 const router = express.Router()
 const pool = require('../db')
+const { StatusCodes } = require('http-status-codes')
+const logger = require('../logger/logger')
 const multer = require('multer')
+const {
+  fetching,
+  save,
+  update,
+  dismiss,
+  Internal,
+  access,
+} = require('./../errors/text-errors')
 const {
   getEmployees,
   addEmployee,
   updateEmployee,
-  deleteEmployee,
+  dismissEmployee,
   getHistoryEmployees,
-} = require('../controllers/employee/db-employee')
-const { addFile } = require('../controllers/employeeFiles/db-file')
+} = require('../controllers/employee/employee.controller')
+const { addFile } = require('../controllers/employeeFiles/file.controller')
 const employeeSchema = require('../controllers/employee/dto/validationd-employees')
 
 const storage = multer.memoryStorage()
@@ -21,11 +31,15 @@ router.get('/employees', async (req, res) => {
       const employees = await getEmployees()
       return res.json(employees)
     } catch (err) {
-      console.error('Error fetching employees:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${fetching} employees: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.get('/employees/history/:id', async (req, res) => {
@@ -35,11 +49,15 @@ router.get('/employees/history/:id', async (req, res) => {
       const historyEmployees = await getHistoryEmployees(id)
       return res.json(historyEmployees)
     } catch (err) {
-      console.error('Error fetching history employees:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${fetching} history employees: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.post('/employees', upload.array('files', 10), async (req, res) => {
@@ -55,7 +73,9 @@ router.post('/employees', upload.array('files', 10), async (req, res) => {
           acc[detail.path[0]] = detail.message
           return acc
         }, {})
-        return res.status(400).json({ errors: errorMessages })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ errors: errorMessages })
       }
 
       const {
@@ -99,17 +119,21 @@ router.post('/employees', upload.array('files', 10), async (req, res) => {
       }
       await connection.query('COMMIT')
       return res
-        .status(201)
+        .status(StatusCodes.CREATED)
         .json({ id: employeeId, message: 'Employee added successfully' })
     } catch (err) {
       await connection.query('ROLLBACK')
-      console.error('Error adding employee:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${save} employee: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     } finally {
       connection.release()
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.put('/employees/:id', async (req, res) => {
@@ -124,7 +148,9 @@ router.put('/employees/:id', async (req, res) => {
           acc[detail.path[0]] = detail.message
           return acc
         }, {})
-        return res.status(400).json({ errors: errorMessages })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ errors: errorMessages })
       }
 
       const { id } = req.params
@@ -166,25 +192,33 @@ router.put('/employees/:id', async (req, res) => {
       )
       return res.json({ message })
     } catch (err) {
-      console.error('Error updating employee data:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${update} employee: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.post('/employees/:id', async (req, res) => {
   if (req.isAuthenticated()) {
     const { id } = req.params
     try {
-      const message = await deleteEmployee(req, id)
+      const message = await dismissEmployee(req, id)
       return res.json({ message })
     } catch (err) {
-      console.error('Error when terminating the employee:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${dismiss} organization: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 module.exports = router

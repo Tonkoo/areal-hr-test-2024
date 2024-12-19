@@ -28,7 +28,7 @@ export default {
       required: true,
     },
   },
-  emits: ["update:deleteDialog", "delete"],
+  emits: ["update:deleteDialog", "delete", "openSnackBar"],
   data() {
     return {
       localdeleteOrganizationId: this.deleteOrganizationId,
@@ -46,12 +46,21 @@ export default {
     deleteOrganization() {
       OrganizationsApi.deleteOrganization(this.localdeleteOrganizationId)
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.$emit("delete");
           this.closeDialog();
           this.localdeleteOrganizationId = null;
         })
         .catch((err) => {
-          console.error("Error deleting organization:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
         });
     },
   },

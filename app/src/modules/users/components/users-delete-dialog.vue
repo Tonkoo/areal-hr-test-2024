@@ -45,7 +45,7 @@ export default {
       deep: true,
     },
   },
-  emits: ["update:deleteDialog", "delete"],
+  emits: ["update:deleteDialog", "delete", "openSnackBar"],
   methods: {
     closeDialog() {
       this.$emit("update:deleteDialog", false);
@@ -53,10 +53,21 @@ export default {
     deleteUser() {
       UsersApi.deleteUser(this.LocalUser.id)
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.closeDialog();
           this.$emit("delete");
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
   },
 };

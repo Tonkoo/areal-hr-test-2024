@@ -38,7 +38,7 @@ export default {
       this.localdeletePositionId = newId;
     },
   },
-  emits: ["update:deleteDialog", "delete"],
+  emits: ["update:deleteDialog", "delete", "openSnackBar"],
   methods: {
     closeDialog() {
       this.$emit("update:deleteDialog", false);
@@ -46,12 +46,21 @@ export default {
     deletePosition() {
       PositionApi.deletePosition(this.localdeletePositionId)
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.$emit("delete");
           this.closeDialog();
           this.localdeletePositionId = null;
         })
         .catch((err) => {
-          console.error("Error deleting position:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
         });
     },
   },

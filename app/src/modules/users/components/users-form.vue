@@ -111,7 +111,7 @@ export default {
       deep: true,
     },
   },
-  emits: ["update:dialog", "save"],
+  emits: ["update:dialog", "save", "openSnackBar"],
   computed: {
     getDialogTitle() {
       return this.resetPassword
@@ -152,14 +152,26 @@ export default {
         password: this.localUsers.password,
       })
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.errors = [];
           this.$emit("save");
           this.closeDialog();
           this.localUsers = [];
         })
         .catch((err) => {
-          this.errors = err;
-          console.error("Error adding user:", err);
+          if (err.status == 400) {
+            this.errors = err.data.errors;
+          } else {
+            this.settingsSnackBar = {
+              error: true,
+              text: err.status + ": " + err.response.statusText,
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
+          }
         });
     },
     updateUser() {
@@ -183,14 +195,26 @@ export default {
 
       UsersApi.updateUser(this.localUsers.id, this.users, this.resetPassword)
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.errors = [];
           this.$emit("save");
           this.closeDialog();
           this.localUsers = [];
         })
         .catch((err) => {
-          this.errors = err;
-          console.error("Error updating user:", err);
+          if (err.status == 400) {
+            this.errors = err.data.errors;
+          } else {
+            this.settingsSnackBar = {
+              error: true,
+              text: err.status + ": " + err.response.statusText,
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
+          }
         });
     },
   },

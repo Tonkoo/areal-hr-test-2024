@@ -2,15 +2,25 @@ const express = require('express')
 const router = express.Router()
 const pool = require('../db')
 const multer = require('multer')
+const { StatusCodes } = require('http-status-codes')
+const logger = require('../logger/logger')
 const {
   getFiles,
   addFile,
   deleteFile,
   getFileById,
-} = require('../controllers/employeeFiles/db-file')
+} = require('../controllers/employeeFiles/file.controller')
+const {
+  fetching,
+  save,
+  deleting,
+  Internal,
+  access,
+  download,
+} = require('./../errors/text-errors')
 const {
   deleteFileFromSystem,
-} = require('../controllers/employeeFiles/service-file')
+} = require('../controllers/employeeFiles/file.services')
 
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
@@ -22,13 +32,15 @@ router.get('/files/:employee_id', async (req, res) => {
       const files = await getFiles(employee_id)
       return res.json(files)
     } catch (err) {
-      console.error(err)
+      logger.error(`${fetching} files: ${err.message}`, {
+        stack: err.stack,
+      })
       return res
-        .status(500)
-        .json({ error: 'An error occurred while fetching files' })
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.post('/files/:employee_id', upload.single('file'), async (req, res) => {
@@ -39,18 +51,20 @@ router.post('/files/:employee_id', upload.single('file'), async (req, res) => {
       const file = req.file
       const newFile = await addFile(req, employee_id, file, connection)
       return res
-        .status(201)
+        .status(StatusCodes.CREATED)
         .json({ message: 'File added successfully', fileId: newFile.id })
     } catch (err) {
-      console.error(err)
+      logger.error(`${save} file: ${err.message}`, {
+        stack: err.stack,
+      })
       return res
-        .status(500)
-        .json({ error: 'An error occurred while adding the file' })
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     } finally {
       connection.release()
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.delete('/files/:fileId', async (req, res) => {
@@ -59,34 +73,29 @@ router.delete('/files/:fileId', async (req, res) => {
     try {
       const { fileId } = req.params
       const { filepath } = req.query
-
-      if (!filepath) {
-        return res.status(400).json({ error: 'The file path is not specified' })
-      }
-
       await connection.query('BEGIN')
 
-      const deletedFiles = await deleteFile(req, fileId, connection)
-      if (!deletedFiles) {
-        await connection.query('ROLLBACK')
-        return res.status(404).json({ error: 'File not found' })
-      }
+      await deleteFile(req, fileId, connection)
       await deleteFileFromSystem(filepath)
 
       await connection.query('COMMIT')
 
-      return res.status(200).json({ message: 'File successfully deleted' })
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: 'File successfully deleted' })
     } catch (err) {
-      console.error(err)
+      logger.error(`${deleting} file: ${err.message}`, {
+        stack: err.stack,
+      })
       await connection.query('ROLLBACK')
       return res
-        .status(500)
-        .json({ error: 'An error occurred while deleting the file' })
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     } finally {
       connection.release()
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.get('/files/download/:fileId', async (req, res) => {
@@ -94,17 +103,17 @@ router.get('/files/download/:fileId', async (req, res) => {
     const { fileId } = req.params
     try {
       const file = await getFileById(fileId)
-      if (!file) {
-        return res.status(404).json({ error: 'File not found' })
-      }
-
       return res.download(file.path, file.name)
     } catch (err) {
-      console.error('Error downloading file:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${download} ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 module.exports = router

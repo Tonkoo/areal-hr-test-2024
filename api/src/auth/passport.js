@@ -1,7 +1,10 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const argon2 = require('argon2')
-const { getUserByLogin, getUserById } = require('../controllers/auth/db-auth')
+const {
+  getUserByLogin,
+  getUserById,
+} = require('../controllers/auth/auth.controller')
 
 passport.use(
   new LocalStrategy(

@@ -1,9 +1,5 @@
 <template>
-  <v-container
-    fluid
-    class="d-flex flex-column"
-    style="height: 100vh; padding: 0"
-  >
+  <v-container fluid class="d-flex flex-column" style="padding: 0">
     <v-toolbar flat>
       <v-toolbar-title>Должности</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -23,6 +19,7 @@
       :TablePosition="TablePosition"
       @update:dialog="dialog = $event"
       @save="refreshPosition"
+      @openSnackBar="openSnackBar"
     />
 
     <PositionDeleteDialog
@@ -30,11 +27,13 @@
       :deletePositionId="deletePositionId"
       @update:deleteDialog="deleteDialog = $event"
       @delete="refreshPosition"
+      @openSnackBar="openSnackBar"
     />
     <PositionHistoryDialog
       :historyDialog="historyDialog"
       :position="TablePosition"
       @update:historyDialog="historyDialog = $event"
+      @openSnackBar="openSnackBar"
     />
 
     <PositionTable
@@ -42,6 +41,13 @@
       @edit="openEditDialog"
       @delete="openDeleteDialog"
       @history="openHistoryDialog"
+      @openSnackBar="openSnackBar"
+    />
+
+    <snackBar
+      :snackbar="snackbar"
+      @update:snackbar="snackbar = $event"
+      :settingsSnackBar="localSettingsSnackBar"
     />
   </v-container>
 </template>
@@ -51,6 +57,7 @@ import PositionForm from "@/modules/positions/components/position-form.vue";
 import PositionDeleteDialog from "@/modules/positions/components/position-delete-dialog.vue";
 import PositionTable from "@/modules/positions/components/position-table.vue";
 import PositionHistoryDialog from "@/modules/positions/components/position-history-dialog.vue";
+import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
   components: {
@@ -58,6 +65,7 @@ export default {
     PositionDeleteDialog,
     PositionTable,
     PositionHistoryDialog,
+    snackBar,
   },
   data() {
     return {
@@ -66,6 +74,11 @@ export default {
       deleteDialog: false,
       historyDialog: false,
       deletePositionId: 0,
+      snackbar: false,
+      localSettingsSnackBar: {
+        error: false,
+        text: null,
+      },
       TablePosition: {
         id: null,
         position_name: "",
@@ -94,6 +107,10 @@ export default {
     openHistoryDialog(item) {
       this.TablePosition = item;
       this.historyDialog = true;
+    },
+    openSnackBar(settingsSnackBar) {
+      this.localSettingsSnackBar = settingsSnackBar;
+      this.snackbar = true;
     },
   },
 };

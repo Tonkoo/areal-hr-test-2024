@@ -247,14 +247,20 @@ export default {
       deep: true,
     },
   },
-  emits: ["update:dialog", "save"],
+  emits: ["update:dialog", "save", "openSnackBar"],
   methods: {
     fetchRegions() {
       EmployeesApi.getRegions()
         .then((data) => {
           this.regions = data;
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
     fetchCitys() {
       EmployeesApi.getCities()
@@ -262,14 +268,26 @@ export default {
           this.citys = data;
           this.citiesLoaded = true;
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
     fetchDepartments() {
       DepartmentApi.getDepartments()
         .then((data) => {
           this.departments = data;
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
     fetchPositions() {
       PositionApi.getPosition()
@@ -277,7 +295,13 @@ export default {
           this.positions = data;
           this.positionsLoaded = true;
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
     formatDate(value) {
       this.date = format(new Date(value), "yyyy-MM-dd");
@@ -295,18 +319,32 @@ export default {
     addEmployees() {
       if (this.employeeFiles.length > 0) {
         const employeeData = { ...this.LocalEmployees };
+        console.log(employeeData);
+
         EmployeesApi.addEmployee(employeeData, this.employeeFiles)
           .then(() => {
+            this.settingsSnackBar = {
+              error: false,
+              text: "Successfully",
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
             this.isErrorsDate = false;
             this.errors = [];
             this.$emit("save");
             this.closeDialog();
           })
           .catch((err) => {
-            this.errors = err;
-            if (this.errors.date_of_birth) this.isErrorsDate = true;
-            else this.isErrorsDate = false;
-            console.error("Error adding employee:", err);
+            if (err.status == 400) {
+              this.errors = err.data.errors;
+              if (this.errors.date_of_birth) this.isErrorsDate = true;
+              else this.isErrorsDate = false;
+            } else {
+              this.settingsSnackBar = {
+                error: true,
+                text: err.status + ": " + err.response.statusText,
+              };
+              this.$emit("openSnackBar", this.settingsSnackBar);
+            }
           });
       } else this.errors.file = "Не загружен ни один файл";
     },
@@ -315,16 +353,28 @@ export default {
         ...this.LocalEmployees,
       })
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.isErrorsDate = false;
           this.errors = [];
           this.$emit("save");
           this.closeDialog();
         })
         .catch((err) => {
-          this.errors = err;
-          if (this.errors.date_of_birth) this.isErrorsDate = true;
-          else this.isErrorsDate = false;
-          console.error("Error updating employee:", err);
+          if (err.status == 400) {
+            this.errors = err.data.errors;
+            if (this.errors.date_of_birth) this.isErrorsDate = true;
+            else this.isErrorsDate = false;
+          } else {
+            this.settingsSnackBar = {
+              error: true,
+              text: err.status + ": " + err.response.statusText,
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
+          }
         });
     },
     onRegionChange() {

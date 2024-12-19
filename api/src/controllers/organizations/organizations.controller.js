@@ -1,4 +1,12 @@
 const pool = require('../../db')
+const { addHistory } = require('./../history/history.controller')
+const logger = require('./../../logger/logger')
+const {
+  fetching,
+  save,
+  update,
+  deleting,
+} = require('./../../errors/text-errors')
 
 async function getOrganizations() {
   const connection = await pool.connect()
@@ -6,7 +14,9 @@ async function getOrganizations() {
     const result = await connection.query('SELECT * FROM organizations')
     return result.rows
   } catch (err) {
-    console.error('Error fetching organizations:', err)
+    logger.error(`${fetching} organizations: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -22,32 +32,12 @@ async function getHistoryOrganizations(id) {
     )
     return result.rows
   } catch (err) {
-    console.error('Error fetching history organizations:', err)
+    logger.error(`${fetching} history organizations: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
-  }
-}
-
-async function addHistory(record_id, oldValue, newValue, connection, req) {
-  try {
-    const currentDate = new Date()
-    const datetime_operations = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-    const author = req.user.id
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
-       VALUES ($1, $2, 1, $3, $4, $5)`,
-      [datetime_operations, author, record_id, oldValue, newValue],
-    )
-  } catch (err) {
-    console.error('Error saving history:', err)
   }
 }
 
@@ -64,13 +54,15 @@ async function addOrganization(req, name, comment) {
 
     const newValue = `Название: ${name}\nКомментарий: ${comment}`
 
-    await addHistory(organizationId, '', newValue, connection, req)
+    await addHistory(1, organizationId, '', newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error saving organization:', err)
+    logger.error(`${save} organization: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -101,13 +93,15 @@ async function updateOrganization(req, id, name, comment) {
       newValue += `Комментарий: ${comment}\n`
     }
 
-    await addHistory(id, oldValue, newValue, connection, req)
+    await addHistory(1, id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error updating organization:', err)
+    logger.error(`${update} organization: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -130,7 +124,9 @@ async function deleteOrganization(id) {
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error deleting organization:', err)
+    logger.error(`${deleting} organization: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()

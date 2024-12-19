@@ -89,8 +89,6 @@ export default {
             this.localUser = {};
           })
           .catch((err) => {
-            console.log(this.localUser);
-            console.log("Error", err);
             this.error = { message: err.response.data.message };
           });
       }

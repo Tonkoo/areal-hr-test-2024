@@ -1,9 +1,5 @@
 <template>
-  <v-container
-    fluid
-    class="d-flex flex-column"
-    style="height: 100vh; padding: 0"
-  >
+  <v-container fluid class="d-flex flex-column" style="padding: 0">
     <v-toolbar flat>
       <v-toolbar-title>Сотрудники</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -23,12 +19,14 @@
       :TableEmployees="TableEmployees"
       @save="refreshEmployees"
       @update:dialog="dialog = $event"
+      @openSnackBar="openSnackBar"
     />
 
     <EmployeesDetailsDialog
       :detailsDialog="detailsDialog"
       :TableEmployees="TableEmployees"
       @update:detailsDialog="detailsDialog = $event"
+      @openSnackBar="openSnackBar"
     />
 
     <EmployeesDismissDialog
@@ -36,18 +34,21 @@
       :TableEmployees="TableEmployees"
       @update:dismissDialog="dismissDialog = $event"
       @dismiss="refreshEmployees"
+      @openSnackBar="openSnackBar"
     />
 
     <EmployeesFilesDialog
       :filesDialog="filesDialog"
       :TableEmployees="TableEmployees"
       @update:filesDialog="filesDialog = $event"
+      @openSnackBar="openSnackBar"
     />
 
     <EmployeesHistoryDialog
       :historyDialog="historyDialog"
       :employee="TableEmployees"
       @update:historyDialog="historyDialog = $event"
+      @openSnackBar="openSnackBar"
     />
 
     <EmployeesTable
@@ -57,6 +58,13 @@
       @DetailsDialog="openDetailsDialog"
       @FilesDialog="openFilesDialog"
       @history="openHistoryDialog"
+      @openSnackBar="openSnackBar"
+    />
+
+    <snackBar
+      :snackbar="snackbar"
+      @update:snackbar="snackbar = $event"
+      :settingsSnackBar="localSettingsSnackBar"
     />
   </v-container>
 </template>
@@ -68,6 +76,7 @@ import EmployeesDismissDialog from "@/modules/employees/components/employees-dis
 import EmployeesFilesDialog from "@/modules/employees/components/employees-files-dialog.vue";
 import EmployeesTable from "@/modules/employees/components/employees-table.vue";
 import EmployeesHistoryDialog from "@/modules/employees/components/employees-history-dialog.vue";
+import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
   components: {
@@ -77,6 +86,7 @@ export default {
     EmployeesFilesDialog,
     EmployeesTable,
     EmployeesHistoryDialog,
+    snackBar,
   },
   data() {
     return {
@@ -86,6 +96,11 @@ export default {
       dismissDialog: false,
       filesDialog: false,
       historyDialog: false,
+      snackbar: false,
+      localSettingsSnackBar: {
+        error: false,
+        text: null,
+      },
       TableEmployees: {
         id: null,
         last_name: "",
@@ -106,7 +121,7 @@ export default {
         position_id: null,
         salary: 0,
       },
-      employees: [],
+      // employees: [],
     };
   },
   methods: {
@@ -155,6 +170,10 @@ export default {
     openHistoryDialog(item) {
       this.TableEmployees = item;
       this.historyDialog = true;
+    },
+    openSnackBar(settingsSnackBar) {
+      this.localSettingsSnackBar = settingsSnackBar;
+      this.snackbar = true;
     },
   },
 };

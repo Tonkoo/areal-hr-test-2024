@@ -1,5 +1,15 @@
 const express = require('express')
+const { StatusCodes } = require('http-status-codes')
+const logger = require('../logger/logger')
 const router = express.Router()
+const {
+  fetching,
+  save,
+  update,
+  deleting,
+  Internal,
+  access,
+} = require('./../errors/text-errors')
 const {
   organizationSchema,
 } = require('../controllers/organizations/dto/validation-organizations')
@@ -9,7 +19,7 @@ const {
   updateOrganization,
   deleteOrganization,
   getHistoryOrganizations,
-} = require('../controllers/organizations/db-organizations')
+} = require('../controllers/organizations/organizations.controller')
 
 router.get('/organizations', async (req, res) => {
   if (req.isAuthenticated()) {
@@ -17,11 +27,15 @@ router.get('/organizations', async (req, res) => {
       const organizations = await getOrganizations()
       return res.json(organizations)
     } catch (err) {
-      console.error('Error fetching organizations:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${fetching} organizations: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.get('/organizations/history/:id', async (req, res) => {
@@ -31,11 +45,15 @@ router.get('/organizations/history/:id', async (req, res) => {
       const historyOrganizations = await getHistoryOrganizations(id)
       return res.json(historyOrganizations)
     } catch (err) {
-      console.error('Error fetching history organizations:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${fetching} history organizations: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.post('/organizations', async (req, res) => {
@@ -50,20 +68,26 @@ router.post('/organizations', async (req, res) => {
           acc[detail.path[0]] = detail.message
           return acc
         }, {})
-        return res.status(400).json({ errors: errorMessages })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ errors: errorMessages })
       }
 
       const { name, comment } = value
 
       const newOrganization = await addOrganization(req, name, comment)
 
-      return res.status(201).json(newOrganization)
+      return res.status(StatusCodes.CREATED).json(newOrganization)
     } catch (err) {
-      console.error('Error saving organization:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${save} organization: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.put('/organizations/:id', async (req, res) => {
@@ -78,7 +102,9 @@ router.put('/organizations/:id', async (req, res) => {
           acc[detail.path[0]] = detail.message
           return acc
         }, {})
-        return res.status(400).json({ errors: errorMessages })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ errors: errorMessages })
       }
 
       const { id } = req.params
@@ -90,13 +116,17 @@ router.put('/organizations/:id', async (req, res) => {
         name,
         comment,
       )
-      return res.status(201).json(updatedOrganizations)
+      return res.status(StatusCodes.CREATED).json(updatedOrganizations)
     } catch (err) {
-      console.error('Error updating organization:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${update} organization: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.delete('/organizations/:id', async (req, res) => {
@@ -104,13 +134,17 @@ router.delete('/organizations/:id', async (req, res) => {
     const { id } = req.params
     try {
       const deltedOrganizations = await deleteOrganization(id)
-      return res.status(201).json(deltedOrganizations)
+      return res.status(StatusCodes.CREATED).json(deltedOrganizations)
     } catch (err) {
-      console.error('Error deleting organization:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${deleting} organization: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 module.exports = router

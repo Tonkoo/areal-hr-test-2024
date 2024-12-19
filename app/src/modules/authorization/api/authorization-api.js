@@ -10,11 +10,52 @@ export default {
       .then((response) => {
         console.log("Успешный вход:", response.data);
         authStore.authenticateUser();
-        router.push("/home");
+        if (response.data.user.roleName == "Администратор")
+          router.push("/users");
+        if (response.data.user.roleName == "Кадровый сотрудник")
+          router.push("/employees");
       })
       .catch((err) => {
-        console.error("Authorization error:", err);
         throw err;
+      });
+  },
+  logOut() {
+    return api
+      .post("/logout")
+      .then((response) => {
+        console.log(response.data.message);
+        window.location.reload();
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+      });
+  },
+  getUserRole() {
+    return api
+      .get("/user-role")
+      .then((response) => {
+        return response.data;
+      })
+      .catch(() => {
+        window.location.reload();
+      });
+  },
+  getUserFullName() {
+    return api
+      .get("/user-fullname")
+      .then((response) => {
+        if (response.data && response.data.fullname) {
+          const authStore = useAuthStore();
+          authStore.authenticateUser();
+          return response.data.fullname;
+        } else {
+          throw new Error(
+            "Expected fullname but got: " + JSON.stringify(response.data)
+          );
+        }
+      })
+      .catch(() => {
+        window.location.reload();
       });
   },
 };

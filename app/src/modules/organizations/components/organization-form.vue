@@ -52,7 +52,7 @@ export default {
       required: true,
     },
   },
-  emits: ["update:dialog", "save"],
+  emits: ["update:dialog", "save", "openSnackBar"],
   data() {
     return {
       localOrganization: { ...this.organization },
@@ -88,10 +88,22 @@ export default {
           this.errors = [];
           this.$emit("update:dialog", false);
           this.$emit("save");
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
         })
         .catch((err) => {
-          this.errors = err;
-          console.error("Error adding organization:", err);
+          if (err.status == 400) {
+            this.errors = err.data.errors;
+          } else {
+            this.settingsSnackBar = {
+              error: true,
+              text: err.status + ": " + err.response.statusText,
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
+          }
         });
     },
     updateOrganization() {
@@ -100,13 +112,25 @@ export default {
         comment: this.localOrganization.comment,
       })
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.errors = [];
           this.$emit("update:dialog", false);
           this.$emit("save");
         })
         .catch((err) => {
-          this.errors = err;
-          console.error("Error updating organization:", err);
+          if (err.status == 400) {
+            this.errors = err.data.errors;
+          } else {
+            this.settingsSnackBar = {
+              error: true,
+              text: err.status + ": " + err.response.statusText,
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
+          }
         });
     },
   },

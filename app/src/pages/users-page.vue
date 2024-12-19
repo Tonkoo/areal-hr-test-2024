@@ -1,9 +1,5 @@
 <template>
-  <v-container
-    fluid
-    class="d-flex flex-column"
-    style="height: 100vh; padding: 0"
-  >
+  <v-container fluid class="d-flex flex-column" style="padding: 0">
     <v-toolbar flat>
       <v-toolbar-title>Пользователи</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -24,6 +20,7 @@
       :resetPassword="resetPassword"
       @update:dialog="dialog = $event"
       @save="refreshUsers"
+      @openSnackBar="openSnackBar"
     />
 
     <UsersDeleteDialog
@@ -31,6 +28,7 @@
       :TableUsers="TableUsers"
       @update:deleteDialog="deleteDialog = $event"
       @delete="refreshUsers"
+      @openSnackBar="openSnackBar"
     />
 
     <UsersUpdateRoleDialog
@@ -38,12 +36,14 @@
       :TableUsers="TableUsers"
       @update:updateRoleDialog="updateRoleDialog = $event"
       @save="refreshUsers"
+      @openSnackBar="openSnackBar"
     />
 
     <UsersHistoryDialog
       :historyDialog="historyDialog"
       :user="TableUsers"
       @update:historyDialog="historyDialog = $event"
+      @openSnackBar="openSnackBar"
     />
 
     <UsersTable
@@ -53,6 +53,13 @@
       @delete="openDeleteDialog"
       @reset="openResetPasswordDialog"
       @history="openHistoryDialog"
+      @openSnackBar="openSnackBar"
+    />
+
+    <snackBar
+      :snackbar="snackbar"
+      @update:snackbar="snackbar = $event"
+      :settingsSnackBar="localSettingsSnackBar"
     />
   </v-container>
 </template>
@@ -63,6 +70,7 @@ import UsersForm from "@/modules/users/components/users-form.vue";
 import UsersDeleteDialog from "@/modules/users/components/users-delete-dialog.vue";
 import UsersUpdateRoleDialog from "@/modules/users/components/users-update-role-dialog.vue";
 import UsersHistoryDialog from "@/modules/users/components/users-history-dialog.vue";
+import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
   components: {
@@ -71,6 +79,7 @@ export default {
     UsersDeleteDialog,
     UsersUpdateRoleDialog,
     UsersHistoryDialog,
+    snackBar,
   },
   data() {
     return {
@@ -81,6 +90,11 @@ export default {
       historyDialog: false,
       updateRoleDialog: false,
       resetPassword: false,
+      snackbar: false,
+      localSettingsSnackBar: {
+        error: false,
+        text: null,
+      },
       TableUsers: {
         id: null,
         last_name: "",
@@ -128,6 +142,10 @@ export default {
     openHistoryDialog(item) {
       this.TableUsers = item;
       this.historyDialog = true;
+    },
+    openSnackBar(settingsSnackBar) {
+      this.localSettingsSnackBar = settingsSnackBar;
+      this.snackbar = true;
     },
   },
 };

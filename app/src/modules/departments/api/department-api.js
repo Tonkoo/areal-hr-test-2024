@@ -1,5 +1,4 @@
 import api from "@/shared/api/axios";
-import { useAuthStore } from "@/stores/use-auth-store";
 
 export default {
   getDepartments() {
@@ -14,11 +13,8 @@ export default {
       })
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error fetching departments:", err);
         throw err;
       });
   },
@@ -34,11 +30,8 @@ export default {
       })
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error fetching history departments:", err);
         throw err;
       });
   },
@@ -48,14 +41,11 @@ export default {
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
         if (err.response && err.response.status === 400) {
-          throw err.response.data.errors;
+          throw err.response;
         }
-        console.error("Error adding department:", err);
         throw err;
       });
   },
@@ -65,14 +55,11 @@ export default {
       .then((response) => response.data)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
         if (err.response && err.response.status === 400) {
-          throw err.response.data.errors;
+          throw err.response;
         }
-        console.error("Error updating department:", err);
         throw err;
       });
   },
@@ -82,11 +69,8 @@ export default {
       .then(() => id)
       .catch((err) => {
         if (err.response && err.response.status === 401) {
-          const authStore = useAuthStore();
-          authStore.disableAuthentication();
           window.location.reload();
         }
-        console.error("Error deleting department:", err);
         throw err;
       });
   },

@@ -1,9 +1,5 @@
 <template>
-  <v-container
-    fluid
-    class="d-flex flex-column"
-    style="height: 100vh; padding: 0"
-  >
+  <v-container fluid class="d-flex flex-column" style="padding: 0">
     <v-toolbar flat>
       <v-toolbar-title>Организации</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -23,6 +19,7 @@
       :organization="TableOrganization"
       @update:dialog="dialog = $event"
       @save="refreshOrganizations"
+      @openSnackBar="openSnackBar"
     />
 
     <OrganizationDeleteDialog
@@ -30,12 +27,14 @@
       :deleteOrganizationId="deleteOrganizationId"
       @update:deleteDialog="deleteDialog = $event"
       @delete="refreshOrganizations"
+      @openSnackBar="openSnackBar"
     />
 
     <OrganizationHistoryDialog
       :historyDialog="historyDialog"
       :organization="TableOrganization"
       @update:historyDialog="historyDialog = $event"
+      @openSnackBar="openSnackBar"
     />
 
     <OrganizationTable
@@ -43,6 +42,13 @@
       @edit="openEditDialog"
       @delete="openDeleteDialog"
       @history="openHistoryDialog"
+      @openSnackBar="openSnackBar"
+    />
+
+    <snackBar
+      :snackbar="snackbar"
+      @update:snackbar="snackbar = $event"
+      :settingsSnackBar="localSettingsSnackBar"
     />
   </v-container>
 </template>
@@ -52,6 +58,7 @@ import OrganizationForm from "@/modules/organizations/components/organization-fo
 import OrganizationDeleteDialog from "@/modules/organizations/components/organization-delete-dialog.vue";
 import OrganizationTable from "@/modules/organizations/components/organization-table.vue";
 import OrganizationHistoryDialog from "@/modules/organizations/components/organization-history-dialog.vue";
+import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
   components: {
@@ -59,6 +66,7 @@ export default {
     OrganizationDeleteDialog,
     OrganizationTable,
     OrganizationHistoryDialog,
+    snackBar,
   },
   data() {
     return {
@@ -66,6 +74,11 @@ export default {
       isEditMode: false,
       deleteDialog: false,
       historyDialog: false,
+      snackbar: false,
+      localSettingsSnackBar: {
+        error: false,
+        text: null,
+      },
       deleteOrganizationId: 0,
       TableOrganization: {
         id: null,
@@ -96,6 +109,10 @@ export default {
     openHistoryDialog(item) {
       this.TableOrganization = item;
       this.historyDialog = true;
+    },
+    openSnackBar(settingsSnackBar) {
+      this.localSettingsSnackBar = settingsSnackBar;
+      this.snackbar = true;
     },
   },
 };

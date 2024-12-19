@@ -1,5 +1,13 @@
 const pool = require('../../db')
 const argon2 = require('argon2')
+const logger = require('./../../logger/logger')
+const { addHistory } = require('./../history/history.controller')
+const {
+  fetching,
+  save,
+  update,
+  deleting,
+} = require('./../../errors/text-errors')
 
 async function getUsers() {
   const connection = await pool.connect()
@@ -9,7 +17,9 @@ async function getUsers() {
     )
     return result.rows
   } catch (err) {
-    console.error('Error fetching users:', err)
+    logger.error(`${fetching} users: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -25,32 +35,12 @@ async function getHistoryUsers(id) {
     )
     return result.rows
   } catch (err) {
-    console.error('Error fetching history users:', err)
+    logger.error(`${fetching} history users: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
-  }
-}
-
-async function addHistory(record_id, oldValue, newValue, connection, req) {
-  try {
-    const currentDate = new Date()
-    const datetime_operations = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-    const author = req.user.id
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
-       VALUES ($1, $2, 5, $3, $4, $5)`,
-      [datetime_operations, author, record_id, oldValue, newValue],
-    )
-  } catch (err) {
-    console.error('Error saving history:', err)
   }
 }
 
@@ -68,7 +58,6 @@ async function addUser(
     const hashedPassword = await argon2.hash(password, {
       type: argon2.argon2id,
     })
-    console.log('Password ', hashedPassword)
 
     const result = await connection.query(
       `INSERT INTO users (last_name, first_name, middle_name, login, password, role_id) 
@@ -79,13 +68,15 @@ async function addUser(
     const Id = result.rows[0].id
     const newValue = `Фамилия: ${last_name}\nИмя: ${first_name}\nОтчество: ${middle_name}\nЛогин: ${login}`
 
-    await addHistory(Id, '', newValue, connection, req)
+    await addHistory(5, Id, '', newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error saving user:', err)
+    logger.error(`${save} user: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -148,8 +139,6 @@ async function updateUser(
         oldValue += `Логин: ${oldDataResult.rows[0].login}\n`
         newValue += `Логин: ${login}\n`
       }
-      // oldValue = `Фамилия: ${oldDataResult.rows[0].last_name}\nИмя: ${oldDataResult.rows[0].first_name}\nОтчество: ${oldDataResult.rows[0].middle_name}\nЛогин: ${oldDataResult.rows[0].login}`
-      // newValue = `Фамилия: ${last_name}\nИмя: ${first_name}\nОтчество: ${middle_name}\nЛогин: ${login}`
     }
 
     const result = await connection.query(query, values)
@@ -157,13 +146,15 @@ async function updateUser(
       return { error: 'User not found' }
     }
 
-    await addHistory(id, oldValue, newValue, connection, req)
+    await addHistory(5, id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error updating user:', err)
+    logger.error(`${update} user: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -191,7 +182,9 @@ async function deletedUser(id) {
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error deleting user:', err)
+    logger.error(`${deleting} user: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -214,13 +207,16 @@ async function updateRole(req, id) {
     const oldValue = `Роль: ${oldDataResult.rows[0].role_name}`
     const newValue = `Роль: Администратор`
 
-    await addHistory(id, oldValue, newValue, connection, req)
+    await addHistory(5, id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error updating user:', err)
+    logger.error(`${update} user: ${err.message}`, {
+      stack: err.stack,
+    })
+    throw err
   } finally {
     connection.release()
   }

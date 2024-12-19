@@ -47,7 +47,7 @@ export default {
       deep: true,
     },
   },
-  emits: ["update:dismissDialog", "dismiss"],
+  emits: ["update:dismissDialog", "dismiss", "openSnackBar"],
   methods: {
     closeDialog() {
       this.$emit("update:dismissDialog", false);
@@ -55,10 +55,21 @@ export default {
     dismissEmployee() {
       EmployeesApi.dismissEmployee(this.LocalEmployees.id)
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.closeDialog();
           this.$emit("dismiss");
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
   },
 };

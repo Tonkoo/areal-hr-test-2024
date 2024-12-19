@@ -9,13 +9,13 @@
       <v-card-text>
         <v-form ref="form">
           <v-text-field
-            v-model="localDepartments.name"
+            v-model="localDepartments.department_name"
             label="Название отдела"
             :error-messages="errors.name"
             required
           ></v-text-field>
           <v-textarea
-            v-model="localDepartments.comment"
+            v-model="localDepartments.department_comment"
             label="Комментарий"
             :error-messages="errors.comment"
             required
@@ -94,7 +94,7 @@ export default {
       deep: true,
     },
   },
-  emits: ["update:dialog", "save"],
+  emits: ["update:dialog", "save", "openSnackBar"],
   computed: {
     getDialogTitle() {
       return this.isAddMode
@@ -121,7 +121,11 @@ export default {
           this.organizations = data;
         })
         .catch((err) => {
-          console.error("Error fetching organizations:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
         });
     },
     closeDialog() {
@@ -139,70 +143,117 @@ export default {
       if (this.isSubDepartmentMode == false) {
         delete this.localDepartments.parent_id;
         DepartmentApi.addDepartment({
-          name: this.localDepartments.name,
-          comment: this.localDepartments.comment,
+          name: this.localDepartments.department_name,
+          comment: this.localDepartments.department_comment,
           organization_id: this.localDepartments.organization_id,
         })
           .then(() => {
+            this.settingsSnackBar = {
+              error: false,
+              text: "Successfully",
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
             this.errors = [];
             this.$emit("update:dialog", false);
             this.$emit("save");
           })
           .catch((err) => {
-            console.log(this.localDepartments);
-            this.errors = err;
-            console.error("Error adding department:", err);
+            if (err.status == 400) {
+              this.errors = err.data.errors;
+            } else {
+              this.settingsSnackBar = {
+                error: true,
+                text: err.status + ": " + err.response.statusText,
+              };
+              this.$emit("openSnackBar", this.settingsSnackBar);
+            }
           });
       } else {
         DepartmentApi.addDepartment({
-          name: this.localDepartments.name,
-          comment: this.localDepartments.comment,
+          name: this.localDepartments.department_name,
+          comment: this.localDepartments.department_comment,
           parent_id: this.localDepartments.parent_id,
           organization_id: this.localDepartments.organization_id,
         })
           .then(() => {
+            this.settingsSnackBar = {
+              error: false,
+              text: "Successfully",
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
             this.errors = [];
             this.$emit("update:dialog", false);
             this.$emit("save");
           })
           .catch((err) => {
-            this.errors = err;
-            console.error("Error adding department:", err);
+            if (err.status == 400) {
+              this.errors = err.data.errors;
+            } else {
+              this.settingsSnackBar = {
+                error: true,
+                text: err.status + ": " + err.response.statusText,
+              };
+              this.$emit("openSnackBar", this.settingsSnackBar);
+            }
           });
       }
     },
     updateDepartment() {
       if (this.isSubDepartmentMode == false) {
         delete this.localDepartments.parent_id;
-        DepartmentApi.updateDepartment(this.localDepartments.id, {
-          name: this.localDepartments.name,
-          comment: this.localDepartments.comment,
+        DepartmentApi.updateDepartment(this.localDepartments.department_id, {
+          name: this.localDepartments.department_name,
+          comment: this.localDepartments.department_comment,
           organization_id: this.localDepartments.organization_id,
         })
           .then(() => {
+            this.settingsSnackBar = {
+              error: false,
+              text: "Successfully",
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
             this.errors = [];
             this.$emit("update:dialog", false);
             this.$emit("save");
           })
           .catch((err) => {
-            this.errors = err;
-            console.error("Error updating department:", err);
+            if (err.status == 400) {
+              this.errors = err.data.errors;
+            } else {
+              this.settingsSnackBar = {
+                error: true,
+                text: err.status + ": " + err.response.statusText,
+              };
+              this.$emit("openSnackBar", this.settingsSnackBar);
+            }
           });
       } else {
-        DepartmentApi.updateDepartment(this.localDepartments.id, {
-          name: this.localDepartments.name,
-          comment: this.localDepartments.comment,
+        DepartmentApi.updateDepartment(this.localDepartments.department_id, {
+          name: this.localDepartments.department_name,
+          comment: this.localDepartments.department_comment,
           parent_id: this.localDepartments.parent_id,
           organization_id: this.localDepartments.organization_id,
         })
           .then(() => {
+            this.settingsSnackBar = {
+              error: false,
+              text: "Successfully",
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
             this.errors = [];
             this.$emit("update:dialog", false);
             this.$emit("save");
           })
           .catch((err) => {
-            this.errors = err;
-            console.error("Error updating department:", err);
+            if (err.status == 400) {
+              this.errors = err.data.errors;
+            } else {
+              this.settingsSnackBar = {
+                error: true,
+                text: err.status + ": " + err.response.statusText,
+              };
+              this.$emit("openSnackBar", this.settingsSnackBar);
+            }
           });
       }
     },

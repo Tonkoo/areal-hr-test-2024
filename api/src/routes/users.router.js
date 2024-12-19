@@ -1,5 +1,7 @@
 const express = require('express')
 const router = express.Router()
+const { StatusCodes } = require('http-status-codes')
+const logger = require('../logger/logger')
 const {
   getUsers,
   addUser,
@@ -7,7 +9,15 @@ const {
   deletedUser,
   updateRole,
   getHistoryUsers,
-} = require('../controllers/users/db-users')
+} = require('../controllers/users/users.controller')
+const {
+  fetching,
+  save,
+  update,
+  deleting,
+  Internal,
+  access,
+} = require('./../errors/text-errors')
 const {
   UsersSchema,
   AlternativeUsersSchema,
@@ -19,11 +29,15 @@ router.get('/users', async (req, res) => {
       const users = await getUsers()
       return res.json(users)
     } catch (err) {
-      console.error('Error fetching users:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${fetching} users: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.get('/users/history/:id', async (req, res) => {
@@ -33,11 +47,16 @@ router.get('/users/history/:id', async (req, res) => {
       const historyUsers = await getHistoryUsers(id)
       return res.json(historyUsers)
     } catch (err) {
-      console.error('Error fetching history users:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${fetching} history users: ${err.message}`, {
+        stack: err.stack,
+      })
+      // console.error('Error fetching history users:', err)
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.post('/users', async (req, res) => {
@@ -51,7 +70,9 @@ router.post('/users', async (req, res) => {
           acc[detail.path[0]] = detail.message
           return acc
         }, {})
-        return res.status(400).json({ errors: errorMessages })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ errors: errorMessages })
       }
       const { last_name, first_name, middle_name, login, password } = value
       const newUser = await addUser(
@@ -62,13 +83,17 @@ router.post('/users', async (req, res) => {
         login,
         password,
       )
-      return res.status(201).json(newUser)
+      return res.status(StatusCodes.CREATED).json(newUser)
     } catch (err) {
-      console.error('Error adding user:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${save} user: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.put('/users/:id', async (req, res) => {
@@ -88,7 +113,9 @@ router.put('/users/:id', async (req, res) => {
           acc[detail.path[0]] = detail.message
           return acc
         }, {})
-        return res.status(400).json({ errors: errorMessages })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ errors: errorMessages })
       }
 
       const { id } = req.params
@@ -104,13 +131,17 @@ router.put('/users/:id', async (req, res) => {
         password,
         isResetPassword,
       )
-      return res.status(201).json(updatedUser)
+      return res.status(StatusCodes.CREATED).json(updatedUser)
     } catch (err) {
-      console.error('Error updating user:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${update} user: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.delete('/users/:id', async (req, res) => {
@@ -119,13 +150,17 @@ router.delete('/users/:id', async (req, res) => {
 
     try {
       const deltedUser = await deletedUser(id)
-      return res.status(201).json(deltedUser)
+      return res.status(StatusCodes.CREATED).json(deltedUser)
     } catch (err) {
-      console.error('Error deleting user:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${deleting} user: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.put('/users/role/:id', async (req, res) => {
@@ -133,13 +168,17 @@ router.put('/users/role/:id', async (req, res) => {
     const { id } = req.params
     try {
       const updateRoleUser = await updateRole(req, id)
-      return res.status(201).json(updateRoleUser)
+      return res.status(StatusCodes.CREATED).json(updateRoleUser)
     } catch (err) {
-      console.error('Error update role user:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${update} user: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 module.exports = router

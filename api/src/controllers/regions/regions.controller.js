@@ -1,11 +1,15 @@
 const client = require('../../db')
+const logger = require('./../../logger/logger')
+const { fetching } = require('./../../errors/text-errors')
 
 async function getRegions() {
   try {
     const result = await client.query('SELECT * FROM regions')
     return result.rows
   } catch (err) {
-    console.error('Error fetching regions:', err)
+    logger.error(`${fetching} regions: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   }
 }

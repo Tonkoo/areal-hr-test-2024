@@ -70,7 +70,7 @@ export default {
       deep: true,
     },
   },
-  emits: ["update:dialog", "save"],
+  emits: ["update:dialog", "save", "openSnackBar"],
   mounted() {
     this.fetchDepartments();
   },
@@ -81,7 +81,11 @@ export default {
           this.departments = data;
         })
         .catch((err) => {
-          console.error("Error fetching departments:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.departments = [];
         });
     },
@@ -99,14 +103,26 @@ export default {
         department_id: this.localPosition.department_id,
       })
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.errors = [];
           this.$emit("save");
           this.closeDialog();
           this.localPosition = [];
         })
         .catch((err) => {
-          this.errors = err;
-          console.error("Error adding position:", err);
+          if (err.status == 400) {
+            this.errors = err.data.errors;
+          } else {
+            this.settingsSnackBar = {
+              error: true,
+              text: err.status + ": " + err.response.statusText,
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
+          }
         });
     },
     updatePosition() {
@@ -115,14 +131,26 @@ export default {
         department_id: this.localPosition.department_id,
       })
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.errors = [];
           this.$emit("save");
           this.closeDialog();
           this.localPosition = [];
         })
         .catch((err) => {
-          this.errors = err;
-          console.error("Error updating position:", err);
+          if (err.status == 400) {
+            this.errors = err.data.errors;
+          } else {
+            this.settingsSnackBar = {
+              error: true,
+              text: err.status + ": " + err.response.statusText,
+            };
+            this.$emit("openSnackBar", this.settingsSnackBar);
+          }
         });
     },
   },

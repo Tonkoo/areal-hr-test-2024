@@ -1,13 +1,23 @@
 const express = require('express')
 const router = express.Router()
+const { StatusCodes } = require('http-status-codes')
+const logger = require('../logger/logger')
 const positionSchema = require('../controllers/positions/dto/validation-positions')
+const {
+  fetching,
+  save,
+  update,
+  deleting,
+  Internal,
+  access,
+} = require('./../errors/text-errors')
 const {
   getPositions,
   addPosition,
   updatePosition,
   deletePosition,
   getHistoryPositions,
-} = require('../controllers/positions/db-positions')
+} = require('../controllers/positions/positions.controller')
 
 router.get('/positions', async (req, res) => {
   if (req.isAuthenticated()) {
@@ -15,11 +25,15 @@ router.get('/positions', async (req, res) => {
       const positions = await getPositions()
       return res.json(positions)
     } catch (err) {
-      console.error('Error fetching positions:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${fetching} positions: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.get('/positions/history/:id', async (req, res) => {
@@ -29,11 +43,15 @@ router.get('/positions/history/:id', async (req, res) => {
       const historyPositions = await getHistoryPositions(id)
       return res.json(historyPositions)
     } catch (err) {
-      console.error('Error fetching history positions:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${fetching} history positions: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.post('/positions', async (req, res) => {
@@ -47,17 +65,23 @@ router.post('/positions', async (req, res) => {
           acc[detail.path[0]] = detail.message
           return acc
         }, {})
-        return res.status(400).json({ errors: errorMessages })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ errors: errorMessages })
       }
       const { name, department_id } = value
       const newPosition = await addPosition(req, name, department_id)
-      return res.status(201).json(newPosition)
+      return res.status(StatusCodes.CREATED).json(newPosition)
     } catch (err) {
-      console.error('Error adding position:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${save} position: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.put('/positions/:id', async (req, res) => {
@@ -72,19 +96,25 @@ router.put('/positions/:id', async (req, res) => {
           acc[detail.path[0]] = detail.message
           return acc
         }, {})
-        return res.status(400).json({ errors: errorMessages })
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ errors: errorMessages })
       }
 
       const { id } = req.params
       const { name, department_id } = value
       const updatedPosition = await updatePosition(req, id, name, department_id)
-      return res.status(201).json(updatedPosition)
+      return res.status(StatusCodes.CREATED).json(updatedPosition)
     } catch (err) {
-      console.error('Error updating position:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${update} position: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 router.delete('/positions/:id', async (req, res) => {
@@ -93,13 +123,17 @@ router.delete('/positions/:id', async (req, res) => {
 
     try {
       const deltedPosition = await deletePosition(id)
-      return res.status(201).json(deltedPosition)
+      return res.status(StatusCodes.CREATED).json(deltedPosition)
     } catch (err) {
-      console.error('Error deleting position:', err)
-      return res.status(500).json({ error: 'Internal server error' })
+      logger.error(`${deleting} position: ${err.message}`, {
+        stack: err.stack,
+      })
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: Internal })
     }
   }
-  return res.status(401).json({ message: 'Неавторизованный доступ' })
+  return res.status(StatusCodes.UNAUTHORIZED).json({ message: access })
 })
 
 module.exports = router

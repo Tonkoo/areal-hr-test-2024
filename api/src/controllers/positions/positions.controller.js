@@ -1,4 +1,12 @@
 const pool = require('../../db')
+const { addHistory } = require('./../history/history.controller')
+const logger = require('./../../logger/logger')
+const {
+  fetching,
+  save,
+  update,
+  deleting,
+} = require('./../../errors/text-errors')
 
 async function getPositions() {
   const connection = await pool.connect()
@@ -8,7 +16,9 @@ async function getPositions() {
     )
     return result.rows
   } catch (err) {
-    console.error('Error fetching positions:', err)
+    logger.error(`${fetching} positions: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -24,32 +34,12 @@ async function getHistoryPositions(id) {
     )
     return result.rows
   } catch (err) {
-    console.error('Error fetching history positions:', err)
+    logger.error(`${fetching} history positions: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
-  }
-}
-
-async function addHistory(record_id, oldValue, newValue, connection, req) {
-  try {
-    const currentDate = new Date()
-    const datetime_operations = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-    const author = req.user.id
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
-       VALUES ($1, $2, 3, $3, $4, $5)`,
-      [datetime_operations, author, record_id, oldValue, newValue],
-    )
-  } catch (err) {
-    console.error('Error saving history:', err)
   }
 }
 
@@ -70,13 +60,15 @@ async function addPosition(req, name, department_id) {
     )
     const newValue = `Название: ${name}\nОтдел: ${department.rows[0].name}`
 
-    await addHistory(positionId, '', newValue, connection, req)
+    await addHistory(3, positionId, '', newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error saving position:', err)
+    logger.error(`${save} position: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -116,16 +108,16 @@ async function updatePosition(req, id, name, department_id) {
       oldValue += `Отдел: ${oldDataResult.rows[0].departments_name}\n`
       newValue += `Отдел: ${department.rows[0].name}\n`
     }
-    // const oldValue = `Название: ${oldDataResult.rows[0].positions_name}\nОтдел: ${oldDataResult.rows[0].departments_name}`
-    // const newValue = `Название: ${name}\nОтдел: ${department.rows[0].name}`
 
-    await addHistory(id, oldValue, newValue, connection, req)
+    await addHistory(3, id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error updating position:', err)
+    logger.error(`${update} position: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -153,7 +145,9 @@ async function deletePosition(id) {
     return result.rows[0]
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error deleting position:', err)
+    logger.error(`${deleting} position: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()

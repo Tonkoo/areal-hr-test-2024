@@ -79,7 +79,13 @@ export default {
         .then((data) => {
           this.employees = data;
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
     openEditDialog(item) {
       this.$emit("edit", item);

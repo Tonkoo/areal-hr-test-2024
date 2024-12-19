@@ -1,4 +1,12 @@
 const pool = require('../../db')
+const logger = require('./../../logger/logger')
+const {
+  fetching,
+  save,
+  update,
+  dismiss,
+} = require('./../../errors/text-errors')
+const { addHistory } = require('./../history/history.controller')
 
 async function getEmployees() {
   const connection = await pool.connect()
@@ -8,7 +16,9 @@ async function getEmployees() {
     )
     return result.rows
   } catch (err) {
-    console.error('Error fetching employees:', err)
+    logger.error(`${fetching} employees: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -24,31 +34,12 @@ async function getHistoryEmployees(id) {
     )
     return result.rows
   } catch (err) {
-    console.error('Error fetching history positions:', err)
+    logger.error(`${fetching} history employees: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
-  }
-}
-async function addHistory(record_id, oldValue, newValue, connection, req) {
-  try {
-    const currentDate = new Date()
-    const datetime_operations = currentDate.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-    const author = req.user.id
-    await connection.query(
-      `INSERT INTO history_change (datetime_operations, author, object_operations_id, record_id, old_value, new_value) 
-       VALUES ($1, $2, 4, $3, $4, $5)`,
-      [datetime_operations, author, record_id, oldValue, newValue],
-    )
-  } catch (err) {
-    console.error('Error saving history:', err)
   }
 }
 
@@ -119,13 +110,15 @@ async function addEmployee(
     const formatteddate_of_birth = date_of_birth.toISOString().split('T')[0]
     const newValue = `Фамилия: ${last_name}\nИмя: ${first_name}\nОтчество: ${middle_name}\nДата рождения: ${formatteddate_of_birth}\nСерия: ${passport_series}\nНомер паспорта: ${passport_number}\nРегион: ${region.rows[0].name}\nГород: ${city.rows[0].name}\nУлица: ${street}\nДом: ${house}\nКорпус: ${building}\nКвартира: ${apartment}\nОтдел: ${department.rows[0].name}\nДолжность: ${position.rows[0].name}\nЗарплата: $${salary}.00\nСтатус: Работает`
 
-    await addHistory(employeeId, '', newValue, connection, req)
+    await addHistory(4, employeeId, '', newValue, connection, req)
 
     await connection.query('COMMIT')
     return employeeId
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error adding employee:', err)
+    logger.error(`${save} employee: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -273,18 +266,21 @@ async function updateEmployee(
       newValue += `Зарплата: $${salary}.00\n`
     }
 
-    await addHistory(id, oldValue, newValue, connection, req)
+    await addHistory(4, id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return 'Employee data successfully updated'
   } catch (err) {
     await connection.query('ROLLBACK')
-    console.error('Error updating employee data:', err)
+    logger.error(`${update} employee: ${err.message}`, {
+      stack: err.stack,
+    })
+    throw err
   } finally {
     connection.release()
   }
 }
-async function deleteEmployee(req, id) {
+async function dismissEmployee(req, id) {
   const connection = await pool.connect()
   try {
     await connection.query('BEGIN')
@@ -305,13 +301,16 @@ async function deleteEmployee(req, id) {
     const oldValue = `Статус: ${fired}`
     const newValue = `Статус: Уволен`
 
-    await addHistory(id, oldValue, newValue, connection, req)
+    await addHistory(4, id, oldValue, newValue, connection, req)
 
     await connection.query('COMMIT')
     return 'Employee terminated successfully'
   } catch (err) {
     await connection.query('ROLLBACK')
-    throw new Error('Error when terminating the employee: ' + err.message)
+    logger.error(`${dismiss} organization: ${err.message}`, {
+      stack: err.stack,
+    })
+    throw err
   } finally {
     connection.release()
   }
@@ -321,6 +320,6 @@ module.exports = {
   getEmployees,
   addEmployee,
   updateEmployee,
-  deleteEmployee,
+  dismissEmployee,
   getHistoryEmployees,
 }

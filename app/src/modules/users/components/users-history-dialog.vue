@@ -48,7 +48,7 @@ export default {
       required: true,
     },
   },
-  emits: ["update:historyDialog", "save"],
+  emits: ["update:historyDialog", "save", "openSnackBar"],
   data() {
     return {
       localUser: { ...this.user },
@@ -81,7 +81,11 @@ export default {
           this.historyUser = data;
         })
         .catch((err) => {
-          console.error("Error fetching history users:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.historyUser = [];
         });
     },

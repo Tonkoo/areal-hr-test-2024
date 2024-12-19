@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import SideBarApi from "../api/sidebar-api";
+import authorizationApi from "@/modules/authorization/api/authorization-api";
 
 export default {
   props: {
@@ -33,7 +33,8 @@ export default {
       this.$emit("update:logOutDialog", false);
     },
     logOut() {
-      SideBarApi.logOut()
+      authorizationApi
+        .logOut()
         .then(() => {
           this.closeDialog();
         })

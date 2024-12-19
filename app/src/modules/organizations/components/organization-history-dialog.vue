@@ -48,11 +48,15 @@ export default {
       required: true,
     },
   },
-  emits: ["update:historyDialog", "save"],
+  emits: ["update:historyDialog", "save", "openSnackBar"],
   data() {
     return {
       localOrganization: { ...this.organization },
       historyOrganization: {},
+      settingsSnackBar: {
+        error: false,
+        text: null,
+      },
     };
   },
   watch: {
@@ -80,7 +84,11 @@ export default {
           this.historyOrganization = data;
         })
         .catch((err) => {
-          console.error("Error fetching history organizations:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.historyOrganization = [];
         });
     },

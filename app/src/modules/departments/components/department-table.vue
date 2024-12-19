@@ -53,7 +53,12 @@ export default {
           this.$emit("updateDepartments", this.departments);
         })
         .catch((err) => {
-          console.error("Error fetching departments:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+          this.departments = [];
         });
     },
     openEditDialog(item) {

@@ -53,7 +53,11 @@ export default {
           this.organizations = data;
         })
         .catch((err) => {
-          console.error("Error fetching organizations:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.organizations = [];
         });
     },

@@ -48,7 +48,7 @@ export default {
       required: true,
     },
   },
-  emits: ["update:historyDialog", "save"],
+  emits: ["update:historyDialog", "save", "openSnackBar"],
   data() {
     return {
       localDepartment: { ...this.department },
@@ -81,7 +81,11 @@ export default {
           this.historyDepartment = data;
         })
         .catch((err) => {
-          console.error("Error fetching history departments:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.historyDepartment = [];
         });
     },

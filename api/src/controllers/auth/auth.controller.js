@@ -1,4 +1,6 @@
 const pool = require('../../db')
+const logger = require('./../../logger/logger')
+const { fetching } = require('./../../errors/text-errors')
 
 async function getUserByLogin(login) {
   const connection = await pool.connect()
@@ -14,7 +16,9 @@ async function getUserByLogin(login) {
     const result = await pool.query(query, [login])
     return result.rows[0]
   } catch (err) {
-    console.error('Error fetching users:', err)
+    logger.error(`${fetching} users: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()
@@ -34,7 +38,9 @@ async function getUserById(id) {
 
     return result.rows[0]
   } catch (err) {
-    console.error('Error fetching users:', err)
+    logger.error(`${fetching} users: ${err.message}`, {
+      stack: err.stack,
+    })
     throw err
   } finally {
     connection.release()

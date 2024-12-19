@@ -1,9 +1,5 @@
 <template>
-  <v-container
-    fluid
-    class="d-flex flex-column"
-    style="height: 100vh; padding: 0"
-  >
+  <v-container fluid class="d-flex flex-column" style="padding: 0">
     <v-toolbar flat>
       <v-toolbar-title>Отделы</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -33,6 +29,7 @@
       :TableDepartment="TableDepartment"
       @update:dialog="dialog = $event"
       @save="refreshDepartment"
+      @openSnackBar="openSnackBar"
     />
 
     <DepartmentDeleteDialog
@@ -40,12 +37,14 @@
       :deleteDepartmentId="deleteDepartmentId"
       @update:deleteDialog="deleteDialog = $event"
       @delete="refreshDepartment"
+      @openSnackBar="openSnackBar"
     />
 
     <DepartmentHistoryDialog
       :historyDialog="historyDialog"
       :department="TableDepartment"
       @update:historyDialog="historyDialog = $event"
+      @openSnackBar="openSnackBar"
     />
 
     <DepartmentTable
@@ -54,6 +53,13 @@
       @delete="openDeleteDialog"
       @updateDepartments="handleUpdateDepartments"
       @history="openHistoryDialog"
+      @openSnackBar="openSnackBar"
+    />
+
+    <snackBar
+      :snackbar="snackbar"
+      @update:snackbar="snackbar = $event"
+      :settingsSnackBar="localSettingsSnackBar"
     />
   </v-container>
 </template>
@@ -63,6 +69,7 @@ import DepartmentForm from "@/modules/departments/components/department-form.vue
 import DepartmentDeleteDialog from "@/modules/departments/components/department-delete-dialog.vue";
 import DepartmentTable from "@/modules/departments/components/department-table.vue";
 import DepartmentHistoryDialog from "@/modules/departments/components/department-history-dialog.vue";
+import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
   components: {
@@ -70,6 +77,7 @@ export default {
     DepartmentDeleteDialog,
     DepartmentTable,
     DepartmentHistoryDialog,
+    snackBar,
   },
   data() {
     return {
@@ -77,10 +85,15 @@ export default {
       deleteDialog: false,
       historyDialog: false,
       isSubDepartmentMode: false,
+      snackbar: false,
+      localSettingsSnackBar: {
+        error: false,
+        text: null,
+      },
       TableDepartment: {
-        id: null,
-        name: "",
-        comment: "",
+        department_id: null,
+        department_name: "",
+        department_comment: "",
         parent_id: null,
         organization_id: null,
       },
@@ -100,8 +113,8 @@ export default {
       this.isAddMode = true;
       this.isSubDepartmentMode = isSubDepartmentMode;
       this.TableDepartment = {
-        name: "",
-        comment: "",
+        department_name: "",
+        department_comment: "",
         parent_id: null,
         organization_id: null,
       };
@@ -110,13 +123,7 @@ export default {
     openEditDialog(department) {
       this.isAddMode = false;
       this.isSubDepartmentMode = !!department.parent_department_name;
-      this.TableDepartment = {
-        id: department.department_id,
-        name: department.department_name,
-        comment: department.department_comment,
-        parent_id: department.parent_id,
-        organization_id: department.organization_id,
-      };
+      this.TableDepartment = { ...department };
       this.dialog = true;
     },
     openDeleteDialog(id) {
@@ -126,6 +133,10 @@ export default {
     openHistoryDialog(item) {
       this.TableDepartment = item;
       this.historyDialog = true;
+    },
+    openSnackBar(settingsSnackBar) {
+      this.localSettingsSnackBar = settingsSnackBar;
+      this.snackbar = true;
     },
   },
 };

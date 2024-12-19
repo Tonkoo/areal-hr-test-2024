@@ -29,7 +29,7 @@ export default {
       required: true,
     },
   },
-  emits: ["update:deleteDialog", "delete"],
+  emits: ["update:deleteDialog", "delete", "openSnackBar"],
   data() {
     return {
       localDeleteDepartmentId: this.deleteDepartmentId,
@@ -47,12 +47,21 @@ export default {
     deleteDepartment() {
       DepartmentApi.deleteDepartment(this.localDeleteDepartmentId)
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.$emit("delete");
           this.closeDialog();
           this.localDeleteDepartmentId = null;
         })
         .catch((err) => {
-          console.error("Error deleting department:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
         });
     },
   },

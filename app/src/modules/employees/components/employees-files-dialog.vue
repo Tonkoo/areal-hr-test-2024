@@ -79,7 +79,7 @@ export default {
       employeeFiles: [],
     };
   },
-  emits: ["update:filesDialog"],
+  emits: ["update:filesDialog", "openSnackBar"],
   watch: {
     filesDialog(newVal) {
       if (newVal) {
@@ -96,24 +96,50 @@ export default {
         .then((data) => {
           this.employeeFiles = data;
         })
-        .catch((err) => console.error("Error fetching employee files:", err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
     uploadFile() {
-      console.log(this.newFile);
-
       EmployeesApi.uploadEmployeeFile(this.TableEmployees, this.newFile)
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.fetchEmployeeFiles();
           this.newFile = null;
         })
-        .catch((err) => console.error("Error uploading file:", err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
     deleteFile(file) {
       EmployeesApi.deleteEmployeeFile(file.file_id, file.filepath)
         .then(() => {
+          this.settingsSnackBar = {
+            error: false,
+            text: "Successfully",
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
           this.fetchEmployeeFiles();
         })
-        .catch((err) => console.error("Error deleting file:", err));
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
+        });
     },
     downloadFile(file) {
       EmployeesApi.downloadFile(file.file_id)
@@ -130,7 +156,11 @@ export default {
           window.URL.revokeObjectURL(url);
         })
         .catch((err) => {
-          console.error("Error downloading file:", err);
+          this.settingsSnackBar = {
+            error: true,
+            text: err.status + ": " + err.response.statusText,
+          };
+          this.$emit("openSnackBar", this.settingsSnackBar);
         });
     },
   },
