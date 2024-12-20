@@ -39,9 +39,9 @@
       @openSnackBar="openSnackBar"
     />
 
-    <UsersHistoryDialog
+    <historyDialog
       :historyDialog="historyDialog"
-      :user="TableUsers"
+      :history="historyUser"
       @update:historyDialog="historyDialog = $event"
       @openSnackBar="openSnackBar"
     />
@@ -52,7 +52,7 @@
       @updateRole="openUpdateRoleDialog"
       @delete="openDeleteDialog"
       @reset="openResetPasswordDialog"
-      @history="openHistoryDialog"
+      @history="fetchHistoryUser"
       @openSnackBar="openSnackBar"
     />
 
@@ -65,11 +65,12 @@
 </template>
 
 <script>
+import usersApi from "@/modules/users/api/users-api";
 import UsersTable from "@/modules/users/components/users-table.vue";
 import UsersForm from "@/modules/users/components/users-form.vue";
 import UsersDeleteDialog from "@/modules/users/components/users-delete-dialog.vue";
 import UsersUpdateRoleDialog from "@/modules/users/components/users-update-role-dialog.vue";
-import UsersHistoryDialog from "@/modules/users/components/users-history-dialog.vue";
+import historyDialog from "@/shared/components/history-dialog.vue";
 import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
@@ -78,7 +79,7 @@ export default {
     UsersForm,
     UsersDeleteDialog,
     UsersUpdateRoleDialog,
-    UsersHistoryDialog,
+    historyDialog,
     snackBar,
   },
   data() {
@@ -103,6 +104,7 @@ export default {
         login: "",
         password: "",
       },
+      historyUser: [],
     };
   },
   methods: {
@@ -139,9 +141,23 @@ export default {
       this.TableUsers = item;
       this.updateRoleDialog = true;
     },
-    openHistoryDialog(item) {
-      this.TableUsers = item;
-      this.historyDialog = true;
+    fetchHistoryUser(item) {
+      console.log(item);
+
+      usersApi
+        .getHistoryUsers(item.id)
+        .then((data) => {
+          this.historyUser = data;
+          this.historyDialog = true;
+        })
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.message,
+          };
+          this.openSnackBar(this.settingsSnackBar);
+          this.historyUser = [];
+        });
     },
     openSnackBar(settingsSnackBar) {
       this.localSettingsSnackBar = settingsSnackBar;

@@ -15,7 +15,7 @@ const authRoutes = require('./routes/authorization.router')
 const cors = require('cors')
 
 const app = express()
-const port = process.env.PORT
+const port = process.env.BACKEND_PORT
 
 app.use(
   cors({

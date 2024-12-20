@@ -30,18 +30,17 @@
       @openSnackBar="openSnackBar"
     />
 
-    <OrganizationHistoryDialog
+    <historyDialog
       :historyDialog="historyDialog"
-      :organization="TableOrganization"
+      :history="historyOrganization"
       @update:historyDialog="historyDialog = $event"
-      @openSnackBar="openSnackBar"
     />
 
     <OrganizationTable
       ref="organizationTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
-      @history="openHistoryDialog"
+      @history="fetchHistoryOrganizations"
       @openSnackBar="openSnackBar"
     />
 
@@ -54,10 +53,11 @@
 </template>
 
 <script>
+import OrganizationsApi from "@/modules/organizations/api/organizations-api";
 import OrganizationForm from "@/modules/organizations/components/organization-form.vue";
 import OrganizationDeleteDialog from "@/modules/organizations/components/organization-delete-dialog.vue";
 import OrganizationTable from "@/modules/organizations/components/organization-table.vue";
-import OrganizationHistoryDialog from "@/modules/organizations/components/organization-history-dialog.vue";
+import historyDialog from "@/shared/components/history-dialog.vue";
 import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
@@ -65,7 +65,7 @@ export default {
     OrganizationForm,
     OrganizationDeleteDialog,
     OrganizationTable,
-    OrganizationHistoryDialog,
+    historyDialog,
     snackBar,
   },
   data() {
@@ -86,6 +86,7 @@ export default {
         comment: "",
       },
       organizations: [],
+      historyOrganization: [],
     };
   },
   methods: {
@@ -106,9 +107,20 @@ export default {
       this.deleteOrganizationId = id;
       this.deleteDialog = true;
     },
-    openHistoryDialog(item) {
-      this.TableOrganization = item;
-      this.historyDialog = true;
+    fetchHistoryOrganizations(item) {
+      OrganizationsApi.getHistoryOrganizations(item.id)
+        .then((data) => {
+          this.historyOrganization = data;
+          this.historyDialog = true;
+        })
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.message,
+          };
+          this.openSnackBar(this.settingsSnackBar);
+          this.historyOrganization = [];
+        });
     },
     openSnackBar(settingsSnackBar) {
       this.localSettingsSnackBar = settingsSnackBar;

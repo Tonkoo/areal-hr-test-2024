@@ -5,7 +5,7 @@
     max-width="1000px"
   >
     <v-card>
-      <v-card-title class="headline">История записиы</v-card-title>
+      <v-card-title class="headline">История записи</v-card-title>
       <v-table>
         <thead>
           <tr>

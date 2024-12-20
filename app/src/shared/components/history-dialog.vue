@@ -5,7 +5,7 @@
     max-width="1000px"
   >
     <v-card>
-      <v-card-title class="headline">История записиы</v-card-title>
+      <v-card-title class="headline">История записи</v-card-title>
       <v-table>
         <thead>
           <tr>
@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in historyPosition" :key="item.id">
+          <tr v-for="item in history" :key="item.id">
             <td>{{ item.id }}</td>
             <td>{{ item.datetime_operations }}</td>
             <td>{{ item.full_name }}</td>
@@ -35,59 +35,24 @@
 </template>
 
 <script>
-import positionApi from "../api/position-api";
-
 export default {
   props: {
     historyDialog: {
       type: Boolean,
       required: true,
     },
-    position: {
+    history: {
       type: Object,
       required: true,
     },
   },
-  emits: ["update:historyDialog", "save", "openSnackBar"],
+  emits: ["update:historyDialog"],
   data() {
-    return {
-      localPosition: { ...this.position },
-      historyPosition: {},
-    };
-  },
-  watch: {
-    historyDialog(newValue) {
-      if (newValue) {
-        this.$nextTick(() => {
-          this.fetchHistoryPositions();
-        });
-      }
-    },
-    position: {
-      handler(newPosition) {
-        this.localPosition = { ...newPosition };
-      },
-      deep: true,
-    },
+    return {};
   },
   methods: {
     closeDialog() {
       this.$emit("update:historyDialog", false);
-    },
-    fetchHistoryPositions() {
-      positionApi
-        .getHistoryPositions(this.localPosition.id)
-        .then((data) => {
-          this.historyPosition = data;
-        })
-        .catch((err) => {
-          this.settingsSnackBar = {
-            error: true,
-            text: err.message,
-          };
-          this.$emit("openSnackBar", this.settingsSnackBar);
-          this.historyPosition = [];
-        });
     },
     formatHistory(value) {
       if (!value) return "";

@@ -29,18 +29,18 @@
       @delete="refreshPosition"
       @openSnackBar="openSnackBar"
     />
-    <PositionHistoryDialog
+
+    <historyDialog
       :historyDialog="historyDialog"
-      :position="TablePosition"
+      :history="historyPosition"
       @update:historyDialog="historyDialog = $event"
-      @openSnackBar="openSnackBar"
     />
 
     <PositionTable
       ref="PositionTable"
       @edit="openEditDialog"
       @delete="openDeleteDialog"
-      @history="openHistoryDialog"
+      @history="fetchHistoryPositions"
       @openSnackBar="openSnackBar"
     />
 
@@ -53,10 +53,11 @@
 </template>
 
 <script>
+import positionApi from "@/modules/positions/api/position-api";
 import PositionForm from "@/modules/positions/components/position-form.vue";
 import PositionDeleteDialog from "@/modules/positions/components/position-delete-dialog.vue";
 import PositionTable from "@/modules/positions/components/position-table.vue";
-import PositionHistoryDialog from "@/modules/positions/components/position-history-dialog.vue";
+import historyDialog from "@/shared/components/history-dialog.vue";
 import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
@@ -64,7 +65,7 @@ export default {
     PositionForm,
     PositionDeleteDialog,
     PositionTable,
-    PositionHistoryDialog,
+    historyDialog,
     snackBar,
   },
   data() {
@@ -84,6 +85,7 @@ export default {
         position_name: "",
         department_id: null,
       },
+      historyPosition: [],
     };
   },
   methods: {
@@ -104,9 +106,21 @@ export default {
       this.deletePositionId = id;
       this.deleteDialog = true;
     },
-    openHistoryDialog(item) {
-      this.TablePosition = item;
-      this.historyDialog = true;
+    fetchHistoryPositions(item) {
+      positionApi
+        .getHistoryPositions(item.id)
+        .then((data) => {
+          this.historyPosition = data;
+          this.historyDialog = true;
+        })
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.message,
+          };
+          this.openSnackBar(this.settingsSnackBar);
+          this.historyPosition = [];
+        });
     },
     openSnackBar(settingsSnackBar) {
       this.localSettingsSnackBar = settingsSnackBar;

@@ -48,7 +48,7 @@ services:
       dockerfile: containers/api/Dockerfile
       args:
         DATABASE_URL: ${DATABASE_URL}
-        PORT: ${PORT}
+        BACKEND_PORT: ${BACKEND_PORT}
         APP_URL: ${APP_URL}
         SESSION_SECRET: ${SESSION_SECRET}
         LOGIN_ADMIN: ${LOGIN_ADMIN}
@@ -57,13 +57,13 @@ services:
       - .env
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      PORT: ${PORT}
+      BACKEND_PORT: ${BACKEND_PORT}
       APP_URL: ${APP_URL}
       SESSION_SECRET: ${SESSION_SECRET}
       LOGIN_ADMIN: ${LOGIN_ADMIN}
       PASSWORD_ADMIN: ${PASSWORD_ADMIN} 
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT}:3000"
     networks:
       - HR-manager
   frontend:
@@ -78,7 +78,7 @@ services:
     environment:
       VITE_API_URL: ${VITE_API_URL}
     ports:
-      - "5174:5174"
+      - "${FRONTEND_PORT}:5174"
     networks:
       - HR-manager
   docs:
@@ -89,7 +89,7 @@ services:
     networks:
       - HR-manager
     ports:
-      - "5173:5173"
+      - "${DOCS_PORT}:5173"
 
 volumes:
   postgres_data:

@@ -44,11 +44,10 @@
       @openSnackBar="openSnackBar"
     />
 
-    <EmployeesHistoryDialog
+    <historyDialog
       :historyDialog="historyDialog"
-      :employee="TableEmployees"
+      :history="historyEmployee"
       @update:historyDialog="historyDialog = $event"
-      @openSnackBar="openSnackBar"
     />
 
     <EmployeesTable
@@ -57,7 +56,7 @@
       @dismiss="openDismissDialog"
       @DetailsDialog="openDetailsDialog"
       @FilesDialog="openFilesDialog"
-      @history="openHistoryDialog"
+      @history="fetchHistoryEmployees"
       @openSnackBar="openSnackBar"
     />
 
@@ -70,12 +69,13 @@
 </template>
 
 <script>
+import employeesApi from "@/modules/employees/api/employees-api";
 import EmployeesForm from "@/modules/employees/components/employees-form.vue";
 import EmployeesDetailsDialog from "@/modules/employees/components/employees-details-dialog.vue";
 import EmployeesDismissDialog from "@/modules/employees/components/employees-dismiss-dialog.vue";
 import EmployeesFilesDialog from "@/modules/employees/components/employees-files-dialog.vue";
 import EmployeesTable from "@/modules/employees/components/employees-table.vue";
-import EmployeesHistoryDialog from "@/modules/employees/components/employees-history-dialog.vue";
+import historyDialog from "@/shared/components/history-dialog.vue";
 import snackBar from "@/shared/components/snack-bar.vue";
 
 export default {
@@ -85,7 +85,7 @@ export default {
     EmployeesDismissDialog,
     EmployeesFilesDialog,
     EmployeesTable,
-    EmployeesHistoryDialog,
+    historyDialog,
     snackBar,
   },
   data() {
@@ -121,7 +121,7 @@ export default {
         position_id: null,
         salary: 0,
       },
-      // employees: [],
+      historyEmployee: [],
     };
   },
   methods: {
@@ -167,9 +167,21 @@ export default {
       this.TableEmployees = item;
       this.filesDialog = true;
     },
-    openHistoryDialog(item) {
-      this.TableEmployees = item;
-      this.historyDialog = true;
+    fetchHistoryEmployees(item) {
+      employeesApi
+        .getHistoryEmployees(item.id)
+        .then((data) => {
+          this.historyEmployee = data;
+          this.historyDialog = true;
+        })
+        .catch((err) => {
+          this.settingsSnackBar = {
+            error: true,
+            text: err.message,
+          };
+          this.openSnackBar(this.settingsSnackBar);
+          this.historyEmployee = [];
+        });
     },
     openSnackBar(settingsSnackBar) {
       this.localSettingsSnackBar = settingsSnackBar;

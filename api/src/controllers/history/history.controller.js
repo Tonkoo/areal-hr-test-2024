@@ -7,7 +7,7 @@ async function getHistorRecord(object_operations_id, id) {
   const connection = await pool.connect()
   try {
     const result = await connection.query(
-      `SELECT history_change.id, to_char(datetime_operations, 'YYYY-MM-DD HH24:MI:SS') as datetime_operations, (users.last_name || ' ' || LEFT(users.first_name, 1) || '. ' || left(users.middle_name, 1) || '.') as full_name, old_value, new_value FROM history_change join users on history_change.author = users.id where object_operations_id =$1 and record_id = $2`,
+      `SELECT history_change.id, to_char(datetime_operations, 'YYYY-MM-DD HH24:MI:SS') as datetime_operations, (users.last_name || ' ' || LEFT(users.first_name, 1) || '. ' || left(users.middle_name, 1) || '.') as full_name, old_value, new_value FROM history_change join users on history_change.author = users.id where object_operations_id =$1 and record_id = $2 order by history_change.id`,
       [object_operations_id, id],
     )
     return result.rows
